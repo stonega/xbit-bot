@@ -62,12 +62,10 @@ async function main() {
   res.wait().then(() => {
     console.log(`[${new Date().toISOString()}] Buy order created, ${price} ${amount} BOL, ${pay} USDT`)
   })
-
 }
 
-main().catch(
+setInterval(() => main().catch(
   (err) => {
     console.error(err)
-    process.exit(1)
   }
-)
+), TEN_MINUTES)
