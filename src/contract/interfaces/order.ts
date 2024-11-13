@@ -1,6 +1,6 @@
-import BigNumber from 'bignumber.js';
-import { ethers } from 'ethers';
-import type { Token } from '~/types/common';
+import BigNumber from "bignumber.js";
+import { ethers } from "ethers";
+import type { Token } from "~/types/common";
 
 export enum OrderType {
   sell,
@@ -10,13 +10,13 @@ export enum OrderType {
 export class Order {
   constructor(info: any[], type: OrderType, payToken: Token, buyToken: Token) {
     const obj = {
-      maker: info[0]?.toString() ?? '',
+      maker: info[0]?.toString() ?? "",
       payAmount: info[1] ?? 0,
       buyAmount: info[2] ?? 0,
       isActive: info[3] ?? false,
       payToken,
       buyToken,
-      type: type,
+      type,
     };
     Object.assign(this, obj);
   }
@@ -30,11 +30,11 @@ export class Order {
   readonly buyToken!: Token;
 
   get pair() {
-    return [this.buyToken.name, this.payToken.name].join('/');
+    return [this.buyToken.name, this.payToken.name].join("/");
   }
 
   get filledQty() {
-    return '0';
+    return "0";
   }
 
   get qty() {
@@ -49,7 +49,8 @@ export class Order {
   get price() {
     const totalValueBN = BigNumber(this.totalValue);
     const qtyBN = BigNumber(this.qty);
-    if (totalValueBN.isZero() || qtyBN.isZero()) return '0';
+    if (totalValueBN.isZero() || qtyBN.isZero())
+      return "0";
 
     if (this.type === OrderType.sell) {
       return qtyBN.dividedBy(totalValueBN).toString();

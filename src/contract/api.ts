@@ -1,9 +1,9 @@
-import BigNumber from 'bignumber.js';
-import type { BrowserProvider, Signer, TransactionReceipt } from 'ethers';
-import { Contract, JsonRpcProvider, MaxUint256 } from 'ethers';
-import { erc20ABI } from './erc20';
+import type { Signer, TransactionReceipt } from "ethers";
+import BigNumber from "bignumber.js";
+import { Contract, JsonRpcProvider, MaxUint256 } from "ethers";
+import { erc20ABI } from "./erc20";
 
-export const ORIGIN_TOKEN = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+export const ORIGIN_TOKEN = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 
 export class BaseEvmApi {
   constructor(rpc: string) {
@@ -20,7 +20,7 @@ export class BaseEvmApi {
     return await this.provider.getBlockNumber();
   }
 
-  private getContractProvider<K extends 'ERC20'>(
+  private getContractProvider<K extends "ERC20">(
     _contractName: K,
     contractAddress: string,
   ) {
@@ -58,7 +58,7 @@ export class BaseEvmApi {
       const balance = await this.provider.getBalance(address);
       return balance;
     }
-    const erc20Contract = this.getContractProvider('ERC20', contractAddress!);
+    const erc20Contract = this.getContractProvider("ERC20", contractAddress!);
     const balance = await erc20Contract.balanceOf!(address);
     return balance;
   }
@@ -82,7 +82,7 @@ export class BaseEvmApi {
   }): Promise<boolean> {
     try {
       const _address = param.address;
-      const erc20Contract = this.getContractProvider('ERC20', param.contract);
+      const erc20Contract = this.getContractProvider("ERC20", param.contract);
       const approved = await erc20Contract.allowance?.(
         _address,
         param.approvedAddress,
@@ -113,9 +113,9 @@ export class BaseEvmApi {
       approvedAddress: string;
     },
   ): Promise<TransactionReceipt | null> {
-    const erc20Contract = this.getContractProvider('ERC20', param.contract);
+    const erc20Contract = this.getContractProvider("ERC20", param.contract);
     const data = await erc20Contract
-      .getFunction('approve')
+      .getFunction("approve")
       .populateTransaction(param.approvedAddress, MaxUint256);
     const res = await signer.sendTransaction(data);
     return res.wait();

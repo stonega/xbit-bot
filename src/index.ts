@@ -1,71 +1,72 @@
-import { BrowserProvider, JsonRpcProvider, Wallet, parseEther } from "ethers";
+import { JsonRpcProvider, parseEther, Wallet } from "ethers";
 import { TradeApi } from "./contract";
 import { betaTestnet } from "./contract/network";
 
 const TEN_MINUTES = 10 * 60 * 1000;
 
-function getPriceInscrease() {
+function getPriceInscrease(): number {
   const random = Math.random();
   if (random < 0.8) {
     return Math.floor(Math.random()) + 1;
-  } else {
+  }
+  else {
     return Math.floor(Math.random() * 10) + 1;
   }
 }
 
-async function getPrice() {
-  const result = await fetch('https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=BOOL%2FUSDT').then(a => a.json())
-  return result.data.latestPrice
+async function getPrice(): Promise<string> {
+  const result = await fetch("https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=BOOL%2FUSDT").then(a => a.json());
+  return result.data.latestPrice;
 }
-async function main() {
-  const currentNetwork = betaTestnet
+
+async function main(): Promise<void> {
+  const currentNetwork = betaTestnet;
   const trade = new TradeApi({
     rpc: currentNetwork.rpc,
     contract: currentNetwork.contracts.trade!,
     usdt: currentNetwork.tokens.usdt!,
-  })
-  if(!Bun.env.PRIVATE_KEY) {
-    throw new Error('PRIVATE_KEY is required')
+  });
+  if (!Bun.env.PRIVATE_KEY) {
+    throw new Error("PRIVATE_KEY is required");
   }
-  const wallet = new Wallet(Bun.env.PRIVATE_KEY!)
-	const provider = new JsonRpcProvider(currentNetwork.rpc);
-	const signer = wallet.connect(provider);
+  const wallet = new Wallet(Bun.env.PRIVATE_KEY!);
+  const provider = new JsonRpcProvider(currentNetwork.rpc);
+  const signer = wallet.connect(provider);
 
-  const currentPrice = await getPrice()
+  const currentPrice = await getPrice();
 
-  console.log(`[${new Date().toISOString()}] Current price: ${currentPrice}`)
+  console.debug(`[${new Date().toISOString()}] Current price: ${currentPrice}`);
 
-  const price = (Number(currentPrice) + getPriceInscrease()).toString()
+  const price = (Number(currentPrice) + getPriceInscrease()).toString();
 
-  const amount = 10 * Math.random()
+  const amount = 10 * Math.random();
 
   // Sell bool
-  const receive = trade.calcUsdt(price, amount.toString())
+  const receive = trade.calcUsdt(price, amount.toString());
   const sellRes = await trade.createSellOrder(signer, {
     amount: BigInt(parseEther(amount.toString())),
-    receive
-  })
+    receive,
+  });
   sellRes.wait().then(() => {
-    console.log(`[${new Date().toISOString()}] Sell order created, ${price} ${amount} BOL, ${receive} USDT`)
-  })
+    console.log(`[${new Date().toISOString()}] Sell order created, ${price} ${amount} BOL, ${receive} USDT`);
+  });
 
-  await new Promise(resolve => setTimeout(resolve, 10000))
-
+  await new Promise(resolve => setTimeout(resolve, 10000));
 
   // Buy bool
-  const pay = trade.calcUsdt(price, amount.toString())
+  const pay = trade.calcUsdt(price, amount.toString());
   const res = await trade.createBuyOrder(signer, {
     amount: BigInt(parseEther(amount.toString())),
-    pay
-  })
+    pay,
+  });
 
   res.wait().then(() => {
-    console.log(`[${new Date().toISOString()}] Buy order created, ${price} ${amount} BOL, ${pay} USDT`)
-  })
+    console.log(`[${new Date().toISOString()}] Buy order created, ${price} ${amount} BOL, ${pay} USDT`);
+  });
 }
 
 setInterval(() => main().catch(
   (err) => {
-    console.error(err)
-  }
-), TEN_MINUTES)
+    console.error(err);
+  },
+), TEN_MINUTES);

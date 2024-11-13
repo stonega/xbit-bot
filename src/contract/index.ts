@@ -1,10 +1,10 @@
-import type { BrowserProvider, Signer } from 'ethers';
-import { Contract } from 'ethers';
-import BN from 'bignumber.js';
-import { BaseEvmApi } from './api';
-import { TradeABI } from './abi';
-import { Order, OrderType } from './interfaces/order';
-import type { Token } from '../types';
+import type { Signer } from "ethers";
+import type { Token } from "../types";
+import BN from "bignumber.js";
+import { Contract } from "ethers";
+import { TradeABI } from "./abi";
+import { BaseEvmApi } from "./api";
+import { Order, OrderType } from "./interfaces/order";
 
 export class TradeApi extends BaseEvmApi {
   constructor({
@@ -33,7 +33,7 @@ export class TradeApi extends BaseEvmApi {
     { amount, pay }: { amount: bigint; pay: bigint },
   ) {
     const res = await this.contract
-      .getFunction('placeOrderBuyB')
+      .getFunction("placeOrderBuyB")
       .populateTransaction(pay, amount);
     await signer.estimateGas(res);
     return signer.sendTransaction(res);
@@ -44,7 +44,7 @@ export class TradeApi extends BaseEvmApi {
     { amount, receive }: { amount: bigint; receive: bigint },
   ) {
     const res = await this.contract
-      .getFunction('placeOrderSellB')
+      .getFunction("placeOrderSellB")
       .populateTransaction(receive, { value: amount });
     await signer.estimateGas(res);
     return signer.sendTransaction(res);
@@ -52,10 +52,10 @@ export class TradeApi extends BaseEvmApi {
 
   async cancelOrder(
     signer: Signer,
-    { orderId, type }: { orderId: bigint; type: 'buy' | 'sell' },
+    { orderId, type }: { orderId: bigint; type: "buy" | "sell" },
   ) {
     const res = await this.contract
-      .getFunction(type === 'buy' ? 'cancelOrderBuyB' : 'cancelOrderSellB')
+      .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
       .populateTransaction(orderId);
     await signer.estimateGas(res);
     return signer.sendTransaction(res);
@@ -105,7 +105,7 @@ export class TradeApi extends BaseEvmApi {
     });
 
     return {
-      totalCount: totalCount,
+      totalCount,
       totalPage: Math.floor(totalCount / (end - begin)),
       items: list,
     };
@@ -131,7 +131,7 @@ export class TradeApi extends BaseEvmApi {
     });
 
     return {
-      totalCount: totalCount,
+      totalCount,
       totalPage: Math.floor(totalCount / (end - begin)),
       items: list,
     };

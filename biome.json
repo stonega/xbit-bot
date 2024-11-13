@@ -4,7 +4,11 @@
     "enabled": true
   },
   "files": {
-    "ignore": ["node_modules/**", "dist/**", "src/text-encoder.ts"]
+    "ignore": [
+      "node_modules/**",
+      "dist/**",
+      "src/text-encoder.ts"
+    ]
   },
   "formatter": {
     "enabled": true,
