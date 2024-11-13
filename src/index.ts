@@ -54,7 +54,7 @@ async function main(): Promise<void> {
   await new Promise(resolve => setTimeout(resolve, 10000));
 
   // Buy bool
-  const pay = trade.calcUsdt(price, amount.toString());
+  const pay = trade.calcUsdt(price, (amount + 1).toString());
   const res = await trade.createBuyOrder(signer, {
     amount: BigInt(parseEther(amount.toString())),
     pay,
