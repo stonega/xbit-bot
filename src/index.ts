@@ -1,8 +1,7 @@
 import { JsonRpcProvider, parseEther, Wallet } from "ethers";
+import schedule from "node-schedule";
 import { TradeApi } from "./contract";
 import { betaTestnet } from "./contract/network";
-
-const TEN_MINUTES = 10 * 60 * 1000;
 
 function getPriceInscrease(): number {
   const random = Math.random();
@@ -65,8 +64,7 @@ async function main(): Promise<void> {
   });
 }
 
-setInterval(() => main().catch(
-  (err) => {
-    console.error(err);
-  },
-), TEN_MINUTES);
+schedule.scheduleJob("*/10 * * * *", () => {
+  console.log("Running task at:", new Date().toLocaleString());
+  main().catch(console.error);
+});
