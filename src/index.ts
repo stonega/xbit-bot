@@ -39,6 +39,7 @@ async function main(): Promise<void> {
 
   console.debug(`[${new Date().toISOString()}] Current price: ${currentPrice}`);
 
+  /// Calculate price
   let nextPrice = Number(currentPrice) + getPriceInscrease();
   if (nextPrice < 0) {
     nextPrice = 1;
@@ -61,7 +62,8 @@ async function main(): Promise<void> {
   await new Promise(resolve => setTimeout(resolve, 10000));
 
   // Buy bool
-  const pay = trade.calcUsdt(price, (amount + 1).toString());
+  const increaseAmount = 0.2 * Math.random() * 0.9;
+  const pay = trade.calcUsdt(price, (amount * increaseAmount).toString());
   const res = await trade.createBuyOrder(signer, {
     amount: BigInt(parseEther(amount.toString())),
     pay,
