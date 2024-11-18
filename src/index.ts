@@ -40,10 +40,7 @@ async function main(): Promise<void> {
   console.debug(`[${new Date().toISOString()}] Current price: ${currentPrice}`);
 
   /// Calculate price
-  let nextPrice = Number(currentPrice) + getPriceInscrease();
-  if (nextPrice < 0) {
-    nextPrice = 1;
-  }
+  const nextPrice = Math.abs(Number(currentPrice) + getPriceInscrease());
 
   const price = nextPrice.toString();
 
