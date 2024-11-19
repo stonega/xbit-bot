@@ -16,9 +16,14 @@ function getPriceInscrease(): number {
   }
 }
 
-async function getPrice(): Promise<string> {
+async function getPrice(): Promise<{ buyPrice: string; sellPrice: string }> {
   const result = await fetch("https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=BOOL%2FUSDT").then(a => a.json());
-  return result.data.latestPrice;
+  const buyPrice = result.data.orderBuyBList[0].price;
+  const sellPrice = result.data.orderSellBList[0].price;
+  return {
+    buyPrice,
+    sellPrice,
+  };
 }
 
 async function main(): Promise<void> {
@@ -35,14 +40,14 @@ async function main(): Promise<void> {
   const provider = new JsonRpcProvider(currentNetwork.rpc);
   const signer = wallet.connect(provider);
 
-  const currentPrice = await getPrice();
+  const { buyPrice, sellPrice } = await getPrice();
 
-  console.debug(`[${new Date().toISOString()}] Current price: ${currentPrice}`);
+  console.debug(`[${new Date().toISOString()}], buyPrice: ${buyPrice}, sellPrice: ${sellPrice}`);
 
   /// Calculate price
-  const nextPrice = Math.abs(Number(currentPrice) + getPriceInscrease());
+  const nextSellPrice = Math.abs(Number(sellPrice) + getPriceInscrease());
 
-  const price = nextPrice.toString();
+  const price = nextSellPrice.toString();
 
   const amount = 10 * Math.random();
 
@@ -59,8 +64,10 @@ async function main(): Promise<void> {
   await new Promise(resolve => setTimeout(resolve, 10000));
 
   // Buy bool
-  const increaseAmount = 0.2 * Math.random() * 0.9;
-  const pay = trade.calcUsdt(price, (amount * increaseAmount).toString());
+  /// Calculate price
+  const nextBuyPrice = Math.abs(Number(buyPrice) + getPriceInscrease());
+
+  const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
   const res = await trade.createBuyOrder(signer, {
     amount: BigInt(parseEther(amount.toString())),
     pay,
