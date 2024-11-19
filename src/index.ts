@@ -5,11 +5,8 @@ import { betaTestnet } from "./contract/network";
 
 function getPriceInscrease(): number {
   const random = Math.random();
-  if (random < 0.2) {
-    return Math.floor(Math.random()) - 4;
-  }
   if (random < 0.8) {
-    return Math.floor(Math.random()) + 1;
+    return Math.random();
   }
   else {
     return Math.floor(Math.random() * 5);
