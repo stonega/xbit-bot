@@ -42,7 +42,7 @@ async function main(): Promise<void> {
   console.debug(`[${new Date().toISOString()}], buyPrice: ${buyPrice}, sellPrice: ${sellPrice}`);
 
   /// Calculate price
-  const nextSellPrice = Math.abs(Number(sellPrice) + getPriceInscrease());
+  const nextSellPrice = Math.abs(Number(sellPrice) - getPriceInscrease());
 
   const price = nextSellPrice.toString();
 
