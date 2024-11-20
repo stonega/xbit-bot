@@ -1,4 +1,4 @@
-import { JsonRpcProvider, parseEther, Wallet } from "ethers";
+import { formatUnits, JsonRpcProvider, parseEther, Wallet } from "ethers";
 import schedule from "node-schedule";
 import { TradeApi } from "./contract";
 import { betaTestnet } from "./contract/network";
@@ -55,7 +55,7 @@ async function main(): Promise<void> {
     receive,
   });
   sellRes.wait().then(() => {
-    console.log(`[${new Date().toISOString()}] Sell order created, ${price} ${amount} BOL, ${receive} USDT`);
+    console.log(`[${new Date().toISOString()}] Sell order created, ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
   });
 
   await new Promise(resolve => setTimeout(resolve, 10000));
@@ -71,7 +71,7 @@ async function main(): Promise<void> {
   });
 
   res.wait().then(() => {
-    console.log(`[${new Date().toISOString()}] Buy order created, ${price} ${amount} BOL, ${pay} USDT`);
+    console.log(`[${new Date().toISOString()}] Buy order created, ${price} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
   });
 }
 
