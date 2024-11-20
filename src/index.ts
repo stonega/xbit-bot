@@ -9,7 +9,7 @@ function getPriceInscrease(): number {
     return Math.random();
   }
   else {
-    return Math.floor(Math.random() * 5);
+    return Math.floor(Math.random() * 2);
   }
 }
 
@@ -42,7 +42,7 @@ async function main(): Promise<void> {
   console.debug(`[${new Date().toISOString()}], buyPrice: ${buyPrice}, sellPrice: ${sellPrice}`);
 
   /// Calculate price
-  const nextSellPrice = Math.abs(Number(sellPrice) - getPriceInscrease());
+  const nextSellPrice = Math.abs(Number(buyPrice) - getPriceInscrease());
 
   const price = nextSellPrice.toString();
 
@@ -55,14 +55,14 @@ async function main(): Promise<void> {
     receive,
   });
   sellRes.wait().then(() => {
-    console.log(`[${new Date().toISOString()}] Sell order created, ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+    console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
   });
 
   await new Promise(resolve => setTimeout(resolve, 10000));
 
   // Buy bool
   /// Calculate price
-  const nextBuyPrice = Math.abs(Number(buyPrice) + getPriceInscrease());
+  const nextBuyPrice = Math.abs(Number(sellPrice) + getPriceInscrease());
 
   const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
   const res = await trade.createBuyOrder(signer, {
@@ -71,7 +71,7 @@ async function main(): Promise<void> {
   });
 
   res.wait().then(() => {
-    console.log(`[${new Date().toISOString()}] Buy order created, ${price} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
+    console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
   });
 }
 
