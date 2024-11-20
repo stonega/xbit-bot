@@ -42,7 +42,7 @@ async function main(): Promise<void> {
   console.debug(`[${new Date().toISOString()}], buyPrice: ${buyPrice}, sellPrice: ${sellPrice}`);
 
   /// Calculate price
-  const nextSellPrice = Math.abs(Number(buyPrice) - getPriceInscrease());
+  const nextSellPrice = Math.abs(Number(buyPrice) + getPriceInscrease());
 
   const price = nextSellPrice.toString();
 
@@ -62,7 +62,7 @@ async function main(): Promise<void> {
 
   // Buy bool
   /// Calculate price
-  const nextBuyPrice = Math.abs(Number(sellPrice) + getPriceInscrease());
+  const nextBuyPrice = Math.abs(Number(sellPrice) - getPriceInscrease());
 
   const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
   const res = await trade.createBuyOrder(signer, {
