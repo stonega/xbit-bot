@@ -46,7 +46,7 @@ async function main(): Promise<void> {
 
   const price = nextSellPrice.toString();
 
-  const amount = 10 * Math.random();
+  const amount = 2 * Math.random();
 
   // Sell bool
   const receive = trade.calcUsdt(price, amount.toString());
@@ -75,7 +75,7 @@ async function main(): Promise<void> {
   });
 }
 
-schedule.scheduleJob("*/10 * * * *", () => {
+schedule.scheduleJob("*/5 * * * *", () => {
   console.log("Running task at:", new Date().toLocaleString());
   main().catch(console.error);
 });
