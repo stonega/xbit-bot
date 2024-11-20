@@ -3,10 +3,10 @@ import schedule from "node-schedule";
 import { TradeApi } from "./contract";
 import { betaTestnet } from "./contract/network";
 
-function getPriceInscrease(): number {
+function getPriceInscrease(base: number): number {
   const random = Math.random();
-  if (random < 0.8) {
-    return Math.random();
+  if (random < 0.9) {
+    return Math.random() * base;
   }
   else {
     return Math.floor(Math.random() * 2);
@@ -42,7 +42,7 @@ async function main(): Promise<void> {
   console.debug(`[${new Date().toISOString()}], buyPrice: ${buyPrice}, sellPrice: ${sellPrice}`);
 
   /// Calculate price
-  const nextSellPrice = Math.abs(Number(buyPrice) + getPriceInscrease());
+  const nextSellPrice = Math.abs(Number(buyPrice) - getPriceInscrease(0.2));
 
   const price = nextSellPrice.toString();
 
@@ -62,7 +62,7 @@ async function main(): Promise<void> {
 
   // Buy bool
   /// Calculate price
-  const nextBuyPrice = Math.abs(Number(sellPrice) - getPriceInscrease());
+  const nextBuyPrice = Math.abs(Number(sellPrice) + getPriceInscrease(0.1));
 
   const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
   const res = await trade.createBuyOrder(signer, {
