@@ -96,6 +96,8 @@ const task = new Task(
     console.log(err);
   },
 );
-const job = new SimpleIntervalJob({ seconds: 60 * 3, runImmediately: true }, task);
+
+const duration = Bun.env.ROLW === "maker" ? 60 * 2 : 60 * 3;
+const job = new SimpleIntervalJob({ seconds: duration, runImmediately: true }, task);
 
 scheduler.addSimpleIntervalJob(job);
