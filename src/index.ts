@@ -45,14 +45,14 @@ async function main(): Promise<void> {
     return;
   }
 
-  console.debug(`[${new Date().toISOString()}], buyPrice: ${buyPrice}, sellPrice: ${sellPrice}`);
+  console.debug(`[${new Date().toISOString()}] BuyPrice: ${buyPrice} SellPrice: ${sellPrice}`);
 
   // Sell bool
   /// Calculate price
   const nextSellPrice
     = role === "maker"
       ? Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.1))
-      : Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(0.1));
+      : Math.abs(Number(buyPrice || sellPrice));
 
   const price = nextSellPrice.toString();
   const amount = 2 * Math.random();
