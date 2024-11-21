@@ -9,7 +9,7 @@ export const betaTestnet = {
   feeRate: 3000,
   explorer: "https://beta-testnet.boolscan.com",
   contracts: {
-    trade: "0xD79d119793f9A7B10A03DFccab6e225fdf901e19",
+    trade: "0x52295088d335EF9BEDc5837b59cA144c1Fd48983",
   },
   tokens: {
     bool: {
