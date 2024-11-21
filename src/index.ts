@@ -15,8 +15,8 @@ function getPriceInscrease(base: number): number {
 
 async function getPrice(): Promise<{ buyPrice: string; sellPrice: string }> {
   const result = await fetch("https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=BOOL%2FUSDC").then(a => a.json());
-  const buyPrice = result.data.orderBuyBList[0].price;
-  const sellPrice = result.data.orderSellBList[0].price;
+  const buyPrice = result.data.orderBuyBList[0]?.price;
+  const sellPrice = result.data.orderSellBList[0]?.price;
   return {
     buyPrice,
     sellPrice,
@@ -40,19 +40,22 @@ async function main(): Promise<void> {
 
   const { buyPrice, sellPrice } = await getPrice();
 
+  if (!buyPrice && !sellPrice) {
+    console.log("No orders");
+    return;
+  }
+
   console.debug(`[${new Date().toISOString()}], buyPrice: ${buyPrice}, sellPrice: ${sellPrice}`);
 
+  // Sell bool
   /// Calculate price
   const nextSellPrice
     = role === "maker"
-      ? Math.abs(Number(buyPrice) + getPriceInscrease(0.1))
-      : Math.abs(Number(buyPrice) - getPriceInscrease(0.1));
+      ? Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.1))
+      : Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(0.1));
 
   const price = nextSellPrice.toString();
-
   const amount = 2 * Math.random();
-
-  // Sell bool
   const receive = trade.calcUsdt(price, amount.toString());
   const sellRes = await trade.createSellOrder(signer, {
     amount: BigInt(parseEther(amount.toString())),
@@ -68,8 +71,8 @@ async function main(): Promise<void> {
   /// Calculate price
   const nextBuyPrice
     = role === "maker"
-      ? Math.abs(Number(sellPrice) - getPriceInscrease(0.1))
-      : Math.abs(Number(sellPrice) + getPriceInscrease(0.2));
+      ? Math.abs(Number(sellPrice || buyPrice) - getPriceInscrease(0.1))
+      : Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(0.2));
 
   const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
   const res = await trade.createBuyOrder(signer, {
