@@ -1,5 +1,5 @@
 import { formatUnits, JsonRpcProvider, parseEther, Wallet } from "ethers";
-import schedule from "node-schedule";
+import { AsyncTask, SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { TradeApi } from "./contract";
 import { betaTestnet } from "./contract/network";
 
@@ -85,7 +85,17 @@ async function main(): Promise<void> {
   });
 }
 
-schedule.scheduleJob("*/5 * * * *", () => {
-  console.log("Running task at:", new Date().toLocaleString());
-  main().catch(console.error);
-});
+const scheduler = new ToadScheduler();
+
+const task = new Task(
+  "simple task",
+  () => {
+    main();
+  },
+  (err: Error) => {
+    console.log(err);
+  },
+);
+const job = new SimpleIntervalJob({ seconds: 60 * 3, runImmediately: true }, task);
+
+scheduler.addSimpleIntervalJob(job);
