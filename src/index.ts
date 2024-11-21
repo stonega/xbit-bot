@@ -33,6 +33,7 @@ async function main(): Promise<void> {
   if (!Bun.env.PRIVATE_KEY) {
     throw new Error("PRIVATE_KEY is required");
   }
+  const role = Bun.env.ROLE || "maker";
   const wallet = new Wallet(Bun.env.PRIVATE_KEY!);
   const provider = new JsonRpcProvider(currentNetwork.rpc);
   const signer = wallet.connect(provider);
@@ -42,7 +43,10 @@ async function main(): Promise<void> {
   console.debug(`[${new Date().toISOString()}], buyPrice: ${buyPrice}, sellPrice: ${sellPrice}`);
 
   /// Calculate price
-  const nextSellPrice = Math.abs(Number(buyPrice) + getPriceInscrease(0.1));
+  const nextSellPrice
+    = role === "maker"
+      ? Math.abs(Number(buyPrice) + getPriceInscrease(0.1))
+      : Math.abs(Number(buyPrice) - getPriceInscrease(0.1));
 
   const price = nextSellPrice.toString();
 
@@ -62,7 +66,10 @@ async function main(): Promise<void> {
 
   // Buy bool
   /// Calculate price
-  const nextBuyPrice = Math.abs(Number(sellPrice) - getPriceInscrease(0.2));
+  const nextBuyPrice
+    = role === "maker"
+      ? Math.abs(Number(sellPrice) - getPriceInscrease(0.1))
+      : Math.abs(Number(sellPrice) + getPriceInscrease(0.2));
 
   const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
   const res = await trade.createBuyOrder(signer, {
