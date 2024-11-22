@@ -73,7 +73,7 @@ async function main(): Promise<void> {
     = role === "maker"
       ? Math.abs(Number(sellPrice || buyPrice) - getPriceInscrease(0.1))
       : Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(0.5));
-  amount = role === "maker" ? Math.random() : 2 * Math.random();
+  amount = role === "maker" ? Math.random() : (1 + Math.random());
 
   const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
   const res = await trade.createBuyOrder(signer, {
