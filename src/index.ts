@@ -55,7 +55,7 @@ async function main(): Promise<void> {
       : Math.abs(Number(buyPrice || sellPrice));
 
   const price = nextSellPrice.toString();
-  const amount = 2 * Math.random();
+  const amount = role === "maker" ? Math.random() : 2 * Math.random();
   const receive = trade.calcUsdt(price, amount.toString());
   const sellRes = await trade.createSellOrder(signer, {
     amount: BigInt(parseEther(amount.toString())),
