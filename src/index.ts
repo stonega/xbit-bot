@@ -49,23 +49,22 @@ async function main(): Promise<void> {
 
   // Sell bool
   /// Calculate price
-  const nextSellPrice
-    = role === "maker"
-      ? Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.1))
-      : Math.abs(Number(buyPrice || sellPrice)) - getPriceInscrease(0.2);
+  if (role === "maker") {
+    const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.2));
 
-  const price = nextSellPrice.toString();
-  let amount = Math.random();
-  const receive = trade.calcUsdt(price, amount.toString());
-  const sellRes = await trade.createSellOrder(signer, {
-    amount: BigInt(parseEther(amount.toString())),
-    receive,
-  });
-  sellRes.wait().then(() => {
-    console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
-  });
+    const price = nextSellPrice.toString();
+    const amount = Math.random();
+    const receive = trade.calcUsdt(price, amount.toString());
+    const sellRes = await trade.createSellOrder(signer, {
+      amount: BigInt(parseEther(amount.toString())),
+      receive,
+    });
+    sellRes.wait().then(() => {
+      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+    });
 
-  await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 10000));
+  }
 
   // Buy bool
   /// Calculate price
@@ -73,7 +72,7 @@ async function main(): Promise<void> {
     = role === "maker"
       ? Math.abs(Number(sellPrice || buyPrice) - getPriceInscrease(0.1))
       : Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(0.5));
-  amount = role === "maker" ? Math.random() : (1 + Math.random());
+  const amount = role === "maker" ? Math.random() : (1 + Math.random());
 
   const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
   const res = await trade.createBuyOrder(signer, {
