@@ -52,7 +52,7 @@ async function main(): Promise<void> {
   const nextSellPrice
     = role === "maker"
       ? Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.1))
-      : Math.abs(Number(buyPrice || sellPrice));
+      : Math.abs(Number(buyPrice || sellPrice)) - getPriceInscrease(0.2);
 
   const price = nextSellPrice.toString();
   let amount = Math.random();
