@@ -6,10 +6,10 @@ import { betaTestnet } from "./contract/network";
 function getPriceInscrease(base: number): number {
   const random = Math.random();
   if (random < 0.9) {
-    return Math.random() * base;
+    return Math.max((Math.random() * base, 0.05));
   }
   else {
-    return Math.floor(Math.random() * 2);
+    return Math.random() + base;
   }
 }
 
