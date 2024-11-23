@@ -23,6 +23,35 @@ async function getPrice(): Promise<{ buyPrice: string; sellPrice: string }> {
   };
 }
 
+function getTargetPrice(): number {
+  // Get current hour in UTC
+  const hour = new Date().getUTCHours();
+  const minutes = new Date().getUTCMinutes();
+
+  // Convert time to radians (24 hours = 2π)
+  const radians = ((hour + minutes / 60) / 24) * 2 * Math.PI;
+
+  // Generate sine wave between -1 and 1
+  const sine = Math.sin(radians);
+
+  // Add some random noise (±0.5)
+  const noise = (Math.random() - 0.5);
+
+  // Transform sine wave to range [2, 15] with noise
+  const amplitude = (15 - 2) / 2; // Half the range
+  const offset = (15 + 2) / 2; // Midpoint of range
+  let price = offset + (sine * amplitude);
+
+  // Add scaled noise (bigger noise when price is in middle range)
+  const noiseFactor = Math.sin(Math.PI * (price - 2) / 13); // peaks in middle of range
+  price += noise * noiseFactor;
+
+  // Ensure price stays within bounds
+  price = Math.min(Math.max(price, 2), 15);
+
+  return Number(price.toFixed(2));
+}
+
 async function main(): Promise<void> {
   const currentNetwork = betaTestnet;
   const trade = new TradeApi({
@@ -80,7 +109,7 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    const target = Bun.env.TARGET || "10";
+    const target = getTargetPrice();
     if (Number(buyPrice || sellPrice) < Number(target)) {
       // Buy bool to increase price
       // Calculate price
