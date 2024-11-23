@@ -110,6 +110,7 @@ async function main(): Promise<void> {
 
   if (role === "taker") {
     const target = getTargetPrice();
+    console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
     if (Number(buyPrice || sellPrice) < Number(target)) {
       // Buy bool to increase price
       // Calculate price
