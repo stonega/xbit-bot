@@ -79,7 +79,7 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(2));
+    const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(1));
     const price = nextSellPrice.toString();
     const amount = 1 + Math.random();
     const receive = trade.calcUsdt(price, amount.toString());
