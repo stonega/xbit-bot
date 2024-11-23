@@ -53,7 +53,7 @@ async function main(): Promise<void> {
     const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.2));
 
     const price = nextSellPrice.toString();
-    const amount = 0.8 * Math.random();
+    const amount = Math.random();
     const receive = trade.calcUsdt(price, amount.toString());
     const sellRes = await trade.createSellOrder(signer, {
       amount: BigInt(parseEther(amount.toString())),
@@ -127,7 +127,7 @@ const task = new Task(
   },
 );
 
-const duration = 60;
+const duration = 2 * 60;
 const job = new SimpleIntervalJob({ seconds: duration, runImmediately: true }, task);
 
 scheduler.addSimpleIntervalJob(job);
