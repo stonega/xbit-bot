@@ -47,9 +47,9 @@ async function main(): Promise<void> {
 
   console.debug(`[${new Date().toISOString()}] BuyPrice: ${buyPrice} SellPrice: ${sellPrice}`);
 
-  // Sell bool
-  /// Calculate price
   if (role === "maker") {
+    // Sell bool
+    // Calculate price
     const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.2));
 
     const price = nextSellPrice.toString();
@@ -64,25 +64,35 @@ async function main(): Promise<void> {
     });
 
     await new Promise(resolve => setTimeout(resolve, 10000));
+    // Buy bool
+    // Calculate price
+    const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) - getPriceInscrease(0.1));
+    const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
+    const res = await trade.createBuyOrder(signer, {
+      amount: BigInt(parseEther(amount.toString())),
+      pay,
+    });
+
+    res.wait().then(() => {
+      console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
+    });
   }
 
-  // Buy bool
-  /// Calculate price
-  const nextBuyPrice
-    = role === "maker"
-      ? Math.abs(Number(sellPrice || buyPrice) - getPriceInscrease(0.1))
-      : Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(0.5));
-  const amount = role === "maker" ? Math.random() : (1 + Math.random());
+  if (role === "taker") {
+    const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(2));
+    const price = nextSellPrice.toString();
+    const amount = 1 + Math.random();
+    const receive = trade.calcUsdt(price, amount.toString());
+    const sellRes = await trade.createSellOrder(signer, {
+      amount: BigInt(parseEther(amount.toString())),
+      receive,
+    });
+    sellRes.wait().then(() => {
+      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+    });
 
-  const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
-  const res = await trade.createBuyOrder(signer, {
-    amount: BigInt(parseEther(amount.toString())),
-    pay,
-  });
-
-  res.wait().then(() => {
-    console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
-  });
+    await new Promise(resolve => setTimeout(resolve, 10000));
+  }
 }
 
 const scheduler = new ToadScheduler();
