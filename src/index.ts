@@ -81,7 +81,7 @@ async function main(): Promise<void> {
     const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.2));
 
     const price = nextSellPrice.toString();
-    const amount = Math.random();
+    const amount = 0.8 * Math.random();
     const receive = trade.calcUsdt(price, amount.toString());
     const sellRes = await trade.createSellOrder(signer, {
       amount: BigInt(parseEther(amount.toString())),
@@ -156,7 +156,8 @@ const task = new Task(
   },
 );
 
-const duration = 2 * 60;
+const role = Bun.env.ROLE || "maker";
+const duration = role === "MAKER" ? 2 * 60 : 3 * 60;
 const job = new SimpleIntervalJob({ seconds: duration, runImmediately: true }, task);
 
 scheduler.addSimpleIntervalJob(job);
