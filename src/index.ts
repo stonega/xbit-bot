@@ -45,6 +45,11 @@ async function main(): Promise<void> {
     return;
   }
 
+  const priceRange = {
+    min: 3,
+    max: 25,
+  };
+
   console.debug(`[${new Date().toISOString()}] BuyPrice: ${buyPrice} SellPrice: ${sellPrice}`);
 
   if (role === "maker") {
@@ -81,7 +86,7 @@ async function main(): Promise<void> {
   if (role === "taker") {
     const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(1));
     const price = nextSellPrice.toString();
-    const amount = 1 + Math.random();
+    const amount = 2 + Math.random();
     const receive = trade.calcUsdt(price, amount.toString());
     const sellRes = await trade.createSellOrder(signer, {
       amount: BigInt(parseEther(amount.toString())),
@@ -92,7 +97,6 @@ async function main(): Promise<void> {
     });
 
     await new Promise(resolve => setTimeout(resolve, 10000));
-  }
 }
 
 const scheduler = new ToadScheduler();
