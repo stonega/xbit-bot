@@ -45,11 +45,6 @@ async function main(): Promise<void> {
     return;
   }
 
-  const priceRange = {
-    min: 3,
-    max: 25,
-  };
-
   console.debug(`[${new Date().toISOString()}] BuyPrice: ${buyPrice} SellPrice: ${sellPrice}`);
 
   if (role === "maker") {
@@ -85,19 +80,38 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(1));
-    const price = nextSellPrice.toString();
-    const amount = 2 + Math.random();
-    const receive = trade.calcUsdt(price, amount.toString());
-    const sellRes = await trade.createSellOrder(signer, {
-      amount: BigInt(parseEther(amount.toString())),
-      receive,
-    });
-    sellRes.wait().then(() => {
-      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
-    });
+    const target = Bun.env.TARGET || "10";
+    if (Number(buyPrice || sellPrice) < Number(target)) {
+      // Buy bool to increase price
+      // Calculate price
+      const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(2));
+      const amount = 2 + Math.random();
+      const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
+      const res = await trade.createBuyOrder(signer, {
+        amount: BigInt(parseEther(amount.toString())),
+        pay,
+      });
 
-    await new Promise(resolve => setTimeout(resolve, 10000));
+      res.wait().then(() => {
+        console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
+      });
+    }
+    else {
+      // Sell bool
+      const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(1));
+      const price = nextSellPrice.toString();
+      const amount = 2 + Math.random();
+      const receive = trade.calcUsdt(price, amount.toString());
+      const sellRes = await trade.createSellOrder(signer, {
+        amount: BigInt(parseEther(amount.toString())),
+        receive,
+      });
+      sellRes.wait().then(() => {
+        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 10000));
+    }
   }
 }
 
