@@ -107,7 +107,7 @@ const task = new Task(
   },
 );
 
-const duration = 60 * 2;
+const duration = 60;
 const job = new SimpleIntervalJob({ seconds: duration, runImmediately: true }, task);
 
 scheduler.addSimpleIntervalJob(job);
