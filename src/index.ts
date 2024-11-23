@@ -26,10 +26,9 @@ async function getPrice(): Promise<{ buyPrice: string; sellPrice: string }> {
 function getTargetPrice(): number {
   // Get current hour in UTC
   const hour = new Date().getUTCHours();
-  const minutes = new Date().getUTCMinutes();
 
   // Convert time to radians (24 hours = 2π)
-  const radians = ((hour + minutes / 60) / 24) * 2 * Math.PI;
+  const radians = (hour / 5) * 2 * Math.PI;
 
   // Generate sine wave between -1 and 1
   const sine = Math.sin(radians);
