@@ -84,8 +84,8 @@ async function main(): Promise<void> {
     if (Number(buyPrice || sellPrice) < Number(target)) {
       // Buy bool to increase price
       // Calculate price
-      const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(2));
-      const amount = 2 + Math.random();
+      const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(1));
+      const amount = 1 + Math.random();
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
         amount: BigInt(parseEther(amount.toString())),
@@ -100,7 +100,7 @@ async function main(): Promise<void> {
       // Sell bool
       const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(1));
       const price = nextSellPrice.toString();
-      const amount = 2 + Math.random();
+      const amount = 1 + Math.random();
       const receive = trade.calcUsdt(price, amount.toString());
       const sellRes = await trade.createSellOrder(signer, {
         amount: BigInt(parseEther(amount.toString())),
