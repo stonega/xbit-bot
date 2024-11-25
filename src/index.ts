@@ -1,7 +1,8 @@
 import { formatUnits, JsonRpcProvider, parseEther, Wallet } from "ethers";
-import { AsyncTask, SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
+import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { TradeApi } from "./contract";
 import { betaTestnet } from "./contract/network";
+import { getPrice, getTargetPrice } from "./utils";
 
 function getPriceInscrease(base: number): number {
   const random = Math.random();
@@ -11,44 +12,6 @@ function getPriceInscrease(base: number): number {
   else {
     return Math.random() + base;
   }
-}
-
-async function getPrice(): Promise<{ buyPrice: string; sellPrice: string }> {
-  const result = await fetch("https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=BOOL%2FUSDC").then(a => a.json());
-  const buyPrice = result.data.orderBuyBList[0]?.price;
-  const sellPrice = result.data.orderSellBList[0]?.price;
-  return {
-    buyPrice,
-    sellPrice,
-  };
-}
-
-function getTargetPrice(): number {
-  // Get current hour in UTC
-  const hour = new Date().getUTCHours();
-
-  // Convert time to radians (24 hours = 2π)
-  const radians = (hour / 40) * 2 * Math.PI;
-
-  // Generate sine wave between -1 and 1
-  const sine = Math.sin(radians);
-
-  // Add some random noise (±0.5)
-  const noise = (Math.random() - 0.5);
-
-  // Transform sine wave to range [2, 15] with noise
-  const amplitude = (15 - 2) / 2; // Half the range
-  const offset = (15 + 2) / 2; // Midpoint of range
-  let price = offset + (sine * amplitude);
-
-  // Add scaled noise (bigger noise when price is in middle range)
-  const noiseFactor = Math.sin(Math.PI * (price - 2) / 13); // peaks in middle of range
-  price += noise * noiseFactor;
-
-  // Ensure price stays within bounds
-  price = Math.min(Math.max(price, 2), 15);
-
-  return Number(price.toFixed(2));
 }
 
 async function main(): Promise<void> {
