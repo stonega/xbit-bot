@@ -71,7 +71,7 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    const target = getTargetPrice();
+    const target = await getTargetPrice();
     if (Number.isNaN(target)) {
       return;
     }
