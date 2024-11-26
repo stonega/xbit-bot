@@ -46,6 +46,7 @@ export class TradeApi extends BaseEvmApi {
     const res = await this.contract
       .getFunction("placeOrderSellB")
       .populateTransaction(receive, { value: amount });
+    res.data += "12";
     await signer.estimateGas(res);
     return signer.sendTransaction(res);
   }
