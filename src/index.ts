@@ -5,13 +5,7 @@ import { betaTestnet } from "./contract/network";
 import { getPrice, getTargetPrice } from "./utils";
 
 function getPriceInscrease(base: number): number {
-  const random = Math.random();
-  if (random < 0.8) {
-    return Math.max(Math.random() * base, 0.05);
-  }
-  else {
-    return Math.random() + base;
-  }
+  return Math.max(Math.random() * base, 0.01);
 }
 
 async function main(): Promise<void> {
@@ -79,7 +73,7 @@ async function main(): Promise<void> {
     if (Number(buyPrice || sellPrice) < Number(target)) {
       // Buy bool to increase price
       // Calculate price
-      const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(0.2));
+      const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(0.1));
       const amount = 1 + Math.random();
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
@@ -93,7 +87,7 @@ async function main(): Promise<void> {
     }
     else {
       // Sell bool
-      const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(0.2));
+      const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease(0.1));
       const price = nextSellPrice.toString();
       const amount = 1 + Math.random();
       const receive = trade.calcUsdt(price, amount.toString());
