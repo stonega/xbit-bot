@@ -7,8 +7,8 @@ export async function getTargetPrice(): Promise<number> {
   const startBtcPrice = prices.find((a: any) => a.time === startHour)?.USD;
   const endBtcPrice = prices.find((a: any) => a.time === hour)?.USD;
   const startPrice = 5;
-  const noise = Math.random() * 0.2 + 1;
-  const targetPrice = startPrice * (1 + (endBtcPrice - startBtcPrice) / startBtcPrice * 2) + noise;
+  // const noise = Math.random() * 0.2 + 1;
+  const targetPrice = startPrice * (1 + (endBtcPrice - startBtcPrice) / startBtcPrice * 2);
   return Number(targetPrice.toFixed(2));
 }
 
