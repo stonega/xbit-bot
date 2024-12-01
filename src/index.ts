@@ -35,7 +35,7 @@ async function main(): Promise<void> {
   if (role === "maker") {
     // Sell bool
     // Calculate price
-    const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.2));
+    const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease(0.1));
 
     const price = nextSellPrice.toString();
     const amount = 0.8 * Math.random();
@@ -73,7 +73,7 @@ async function main(): Promise<void> {
     if (Number(buyPrice || sellPrice) < Number(target)) {
       // Buy bool to increase price
       // Calculate price
-      const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(0.3));
+      const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease(0.1));
       const amount = 1 + Math.random();
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
