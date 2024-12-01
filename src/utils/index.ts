@@ -2,7 +2,8 @@ const offsetMap: Map<string, number> = new Map();
 export async function getTargetPrice(): Promise<number> {
   const currentHour = Math.floor(new Date().getTime() / 1000 / 60 / 60).toString();
   let offset = offsetMap.get(currentHour);
-  if (!offset) {
+  const reset = Math.random() < 0.01;
+  if (!offset || reset) {
     offsetMap.set(currentHour, Math.floor(Math.random() * 1000) + 250);
     offset = offsetMap.get(currentHour);
   }
@@ -14,7 +15,7 @@ export async function getTargetPrice(): Promise<number> {
   const endBtcPrice = prices.find((a: any) => a.time === hour)?.USD;
   const startPrice = 5;
   // const noise = Math.random() * 0.2 + 1;
-  const targetPrice = startPrice * (1 + (endBtcPrice - startBtcPrice) / startBtcPrice * 4);
+  const targetPrice = startPrice * (1 + (endBtcPrice - startBtcPrice) / startBtcPrice * 2);
   return Number(targetPrice.toFixed(4));
 }
 
