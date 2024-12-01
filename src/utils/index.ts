@@ -2,7 +2,7 @@ const offsetMap: Map<string, number> = new Map();
 export async function getTargetPrice(): Promise<number> {
   const currentHour = Math.floor(new Date().getTime() / 1000 / 60 / 60).toString();
   let offset = offsetMap.get(currentHour);
-  const reset = Math.random() < 0.01;
+  const reset = Math.random() < 0.032;
   if (!offset || reset) {
     offsetMap.set(currentHour, Math.floor(Math.random() * 1000) + 250);
     offset = offsetMap.get(currentHour);
