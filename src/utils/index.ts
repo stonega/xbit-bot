@@ -7,15 +7,13 @@ export async function getTargetPrice(): Promise<number> {
     offsetMap.set(currentHour, Math.floor(Math.random() * 1000) + 250);
     offset = offsetMap.get(currentHour);
   }
-  const hour = Math.floor(new Date().getTime() / 1000 / 60 / 60) * 3600 - 3600 * offset!;
   const priceResult = await fetch(`https://mempool.space/api/v1/historical-price`).then(a => a.json());
   const prices = priceResult.prices;
   const startHour = 1732582800 - 3600 * offset!;
   const startBtcPrice = prices.find((a: any) => a.time === startHour)?.USD;
-  const endBtcPrice = prices.find((a: any) => a.time === hour)?.USD;
   const startPrice = 5;
   // const noise = Math.random() * 0.2 + 1;
-  const targetPrice = startPrice * (1 + (endBtcPrice - startBtcPrice) / startBtcPrice * 2);
+  const targetPrice = startPrice * (1 + (startBtcPrice - 50000) / 50000);
   return Number(targetPrice.toFixed(4));
 }
 
