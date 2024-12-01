@@ -5,7 +5,11 @@ import { betaTestnet } from "./contract/network";
 import { getPrice, getTargetPrice } from "./utils";
 
 function getPriceInscrease(): number {
-  return Math.max(Math.random() * 0.05, 0.01);
+  const random = Math.random();
+  if (random < 0.9) {
+    return Math.max(Math.random() * 0.04, 0.01);
+  }
+  return -Math.max(Math.random() * 0.02, 0.01);
 }
 
 async function main(): Promise<void> {
