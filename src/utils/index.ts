@@ -1,5 +1,5 @@
 export async function getTargetPrice(): Promise<number> {
-  const offset = 1170;
+  const offset = 550;
   const hour = Math.floor(new Date().getTime() / 1000 / 60 / 60) * 3600 - 3600 * offset;
   const priceResult = await fetch(`https://mempool.space/api/v1/historical-price`).then(a => a.json());
   const prices = priceResult.prices;
