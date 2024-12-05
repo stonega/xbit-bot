@@ -39,7 +39,7 @@ async function main(): Promise<void> {
   if (role === "maker") {
     // Sell bool
     // Calculate price
-    const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) + getPriceInscrease());
+    const nextSellPrice = Math.abs(Number(buyPrice) + getPriceInscrease());
 
     const price = nextSellPrice.toString();
     const amount = 0.6 * Math.random();
@@ -56,7 +56,7 @@ async function main(): Promise<void> {
 
     // Buy bool
     // Calculate price
-    const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) - getPriceInscrease());
+    const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceInscrease());
     const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
     const res = await trade.createBuyOrder(signer, {
       amount: BigInt(parseEther(amount.toString())),
@@ -74,10 +74,10 @@ async function main(): Promise<void> {
       return;
     }
     console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
-    if (Number(buyPrice || sellPrice) < Number(target)) {
+    if (Number(buyPrice) < Number(target)) {
       // Buy bool to increase price
       // Calculate price
-      const nextBuyPrice = Math.abs(Number(sellPrice || buyPrice) + getPriceInscrease());
+      const nextBuyPrice = Math.abs(Number(buyPrice) + getPriceInscrease());
       const amount = 1 + Math.random();
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
@@ -91,7 +91,7 @@ async function main(): Promise<void> {
     }
     else {
       // Sell bool
-      const nextSellPrice = Math.abs(Number(buyPrice || sellPrice) - getPriceInscrease());
+      const nextSellPrice = Math.abs(Number(buyPrice) - getPriceInscrease());
       const price = nextSellPrice.toString();
       const amount = 0.8 + Math.random();
       const receive = trade.calcUsdt(price, amount.toString());
