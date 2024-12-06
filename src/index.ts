@@ -77,7 +77,7 @@ async function main(): Promise<void> {
     if (Number(buyPrice) < Number(target)) {
       // Buy bool to increase price
       // Calculate price
-      const nextBuyPrice = Math.abs(Number(buyPrice) + getPriceInscrease());
+      const nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + getPriceInscrease());
       const amount = 1 + Math.random();
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
