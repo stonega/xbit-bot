@@ -6,8 +6,11 @@ import { getPrice, getTargetPrice } from "./utils";
 
 function getPriceInscrease(): number {
   const random = Math.random();
+  if (random < 0.1) {
+    return Math.max(Math.random() * 0.06, 0.03);
+  }
   if (random < 0.7) {
-    return Math.max(Math.random() * 0.03, 0.01);
+    return Math.max(Math.random() * 0.03, 0.015);
   }
   return -Math.max(Math.random() * 0.01, 0.005);
 }
