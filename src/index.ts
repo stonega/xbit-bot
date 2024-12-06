@@ -4,7 +4,7 @@ import { TradeApi } from "./contract";
 import { betaTestnet } from "./contract/network";
 import { getPrice, getTargetPrice } from "./utils";
 
-function getPriceInscrease(): number {
+function getPriceTakerInscrease(): number {
   const random = Math.random();
   if (random < 0.1) {
     return Math.max(Math.random() * 0.1, 0.05);
@@ -13,6 +13,10 @@ function getPriceInscrease(): number {
     return Math.max(Math.random() * 0.05, 0.025);
   }
   return -Math.max(Math.random() * 0.02, 0.005);
+}
+
+function getPriceMakerInscrease(): number {
+  return Math.max(Math.random() * 0.05, 0.025);
 }
 
 async function main(): Promise<void> {
@@ -42,7 +46,7 @@ async function main(): Promise<void> {
   if (role === "maker") {
     // Sell bool
     // Calculate price
-    const nextSellPrice = Math.abs(Number(buyPrice) + getPriceInscrease());
+    const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
 
     const price = nextSellPrice.toString();
     const amount = 0.5 * Math.random() + 1;
@@ -59,7 +63,7 @@ async function main(): Promise<void> {
 
     // Buy bool
     // Calculate price
-    const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceInscrease());
+    const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
     const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
     const res = await trade.createBuyOrder(signer, {
       amount: BigInt(parseEther(amount.toString())),
@@ -80,7 +84,7 @@ async function main(): Promise<void> {
     if (Number(buyPrice) < Number(target)) {
       // Buy bool to increase price
       // Calculate price
-      const nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + getPriceInscrease());
+      const nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + getPriceTakerInscrease());
       const amount = 0.6 + Math.random();
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
@@ -94,7 +98,7 @@ async function main(): Promise<void> {
     }
     else {
       // Sell bool
-      const nextSellPrice = Math.abs(Number(buyPrice) - getPriceInscrease());
+      const nextSellPrice = Math.abs(Number(buyPrice) - getPriceTakerInscrease());
       const price = nextSellPrice.toString();
       const amount = 0.6 + Math.random();
       const receive = trade.calcUsdt(price, amount.toString());
