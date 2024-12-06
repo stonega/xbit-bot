@@ -10,9 +10,9 @@ function getPriceInscrease(): number {
     return Math.max(Math.random() * 0.06, 0.03);
   }
   if (random < 0.7) {
-    return Math.max(Math.random() * 0.03, 0.015);
+    return Math.max(Math.random() * 0.04, 0.02);
   }
-  return -Math.max(Math.random() * 0.01, 0.005);
+  return -Math.max(Math.random() * 0.02, 0.005);
 }
 
 async function main(): Promise<void> {
