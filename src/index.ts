@@ -42,7 +42,7 @@ async function main(): Promise<void> {
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceInscrease());
 
     const price = nextSellPrice.toString();
-    const amount = 0.5 * Math.random() + 0.5;
+    const amount = 0.5 * Math.random() + 1;
     const receive = trade.calcUsdt(price, amount.toString());
     const sellRes = await trade.createSellOrder(signer, {
       amount: BigInt(parseEther(amount.toString())),
@@ -52,7 +52,7 @@ async function main(): Promise<void> {
       console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
     });
 
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     // Buy bool
     // Calculate price
@@ -78,7 +78,7 @@ async function main(): Promise<void> {
       // Buy bool to increase price
       // Calculate price
       const nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + getPriceInscrease());
-      const amount = 1 + Math.random();
+      const amount = 0.6 + Math.random();
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
         amount: BigInt(parseEther(amount.toString())),
