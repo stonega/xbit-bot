@@ -7,7 +7,7 @@ import { getPrice, getTargetPrice } from "./utils";
 function getPriceTakerInscrease(): number {
   const random = Math.random();
   if (random < 0.7) {
-    return Math.max(Math.random() * 0.02, 0.01);
+    return Math.max(Math.random() * 0.01, 0.005);
   }
   return -Math.max(Math.random() * 0.02, 0.005);
 }
@@ -60,7 +60,7 @@ async function main(): Promise<void> {
 
     // Buy bool
     // Calculate price
-    const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
+    const nextBuyPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
     const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
     const res = await trade.createBuyOrder(signer, {
       amount: BigInt(parseEther(amount.toString())),
