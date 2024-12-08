@@ -56,8 +56,17 @@ async function main(): Promise<void> {
       console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
     });
 
-    await new Promise(resolve => setTimeout(resolve, 5000));
-
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    if (!sellPrice) {
+      const sellRes = await trade.createSellOrder(signer, {
+        amount: BigInt(parseEther(amount.toString())),
+        receive,
+      });
+      sellRes.wait().then(() => {
+        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+      });
+    }
+    await new Promise(resolve => setTimeout(resolve, 3000));
     // Buy bool
     // Calculate price
     const nextBuyPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
