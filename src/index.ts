@@ -82,7 +82,7 @@ async function main(): Promise<void> {
     }
     console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
     if (Number(buyPrice) < Number(target)) {
-      let amount = 0.8 + Math.random();
+      let amount = 1 + Math.random();
       const priceIncrease = getPriceTakerInscrease();
       if (priceIncrease > 0 && !Number.isNaN(Number(sellAmount))) {
         if (Number(sellAmount) < 10) {
@@ -104,7 +104,7 @@ async function main(): Promise<void> {
     }
     else {
       // Sell bool
-      let amount = 0.8 + Math.random();
+      let amount = 1 + Math.random();
       const priceIncrease = getPriceTakerInscrease();
       if (priceIncrease > 0 && !Number.isNaN(Number(buyAmount))) {
         if (Number(buyAmount) < 10) {
