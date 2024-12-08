@@ -31,7 +31,7 @@ async function main(): Promise<void> {
   const provider = new JsonRpcProvider(currentNetwork.rpc);
   const signer = wallet.connect(provider);
 
-  const { buyPrice, sellPrice } = await getPrice();
+  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice();
 
   if (!buyPrice && !sellPrice) {
     console.log("No orders");
@@ -82,10 +82,15 @@ async function main(): Promise<void> {
     }
     console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
     if (Number(buyPrice) < Number(target)) {
+      let amount = 0.8 + Math.random();
+      if (!Number.isNaN(Number(sellAmount))) {
+        if (Number(sellAmount) < 10) {
+          amount = Math.max(Number(sellAmount), amount);
+        }
+      }
       // Buy bool to increase price
       // Calculate price
       const nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + getPriceTakerInscrease());
-      const amount = 0.8 + Math.random();
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
         amount: BigInt(parseEther(amount.toString())),
@@ -98,9 +103,14 @@ async function main(): Promise<void> {
     }
     else {
       // Sell bool
+      let amount = 0.8 + Math.random();
+      if (!Number.isNaN(Number(buyAmount))) {
+        if (Number(buyAmount) < 10) {
+          amount = Math.max(Number(buyAmount), amount);
+        }
+      }
       const nextSellPrice = Math.abs(Number(buyPrice) - getPriceTakerInscrease());
       const price = nextSellPrice.toString();
-      const amount = 0.8 + Math.random();
       const receive = trade.calcUsdt(price, amount.toString());
       const sellRes = await trade.createSellOrder(signer, {
         amount: BigInt(parseEther(amount.toString())),

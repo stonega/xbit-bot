@@ -20,12 +20,16 @@ export async function getTargetPrice(force?: boolean): Promise<number> {
 }
 
 // Get sell and buy price from order-books
-export async function getPrice(): Promise<{ buyPrice: string; sellPrice: string }> {
+export async function getPrice(): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
   const result = await fetch("https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=TBOL%2FUSDC").then(a => a.json());
   const buyPrice = result.data.orderBuyBList[0]?.price;
+  const buyAmount = result.data.orderBuyBList[0]?.qty;
   const sellPrice = result.data.orderSellBList[0]?.price;
+  const sellAmount = result.data.orderSellBList[0]?.qty;
   return {
     buyPrice,
+    buyAmount,
     sellPrice,
+    sellAmount,
   };
 }
