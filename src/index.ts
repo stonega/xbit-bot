@@ -73,9 +73,12 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    const target = await getTargetPrice();
+    let target = await getTargetPrice();
     if (Number.isNaN(target)) {
       return;
+    }
+    while (Math.abs(Number(buyPrice) - Number(target)) < 0.1) {
+      target = await getTargetPrice(true);
     }
     console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
     if (Number(buyPrice) < Number(target)) {

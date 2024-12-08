@@ -1,11 +1,11 @@
 const offsetMap: Map<string, number> = new Map();
-export async function getTargetPrice(): Promise<number> {
+export async function getTargetPrice(force?: boolean): Promise<number> {
   // 4 hour as as update intervel
   const currentHour = Math.floor(new Date().getTime() / 1000 / 60 / 60 / 4).toString();
   // Get saved offet from memery
   let offset = offsetMap.get(currentHour);
   const reset = Math.random() < 0.01;
-  if (!offset || reset) {
+  if (!offset || reset || force) {
     offsetMap.set(currentHour, Math.floor(Math.random() * 1000) + 250);
     offset = offsetMap.get(currentHour);
   }
