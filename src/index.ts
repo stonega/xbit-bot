@@ -9,7 +9,7 @@ function getPriceTakerInscrease(): number {
   if (random <= 0.85) {
     return Math.max(Math.random() * 0.01, 0.005);
   }
-  return -Math.max(Math.random() * 0.02, 0.005);
+  return -Math.max(Math.random() * 0.01, 0.005);
 }
 
 function getPriceMakerInscrease(): number {
@@ -95,11 +95,11 @@ async function main(): Promise<void> {
       let amount = 1 + Math.random();
       const priceIncrease = getPriceTakerInscrease();
       if (priceIncrease > 0 && !Number.isNaN(Number(sellAmount))) {
-        if (Number(sellAmount) < 10) {
+        if (Number(sellAmount) < 4) {
           amount = Math.max(Number(sellAmount), amount);
         }
         else {
-          amount = 10;
+          amount = 4;
         }
       }
       const nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + priceIncrease);
@@ -118,11 +118,11 @@ async function main(): Promise<void> {
       let amount = 1 + Math.random();
       const priceIncrease = getPriceTakerInscrease();
       if (priceIncrease > 0 && !Number.isNaN(Number(buyAmount))) {
-        if (Number(buyAmount) < 10) {
+        if (Number(buyAmount) < 4) {
           amount = Math.max(Number(buyAmount), amount);
         }
         else {
-          amount = 10;
+          amount = 4;
         }
       }
       const nextSellPrice = Math.abs(Number(buyPrice) - priceIncrease);
