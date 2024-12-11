@@ -43,7 +43,7 @@ async function main(): Promise<void> {
   if (role === "maker") {
     // Sell bool
     // Calculate price
-    const nextSellPrice = Math.abs(Number(sellPrice) + getPriceMakerInscrease());
+    const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
 
     const price = nextSellPrice.toString();
     const amount = 0.6 * Math.random() + 0.8;
