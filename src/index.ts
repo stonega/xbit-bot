@@ -65,8 +65,8 @@ async function main(): Promise<void> {
       sellRes.wait().then(() => {
         console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
       });
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    await new Promise(resolve => setTimeout(resolve, 1000));
     // Buy bool
     // Calculate price
     const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
