@@ -108,10 +108,8 @@ async function main(): Promise<void> {
         amount: BigInt(parseEther(amount.toString())),
         pay,
       });
-
-      res.wait().then(() => {
-        console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
-      });
+      await res.wait();
+      console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
     }
     else {
       // Sell bool
@@ -132,9 +130,8 @@ async function main(): Promise<void> {
         amount: BigInt(parseEther(amount.toString())),
         receive,
       });
-      sellRes.wait().then(() => {
-        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
-      });
+      await sellRes.wait();
+      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
     }
   }
 }
