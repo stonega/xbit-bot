@@ -14,7 +14,7 @@ export async function getTargetPrice(force?: boolean): Promise<number> {
   // From a static time
   const startHour = 1732582800 - 3600 * offset!;
   const startBtcPrice = prices.find((a: any) => a.time === startHour)?.USD;
-  const startPrice = 3;
+  const startPrice = 2;
   const basePrice = 40000 - Math.min(10000, (Number(currentHour) - 120400) * 100);
   const targetPrice = startPrice * (1 + (startBtcPrice - basePrice) / basePrice);
   return Number(targetPrice.toFixed(4));
