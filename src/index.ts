@@ -1,7 +1,7 @@
 import { formatUnits, JsonRpcProvider, parseEther, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { TradeApi } from "./contract";
-import { betaTestnet, ultraLiquidTestnet } from "./contract/network";
+import { ultraLiquidTestnet } from "./contract/network";
 import { getPrice, getTargetPrice } from "./utils";
 
 function getPriceTakerInscrease(): number {
@@ -56,7 +56,7 @@ async function main(): Promise<void> {
       console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
     });
 
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     if (!sellPrice) {
       const sellRes = await trade.createSellOrder(signer, {
         amount: BigInt(parseEther(amount.toString())),
@@ -66,7 +66,7 @@ async function main(): Promise<void> {
         console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
       });
     }
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, 1000));
     // Buy bool
     // Calculate price
     const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
@@ -135,8 +135,6 @@ async function main(): Promise<void> {
       sellRes.wait().then(() => {
         console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
       });
-
-      await new Promise(resolve => setTimeout(resolve, 10000));
     }
   }
 }
@@ -154,7 +152,7 @@ const task = new Task(
 );
 
 const role = Bun.env.ROLE || "maker";
-const duration = role === "MAKER" ? 25 : 45;
+const duration = role === "MAKER" ? 10 : 15;
 const job = new SimpleIntervalJob({ seconds: duration, runImmediately: true }, task);
 
 scheduler.addSimpleIntervalJob(job);
