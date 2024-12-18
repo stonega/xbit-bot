@@ -48,7 +48,7 @@ export const ultraLiquidTestnet = {
       icon: "https://bool.network/bool-orange.png",
       address: "",
     },
-    usdc: {
+    usdt: {
       name: "USDC",
       address: "0xaba94d6c512f9a37a3b12ae5d3ed171c5d0b475a",
       icon: "/images/usdc.png",

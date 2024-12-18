@@ -1,7 +1,7 @@
 import { formatUnits, JsonRpcProvider, parseEther, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { TradeApi } from "./contract";
-import { betaTestnet } from "./contract/network";
+import { betaTestnet, ultraLiquidTestnet } from "./contract/network";
 import { getPrice, getTargetPrice } from "./utils";
 
 function getPriceTakerInscrease(): number {
@@ -17,7 +17,7 @@ function getPriceMakerInscrease(): number {
 }
 
 async function main(): Promise<void> {
-  const currentNetwork = betaTestnet;
+  const currentNetwork = ultraLiquidTestnet;
   const trade = new TradeApi({
     rpc: currentNetwork.rpc,
     contract: currentNetwork.contracts.trade!,
