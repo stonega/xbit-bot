@@ -28,3 +28,32 @@ export const betaTestnet = {
     },
   },
 };
+
+export const ultraLiquidTestnet = {
+  rpc: "https://ultra-test-node-rpc.bool.network",
+  chainId: 483,
+  symbol: "tBOL",
+  name: "Ultra Liquid Testnet",
+  value: "ultra_liquid_testnet",
+  explorer: "https://beta-testnet.boolscan.com",
+  icon: "https://bool.network/bool-network-orange.png",
+  contracts: {
+    trade: "0x2a375fbd16e8c00a40dd1c5402042267d5800407",
+  },
+  tokens: {
+    bool: {
+      name: "BOL",
+      symbol: "tBOL",
+      decimals: 18,
+      icon: "https://bool.network/bool-orange.png",
+      address: "",
+    },
+    usdc: {
+      name: "USDC",
+      address: "0xaba94d6c512f9a37a3b12ae5d3ed171c5d0b475a",
+      icon: "/images/usdc.png",
+      symbol: "USDC",
+      decimals: 6,
+    },
+  },
+};
