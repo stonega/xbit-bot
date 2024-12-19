@@ -6,8 +6,8 @@ import { getPrice, getTargetPrice } from "./utils";
 
 function getPriceTakerInscrease(): number {
   const random = Math.random();
-  if (random <= 0.85) {
-    return Math.max(Math.random() * 0.01, 0.005);
+  if (random <= 0.9) {
+    return Math.max(Math.random() * 0.02, 0.01);
   }
   return -Math.max(Math.random() * 0.01, 0.005);
 }
@@ -82,12 +82,9 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    let target = await getTargetPrice();
+    const target = await getTargetPrice();
     if (Number.isNaN(target)) {
       return;
-    }
-    while (Math.abs(Number(buyPrice) - Number(target)) < 0.1) {
-      target = await getTargetPrice(true);
     }
     console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
     if (Number(buyPrice) < Number(target)) {
