@@ -38,7 +38,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  console.debug(`[${new Date().toISOString()}] BuyPrice: ${buyPrice} SellPrice: ${sellPrice}`);
+  console.debug(`[${new Date().toISOString()}] BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
 
   if (role === "maker") {
     // Sell bool
