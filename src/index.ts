@@ -5,11 +5,7 @@ import { ultraLiquidTestnet } from "./contract/network";
 import { getPrice, getTargetPrice } from "./utils";
 
 function getPriceTakerInscrease(): number {
-  const random = Math.random();
-  if (random <= 0.9) {
-    return Math.max(Math.random() * 0.02, 0.01);
-  }
-  return -Math.max(Math.random() * 0.01, 0.005);
+  return Math.max(Math.random() * 0.02, 0.01);
 }
 
 function getPriceMakerInscrease(): number {
@@ -44,20 +40,28 @@ async function main(): Promise<void> {
     // Sell bool
     // Calculate price
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
-
-    const price = nextSellPrice.toString();
+    const target = await getTargetPrice();
+    if (Number.isNaN(target)) {
+      return;
+    }
+    console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
     const amount = 0.4 * Math.random() + 0.8;
-    const receive = trade.calcUsdt(price, amount.toString());
-    const sellRes = await trade.createSellOrder(signer, {
-      amount: BigInt(parseEther(amount.toString())),
-      receive,
-    });
-    sellRes.wait().then(() => {
-      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    if (!sellPrice) {
+    if (Number(buyPrice) < Number(target)) {
+    // Buy bool
+    // Calculate price
+      const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
+      const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
+      const res = await trade.createBuyOrder(signer, {
+        amount: BigInt(parseEther(amount.toString())),
+        pay,
+      });
+      res.wait().then(() => {
+        console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
+      });
+    }
+    else {
+      const price = nextSellPrice.toString();
+      const receive = trade.calcUsdt(price, amount.toString());
       const sellRes = await trade.createSellOrder(signer, {
         amount: BigInt(parseEther(amount.toString())),
         receive,
@@ -65,20 +69,19 @@ async function main(): Promise<void> {
       sellRes.wait().then(() => {
         console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
       });
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-    // Buy bool
-    // Calculate price
-    const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
-    const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
-    const res = await trade.createBuyOrder(signer, {
-      amount: BigInt(parseEther(amount.toString())),
-      pay,
-    });
 
-    res.wait().then(() => {
-      console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
-    });
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!sellPrice) {
+        const sellRes = await trade.createSellOrder(signer, {
+          amount: BigInt(parseEther(amount.toString())),
+          receive,
+        });
+        sellRes.wait().then(() => {
+          console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+        });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
   }
 
   if (role === "taker") {
