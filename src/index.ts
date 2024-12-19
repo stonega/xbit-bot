@@ -46,7 +46,7 @@ async function main(): Promise<void> {
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
 
     const price = nextSellPrice.toString();
-    const amount = 0.6 * Math.random() + 0.8;
+    const amount = 0.4 * Math.random() + 0.8;
     const receive = trade.calcUsdt(price, amount.toString());
     const sellRes = await trade.createSellOrder(signer, {
       amount: BigInt(parseEther(amount.toString())),
