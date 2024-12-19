@@ -73,7 +73,7 @@ async function main(): Promise<void> {
       await new Promise(resolve => setTimeout(resolve, 1000));
       if (!sellPrice) {
         const sellRes = await trade.createSellOrder(signer, {
-          amount: BigInt(parseEther(amount.toString())),
+          amount: BigInt(parseEther((amount * 2).toString())),
           receive,
         });
         sellRes.wait().then(() => {
