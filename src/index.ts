@@ -102,7 +102,10 @@ async function main(): Promise<void> {
           amount = 4;
         }
       }
-      const nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + priceIncrease);
+      let nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + priceIncrease);
+      if (target < nextBuyPrice) {
+        nextBuyPrice = target;
+      }
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
         amount: BigInt(parseEther(amount.toString())),
@@ -123,7 +126,10 @@ async function main(): Promise<void> {
           amount = 4;
         }
       }
-      const nextSellPrice = Math.abs(Number(buyPrice) - priceIncrease);
+      let nextSellPrice = Math.abs(Number(buyPrice) - priceIncrease);
+      if (target > nextSellPrice) {
+        nextSellPrice = target;
+      }
       const price = nextSellPrice.toString();
       const receive = trade.calcUsdt(price, amount.toString());
       const sellRes = await trade.createSellOrder(signer, {
