@@ -90,6 +90,10 @@ async function main(): Promise<void> {
       return;
     }
     console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
+    if (Math.abs(Number(buyPrice) - target) < 0.002) {
+      console.debug(`[${new Date().toISOString()}] No action required`);
+      return;
+    }
     if (Number(buyPrice) < Number(target)) {
       // Buy bool to increase price
       let amount = 4 + Math.random() * 4;
