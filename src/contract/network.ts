@@ -38,7 +38,7 @@ export const ultraLiquidTestnet = {
   explorer: "https://beta-testnet.boolscan.com",
   icon: "https://bool.network/bool-network-orange.png",
   contracts: {
-    trade: "0x2a375fbd16e8c00a40dd1c5402042267d5800407",
+    trade: "0xeca041b6ab360a1aab06c433838f295a73fb4d35",
   },
   tokens: {
     bool: {
