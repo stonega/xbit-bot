@@ -48,7 +48,6 @@ async function main(): Promise<void> {
     // Sell bool
     // Calculate price
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
-    console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
     const amount = 0.4 * Math.random() + 0.8;
     if (Number(buyPrice) < Number(target)) {
     // Buy bool
@@ -89,7 +88,7 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    if (Math.abs(Number(buyPrice) - target) < 0.002) {
+    if (Math.abs(Number(buyPrice) - target) < 0.001) {
       console.debug(`[${new Date().toISOString()}] No action required`);
       return;
     }
