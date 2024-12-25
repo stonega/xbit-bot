@@ -33,17 +33,21 @@ async function main(): Promise<void> {
     console.log("No orders");
     return;
   }
+  const target = await getTargetPrice();
+  if (Number.isNaN(target)) {
+    return;
+  }
 
   console.debug(`[${new Date().toISOString()}] BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
+  if (Math.abs(Number(buyPrice) - target) < 0.002) {
+    console.debug(`[${new Date().toISOString()}] No action required`);
+    return;
+  }
 
   if (role === "maker") {
     // Sell bool
     // Calculate price
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
-    const target = await getTargetPrice();
-    if (Number.isNaN(target)) {
-      return;
-    }
     console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
     const amount = 0.4 * Math.random() + 0.8;
     if (Number(buyPrice) < Number(target)) {
@@ -85,15 +89,7 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    const target = await getTargetPrice();
-    if (Number.isNaN(target)) {
-      return;
-    }
     console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
-    if (Math.abs(Number(buyPrice) - target) < 0.002) {
-      console.debug(`[${new Date().toISOString()}] No action required`);
-      return;
-    }
     if (Number(buyPrice) < Number(target)) {
       // Buy bool to increase price
       let amount = 4 + Math.random() * 4;
