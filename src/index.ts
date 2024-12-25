@@ -38,7 +38,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  console.debug(`[${new Date().toISOString()}] BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
+  console.debug(`[${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
   if (Math.abs(Number(buyPrice) - target) < 0.002) {
     console.debug(`[${new Date().toISOString()}] No action required`);
     return;
