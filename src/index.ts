@@ -39,12 +39,12 @@ async function main(): Promise<void> {
   }
 
   console.debug(`[${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
-  if (Math.abs(Number(buyPrice) - target) < 0.002) {
-    console.debug(`[${new Date().toISOString()}] No action required`);
-    return;
-  }
 
   if (role === "maker") {
+    if (Math.abs(Number(buyPrice) - target) < 0.001) {
+      console.debug(`[${new Date().toISOString()}] No action required`);
+      return;
+    }
     // Sell bool
     // Calculate price
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
@@ -89,7 +89,10 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    console.debug(`[${new Date().toISOString()}] Target price: ${target}`);
+    if (Math.abs(Number(buyPrice) - target) < 0.002) {
+      console.debug(`[${new Date().toISOString()}] No action required`);
+      return;
+    }
     if (Number(buyPrice) < Number(target)) {
       // Buy bool to increase price
       let amount = 4 + Math.random() * 4;
