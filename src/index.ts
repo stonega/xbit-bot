@@ -129,7 +129,7 @@ async function main(): Promise<void> {
         }
       }
       let nextSellPrice = Math.abs(Number(buyPrice) - priceIncrease);
-      if (target > nextSellPrice) {
+      if (target > nextSellPrice && priceIncrease > 0.002) {
         nextSellPrice = target;
       }
       const price = nextSellPrice.toString();
