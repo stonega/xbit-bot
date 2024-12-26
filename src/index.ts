@@ -88,14 +88,15 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
+    let priceIncrease = getPriceTakerInscrease();
     if (Math.abs(Number(buyPrice) - target) < 0.001) {
-      console.debug(`[${new Date().toISOString()}] No action required`);
-      return;
+      console.debug(`[${new Date().toISOString()}] Target price reached`);
+      // If target price reached, add small random price increase
+      priceIncrease = 0.001 + Math.random() * 0.001;
     }
     if (Number(buyPrice) < Number(target)) {
       // Buy bool to increase price
       let amount = 4 + Math.random() * 4;
-      const priceIncrease = getPriceTakerInscrease();
       if (priceIncrease > 0 && !Number.isNaN(Number(sellAmount))) {
         if (Number(sellAmount) < 8) {
           amount = Math.max(Number(sellAmount), amount);
@@ -105,7 +106,7 @@ async function main(): Promise<void> {
         }
       }
       let nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + priceIncrease);
-      if (target < nextBuyPrice) {
+      if (target < nextBuyPrice && priceIncrease > 0.002) {
         nextBuyPrice = target;
       }
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
@@ -119,7 +120,6 @@ async function main(): Promise<void> {
     else {
       // Sell bool
       let amount = 4 + Math.random() * 4;
-      const priceIncrease = getPriceTakerInscrease();
       if (priceIncrease > 0 && !Number.isNaN(Number(buyAmount))) {
         if (Number(buyAmount) < 8) {
           amount = Math.max(Number(buyAmount), amount);
