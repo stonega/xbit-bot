@@ -91,7 +91,15 @@ async function main(): Promise<void> {
     const priceIncrease = getPriceTakerInscrease();
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       console.debug(`[${new Date().toISOString()}] Target price reached`);
-      // If target price reached, add small random price increase
+      const buyAmount = 0.1;
+      const price = buyPrice.toString();
+      const receive = trade.calcUsdt(price, buyAmount.toString());
+      const sellRes = await trade.createSellOrder(signer, {
+        amount: BigInt(parseEther(buyAmount.toString())),
+        receive,
+      });
+      await sellRes.wait();
+      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
       return;
     }
     if (Number(buyPrice) < Number(target)) {
