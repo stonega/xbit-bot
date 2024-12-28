@@ -66,7 +66,7 @@ let lastPrice = 0;
 export async function getTargetPrice(): Promise<number> {
   const timestamp = new Date().toISOString();
   const baseUrl = "https://www.okx.com";
-  const queryString = "instId=SOL-USDC&limit=1";
+  const queryString = "instId=SOL-USDT&limit=1";
   const requestPath = "/api/v5/market/history-index-candles";
   const headers = getHeaders(timestamp, "GET", requestPath, queryString);
   const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
