@@ -106,7 +106,7 @@ async function main(): Promise<void> {
         }
       }
       let nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + priceIncrease);
-      if (target < nextBuyPrice && priceIncrease > 0.002) {
+      if (target < nextBuyPrice && priceIncrease > 0.001) {
         nextBuyPrice = target;
       }
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
         }
       }
       let nextSellPrice = Math.abs(Number(buyPrice) - priceIncrease);
-      if (target > nextSellPrice && priceIncrease > 0.002) {
+      if (target > nextSellPrice && priceIncrease > 0.001) {
         nextSellPrice = target;
       }
       const price = nextSellPrice.toString();
