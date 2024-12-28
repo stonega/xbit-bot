@@ -71,12 +71,12 @@ export async function getTargetPrice(): Promise<number> {
   const headers = getHeaders(timestamp, "GET", requestPath, queryString);
   const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
   let price = Number(data.data[0][1]) / 50;
-  if (Math.abs(price - lastPrice) > 0.0001) {
+  if (Math.abs(price - lastPrice) > 0.001) {
     lastPrice = price;
   }
   else {
     lastPrice = price;
-    price += 0.0001;
+    price += 0.001;
   }
   return price;
 }
