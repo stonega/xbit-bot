@@ -89,7 +89,7 @@ async function main(): Promise<void> {
 
   if (role === "taker") {
     let priceIncrease = getPriceTakerInscrease();
-    if (Math.abs(Number(buyPrice) - target) < 0.00001) {
+    if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       priceIncrease = 0.00012;
       console.debug(`[${new Date().toISOString()}] Target price reached, price inscrease ${priceIncrease}`);
       // If target price reached, add small random price increase
@@ -107,7 +107,7 @@ async function main(): Promise<void> {
         }
       }
       let nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + priceIncrease);
-      if (target < nextBuyPrice && priceIncrease > 0.001) {
+      if (target < nextBuyPrice) {
         nextBuyPrice = target;
       }
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
@@ -130,7 +130,7 @@ async function main(): Promise<void> {
         }
       }
       let nextSellPrice = Math.abs(Number(buyPrice) - priceIncrease);
-      if (target > nextSellPrice && priceIncrease > 0.001) {
+      if (target > nextSellPrice) {
         nextSellPrice = target;
       }
       const price = nextSellPrice.toString();

@@ -22,7 +22,7 @@ import CryptoJS from "crypto-js";
 //   return Number(targetPrice.toFixed(4));
 // }
 //
-// Get sell and buy price from order-books
+// Get sell and buy price f rom order-books
 export async function getPrice(): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
   const result = await fetch("https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=TBOL%2FUSDC").then(a => a.json());
   const buyPrice = result.data.orderBuyBList[0]?.price;
@@ -62,6 +62,7 @@ export function getHeaders(timestamp: string, method: string, requestPath: strin
   };
 }
 
+let lastPrice = 0;
 export async function getTargetPrice(): Promise<number> {
   const timestamp = new Date().toISOString();
   const baseUrl = "https://www.okx.com";
@@ -69,5 +70,13 @@ export async function getTargetPrice(): Promise<number> {
   const requestPath = "/api/v5/market/history-index-candles";
   const headers = getHeaders(timestamp, "GET", requestPath, queryString);
   const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
-  return Number(data.data[0][1]) / 50;
+  let price = Number(data.data[0][1]) / 50;
+  if (Math.abs(price - lastPrice) > 0.0001) {
+    lastPrice = price;
+  }
+  else {
+    lastPrice = price;
+    price += 0.0001;
+  }
+  return price;
 }
