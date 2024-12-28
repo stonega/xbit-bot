@@ -41,7 +41,7 @@ async function main(): Promise<void> {
   console.debug(`[${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
 
   if (role === "maker") {
-    if (Math.abs(Number(buyPrice) - target) < 0.001) {
+    if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       console.debug(`[${new Date().toISOString()}] No action required`);
       return;
     }
@@ -89,7 +89,7 @@ async function main(): Promise<void> {
 
   if (role === "taker") {
     const priceIncrease = getPriceTakerInscrease();
-    if (Math.abs(Number(buyPrice) - target) < 0.0005) {
+    if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       console.debug(`[${new Date().toISOString()}] Target price reached`);
       // If target price reached, add small random price increase
       return;
