@@ -88,10 +88,9 @@ async function main(): Promise<void> {
   }
 
   if (role === "taker") {
-    let priceIncrease = getPriceTakerInscrease();
-    if (Math.abs(Number(buyPrice) - target) < 0.0001) {
-      priceIncrease = 0.00012;
-      console.debug(`[${new Date().toISOString()}] Target price reached, price inscrease ${priceIncrease}`);
+    const priceIncrease = getPriceTakerInscrease();
+    if (Math.abs(Number(buyPrice) - target) < 0.0005) {
+      console.debug(`[${new Date().toISOString()}] Target price reached`);
       // If target price reached, add small random price increase
       return;
     }

@@ -76,7 +76,7 @@ export async function getTargetPrice(): Promise<number> {
   }
   else {
     lastPrice = price;
-    price += 0.001;
+    price += (price > lastPrice ? 0.001 : -0.001);
   }
   return price;
 }
