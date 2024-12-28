@@ -93,6 +93,7 @@ async function main(): Promise<void> {
       priceIncrease = 0.00012;
       console.debug(`[${new Date().toISOString()}] Target price reached, price inscrease ${priceIncrease}`);
       // If target price reached, add small random price increase
+      return;
     }
     if (Number(buyPrice) < Number(target)) {
       // Buy bool to increase price
