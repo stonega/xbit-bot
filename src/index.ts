@@ -91,7 +91,7 @@ async function main(): Promise<void> {
     const priceIncrease = getPriceTakerInscrease();
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       console.debug(`[${new Date().toISOString()}] Target price reached`);
-      const buyAmount = 0.1;
+      const buyAmount = 0.5;
       const price = buyPrice.toString();
       const receive = trade.calcUsdt(price, buyAmount.toString());
       const sellRes = await trade.createSellOrder(signer, {
