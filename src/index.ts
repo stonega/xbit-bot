@@ -1,4 +1,4 @@
-import { formatUnits, JsonRpcProvider, parseEther, Wallet } from "ethers";
+import { formatUnits, JsonRpcProvider, parseEther, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { TradeApi } from "./contract";
 import { ultraLiquidTestnet } from "./contract/network";
@@ -14,10 +14,15 @@ function getPriceMakerInscrease(): number {
 
 async function main(): Promise<void> {
   const currentNetwork = ultraLiquidTestnet;
+  const pair = Bun.env.PAIR!;
+  const tokenA = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.split("/")[0])!;
+  const tokenB = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.split("/")[1])!;
   const trade = new TradeApi({
     rpc: currentNetwork.rpc,
-    contract: currentNetwork.contracts.trade!,
-    usdt: currentNetwork.tokens.usdt!,
+    // @ts-expect-error type error
+    contract: tokenA.trade!,
+    tokenA,
+    tokenB,
   });
   if (!Bun.env.PRIVATE_KEY) {
     throw new Error("PRIVATE_KEY is required");
@@ -27,13 +32,13 @@ async function main(): Promise<void> {
   const provider = new JsonRpcProvider(currentNetwork.rpc);
   const signer = wallet.connect(provider);
 
-  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice();
+  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair);
 
   if (!buyPrice && !sellPrice) {
     console.log("No orders");
     return;
   }
-  const target = await getTargetPrice();
+  const target = await getTargetPrice(tokenA.price);
   if (Number.isNaN(target)) {
     return;
   }
@@ -55,7 +60,7 @@ async function main(): Promise<void> {
       const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
-        amount: BigInt(parseEther(amount.toString())),
+        amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         pay,
       });
       res.wait().then(() => {
@@ -76,7 +81,7 @@ async function main(): Promise<void> {
       await new Promise(resolve => setTimeout(resolve, 1000));
       if (!sellPrice) {
         const sellRes = await trade.createSellOrder(signer, {
-          amount: BigInt(parseEther((amount * 2).toString())),
+          amount: BigInt(parseUnits((amount * 2).toString(), tokenA.decimals)),
           receive,
         });
         sellRes.wait().then(() => {
@@ -95,7 +100,7 @@ async function main(): Promise<void> {
       const price = buyPrice.toString();
       const receive = trade.calcUsdt(price, buyAmount.toString());
       const sellRes = await trade.createSellOrder(signer, {
-        amount: BigInt(parseEther(buyAmount.toString())),
+        amount: BigInt(parseUnits(buyAmount.toString(), tokenA.decimals)),
         receive,
       });
       await sellRes.wait();
@@ -119,7 +124,7 @@ async function main(): Promise<void> {
       }
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
       const res = await trade.createBuyOrder(signer, {
-        amount: BigInt(parseEther(amount.toString())),
+        amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         pay,
       });
       await res.wait();
@@ -143,7 +148,7 @@ async function main(): Promise<void> {
       const price = nextSellPrice.toString();
       const receive = trade.calcUsdt(price, amount.toString());
       const sellRes = await trade.createSellOrder(signer, {
-        amount: BigInt(parseEther(amount.toString())),
+        amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         receive,
       });
       await sellRes.wait();

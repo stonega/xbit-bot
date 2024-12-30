@@ -1,4 +1,4 @@
-import type { Signer } from "ethers";
+import type { Signer, TransactionReceipt, TransactionResponse } from "ethers";
 import type { Token } from "../types";
 import BN from "bignumber.js";
 import { Contract } from "ethers";
@@ -9,29 +9,33 @@ import { Order, OrderType } from "./interfaces/order";
 export class TradeApi extends BaseEvmApi {
   constructor({
     rpc,
-    usdt,
+    tokenA,
+    tokenB,
     contract,
   }: {
     rpc: string;
-    usdt: { address: string; decimals: number };
+    tokenA: { address: string; decimals: number };
+    tokenB: { address: string; decimals: number };
     contract: string;
   }) {
     super(rpc);
     this.contractAddress = contract;
-    this.usdt = usdt;
+    this.tokenA = tokenA;
+    this.tokenB = tokenB;
   }
 
-  readonly usdt;
+  readonly tokenA;
+  readonly tokenB;
   readonly contractAddress: string;
 
-  get contract() {
+  get contract(): Contract {
     return new Contract(this.contractAddress, TradeABI, this.provider);
   }
 
   async createBuyOrder(
     signer: Signer,
     { amount, pay }: { amount: bigint; pay: bigint },
-  ) {
+  ): Promise<TransactionResponse> {
     const res = await this.contract
       .getFunction("placeOrderBuyB")
       .populateTransaction(pay, amount);
@@ -42,11 +46,10 @@ export class TradeApi extends BaseEvmApi {
   async createSellOrder(
     signer: Signer,
     { amount, receive }: { amount: bigint; receive: bigint },
-  ) {
+  ): Promise<TransactionResponse> {
     const res = await this.contract
       .getFunction("placeOrderSellB")
-      .populateTransaction(receive, { value: amount });
-    res.data += "12";
+      .populateTransaction(receive, { value: this.tokenA.address ? amount : 0n });
     await signer.estimateGas(res);
     return signer.sendTransaction(res);
   }
@@ -54,7 +57,7 @@ export class TradeApi extends BaseEvmApi {
   async cancelOrder(
     signer: Signer,
     { orderId, type }: { orderId: bigint; type: "buy" | "sell" },
-  ) {
+  ): Promise<TransactionResponse> {
     const res = await this.contract
       .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
       .populateTransaction(orderId);
@@ -62,26 +65,10 @@ export class TradeApi extends BaseEvmApi {
     return signer.sendTransaction(res);
   }
 
-  isUsdtApproved(address: string, amount: bigint) {
-    return super.isApprove({
-      contract: this.usdt.address,
-      approvedAddress: this.contractAddress,
-      amount,
-      address,
-    });
-  }
-
-  approveUsdt(signer: Signer) {
-    return super.approve(signer, {
-      contract: this.usdt.address,
-      approvedAddress: this.contractAddress,
-    });
-  }
-
-  calcUsdt(price: string, bool: string) {
+  calcUsdt(price: string, bool: string): bigint {
     const receive = BN(bool)
       .times(BN(price))
-      .times(10 ** this.usdt.decimals)
+      .times(10 ** this.tokenB.decimals)
       .toFixed(0);
     return BigInt(receive);
   }

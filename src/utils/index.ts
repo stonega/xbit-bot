@@ -1,30 +1,7 @@
 import CryptoJS from "crypto-js";
 
-// const offsetMap: Map<string, number> = new Map();
-// export async function getTargetPrice(force?: boolean): Promise<number> {
-//   // 4 hour as as update intervel
-//   const currentHour = Math.floor(new Date().getTime() / 1000 / 60 / 60 / 4).toString();
-//   // Get saved offet from memery
-//   let offset = offsetMap.get(currentHour);
-//   const reset = Math.random() < 0.01;
-//   if (!offset || reset || force) {
-//     offsetMap.set(currentHour, Math.floor(Math.random() * 1000) + 250);
-//     offset = offsetMap.get(currentHour);
-//   }
-//   const priceResult = await fetch(`https://mempool.space/api/v1/historical-price`).then(a => a.json());
-//   const prices = priceResult.prices;
-//   // From a static time
-//   const startHour = 1732582800 - 3600 * offset!;
-//   const startBtcPrice = prices.find((a: any) => a.time === startHour)?.USD;
-//   const startPrice = 2;
-//   const basePrice = 40000 - Math.min(10000, (Number(currentHour) - 120400) * 100);
-//   const targetPrice = startPrice * (1 + (startBtcPrice - basePrice) / basePrice);
-//   return Number(targetPrice.toFixed(4));
-// }
-//
-// Get sell and buy price f rom order-books
-export async function getPrice(): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const result = await fetch("https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=TBOL%2FUSDC").then(a => a.json());
+export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
+  const result = await fetch(`https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=${pair}`).then(a => a.json());
   const buyPrice = result.data.orderBuyBList[0]?.price;
   const buyAmount = result.data.orderBuyBList[0]?.qty;
   const sellPrice = result.data.orderSellBList[result.data.orderSellBList.length - 1]?.price;
@@ -63,10 +40,10 @@ export function getHeaders(timestamp: string, method: string, requestPath: strin
 }
 
 let lastPrice = 0;
-export async function getTargetPrice(): Promise<number> {
+export async function getTargetPrice(pair: string): Promise<number> {
   const timestamp = new Date().toISOString();
   const baseUrl = "https://www.okx.com";
-  const queryString = "instId=SOL-USDT&limit=1";
+  const queryString = `instId=${pair}-USDT&limit=1`;
   const requestPath = "/api/v5/market/history-index-candles";
   const headers = getHeaders(timestamp, "GET", requestPath, queryString);
   const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
