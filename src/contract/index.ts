@@ -2,7 +2,7 @@ import type { Signer, TransactionReceipt, TransactionResponse } from "ethers";
 import type { Token } from "../types";
 import BN from "bignumber.js";
 import { Contract } from "ethers";
-import { TradeABI } from "./abi";
+import { TradeABI, TradeNativeABI } from "./abi";
 import { BaseEvmApi } from "./api";
 import { Order, OrderType } from "./interfaces/order";
 
@@ -29,7 +29,10 @@ export class TradeApi extends BaseEvmApi {
   readonly contractAddress: string;
 
   get contract(): Contract {
-    return new Contract(this.contractAddress, TradeABI, this.provider);
+    if (this.tokenA.address) {
+      return new Contract(this.contractAddress, TradeABI, this.provider);
+    }
+    return new Contract(this.contractAddress, TradeNativeABI, this.provider);
   }
 
   async createBuyOrder(
@@ -47,9 +50,18 @@ export class TradeApi extends BaseEvmApi {
     signer: Signer,
     { amount, receive }: { amount: bigint; receive: bigint },
   ): Promise<TransactionResponse> {
-    const res = await this.contract
-      .getFunction("placeOrderSellB")
-      .populateTransaction(receive, { value: this.tokenA.address ? amount : 0n });
+    let res;
+    const isNative = !this.tokenA.address;
+    if (isNative) {
+      res = await this.contract
+        .getFunction("placeOrderSellB")
+        .populateTransaction(receive, { value: amount });
+    }
+    else {
+      res = await this.contract
+        .getFunction("placeOrderSellB")
+        .populateTransaction(receive, amount);
+    }
     await signer.estimateGas(res);
     return signer.sendTransaction(res);
   }
