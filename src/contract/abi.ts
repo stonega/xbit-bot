@@ -11,116 +11,22 @@ export const TradeABI = [
     type: "constructor",
   },
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: true,
-        internalType: "uint256",
-        name: "orderId",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "bool",
-        name: "isOrderBuyB",
-        type: "bool",
-      },
-    ],
-    name: "OrderCancelled",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "idBuy",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "idSell",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "tradeAmountU",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "tradeAmountB",
-        type: "uint256",
-      },
-    ],
-    name: "OrderMatched",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "orderId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "maker",
-        type: "address",
-      },
-      {
-        indexed: false,
         internalType: "uint256",
         name: "amountU",
         type: "uint256",
       },
       {
-        indexed: false,
         internalType: "uint256",
         name: "amountB",
         type: "uint256",
       },
     ],
-    name: "StateOrderBuyB",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "orderId",
-        type: "uint256",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "maker",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amountB",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "amountU",
-        type: "uint256",
-      },
-    ],
-    name: "StateOrderSellB",
-    type: "event",
+    name: "placeOrderSellB",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
@@ -396,19 +302,6 @@ export const TradeABI = [
     type: "function",
   },
   {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "amountU",
-        type: "uint256",
-      },
-    ],
-    name: "placeOrderSellB",
-    outputs: [],
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
     inputs: [],
     name: "tokenU",
     outputs: [
@@ -470,7 +363,6 @@ export const TradeABI = [
     type: "function",
   },
 ];
-
 export const TradeNativeABI = [
   {
     inputs: [
