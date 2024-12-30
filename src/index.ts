@@ -81,7 +81,7 @@ async function main(): Promise<void> {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     if (!sellPrice) {
-      const price = nextSellPrice.toString();
+      const price = Number(buyPrice) + getPriceMakerInscrease();
       const receive = trade.calcUsdt(price, amount.toString());
       const sellRes = await trade.createSellOrder(signer, {
         amount: BigInt(parseUnits((amount * 2).toString(), tokenA.decimals)),
