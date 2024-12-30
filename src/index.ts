@@ -79,16 +79,18 @@ async function main(): Promise<void> {
       });
 
       await new Promise(resolve => setTimeout(resolve, 1000));
-      if (!sellPrice) {
-        const sellRes = await trade.createSellOrder(signer, {
-          amount: BigInt(parseUnits((amount * 2).toString(), tokenA.decimals)),
-          receive,
-        });
-        sellRes.wait().then(() => {
-          console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
-        });
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+    }
+    if (!sellPrice) {
+      const price = nextSellPrice.toString();
+      const receive = trade.calcUsdt(price, amount.toString());
+      const sellRes = await trade.createSellOrder(signer, {
+        amount: BigInt(parseUnits((amount * 2).toString(), tokenA.decimals)),
+        receive,
+      });
+      sellRes.wait().then(() => {
+        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+      });
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 
