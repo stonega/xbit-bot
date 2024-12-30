@@ -64,7 +64,7 @@ async function main(): Promise<void> {
         pay,
       });
       res.wait().then(() => {
-        console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
+        console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
       });
     }
     else {
@@ -75,7 +75,7 @@ async function main(): Promise<void> {
         receive,
       });
       sellRes.wait().then(() => {
-        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       });
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -88,7 +88,7 @@ async function main(): Promise<void> {
         receive,
       });
       sellRes.wait().then(() => {
-        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount * 5} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       });
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
@@ -106,7 +106,7 @@ async function main(): Promise<void> {
         receive,
       });
       await sellRes.wait();
-      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       return;
     }
     if (Number(buyPrice) < Number(target)) {
@@ -130,7 +130,7 @@ async function main(): Promise<void> {
         pay,
       });
       await res.wait();
-      console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} BOL, ${formatUnits(pay, currentNetwork.tokens.usdt.decimals)} USDT`);
+      console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.decimals}`);
     }
     else {
       // Sell bool
@@ -154,7 +154,7 @@ async function main(): Promise<void> {
         receive,
       });
       await sellRes.wait();
-      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} BOL, ${formatUnits(receive, currentNetwork.tokens.usdt.decimals)} USDT`);
+      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
     }
   }
 }
