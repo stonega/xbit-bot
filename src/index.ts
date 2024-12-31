@@ -163,7 +163,9 @@ const scheduler = new ToadScheduler();
 const task = new Task(
   "simple task",
   () => {
-    main();
+    main().catch((err: Error) => {
+      console.log(err);
+    });
   },
   (err: Error) => {
     console.log(err);
