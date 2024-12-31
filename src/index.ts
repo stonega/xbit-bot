@@ -50,8 +50,6 @@ async function main(): Promise<void> {
       console.debug(`[${new Date().toISOString()}] No action required`);
       return;
     }
-    // Sell bool
-    // Calculate price
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
     const amount = 0.4 * Math.random() + 0.8;
     if (Number(buyPrice) < Number(target)) {
@@ -81,6 +79,7 @@ async function main(): Promise<void> {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     if (!sellPrice) {
+      // If no sell order, create sell order
       const price = Number(buyPrice) + getPriceMakerInscrease() * 2;
       const receive = trade.calcUsdt(price.toString(), amount.toString());
       const sellRes = await trade.createSellOrder(signer, {

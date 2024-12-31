@@ -5,8 +5,11 @@ To install dependencies:
 ```bash
 bun install
 ```
+Configure the bot by copy .env.example to .env and fill in the required values.
 
 To run:
+
+```bash
 
 ```bash
 bun run index.ts

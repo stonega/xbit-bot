@@ -1,5 +1,8 @@
 import CryptoJS from "crypto-js";
 
+/**
+ * Get orderbook data from xbit api
+ */
 export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
   const result = await fetch(`https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=${pair}`).then(a => a.json());
   const buyPrice = result.data.orderBuyBList[0]?.price;
@@ -39,6 +42,9 @@ export function getHeaders(timestamp: string, method: string, requestPath: strin
   };
 }
 
+/**
+ * Fetch price from okx api
+ */
 let lastPrice = 0;
 export async function getTargetPrice(pair: string): Promise<number> {
   const timestamp = new Date().toISOString();
@@ -48,8 +54,10 @@ export async function getTargetPrice(pair: string): Promise<number> {
   const headers = getHeaders(timestamp, "GET", requestPath, queryString);
   const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
   let price = Number(data.data[0][1]);
+  // To avoid the price being too high
   if (price > 100)
     price = price / 50;
+  // Force update price if price unchanged
   if (Math.abs(price - lastPrice) > 0.005) {
     lastPrice = price;
   }
