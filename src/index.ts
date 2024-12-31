@@ -12,6 +12,12 @@ function getPriceMakerInscrease(): number {
   return Math.max(Math.random() * 0.04, 0.02);
 }
 
+const priceMap = {
+  "TBOL/USDC": "SOL",
+  "STK/USDC": "BNB",
+  "STK/BTU": "TON",
+};
+
 async function main(): Promise<void> {
   const currentNetwork = ultraLiquidTestnet;
   const pair = Bun.env.PAIR!;
@@ -38,7 +44,7 @@ async function main(): Promise<void> {
     console.log("No orders");
     return;
   }
-  const target = await getTargetPrice(tokenA.price);
+  const target = await getTargetPrice(priceMap.get(pair));
   if (Number.isNaN(target)) {
     return;
   }
