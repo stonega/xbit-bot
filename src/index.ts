@@ -68,13 +68,11 @@ async function main(): Promise<void> {
     else {
       const price = nextSellPrice.toString();
       const receive = trade.calcUsdt(price, amount.toString());
-      const sellRes = await trade.createSellOrder(signer, {
+      await trade.createSellOrder(signer, {
         amount: BigInt(parseEther(amount.toString())),
         receive,
       });
-      sellRes.wait().then(() => {
-        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
-      });
+      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
