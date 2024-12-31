@@ -73,7 +73,7 @@ export const ultraLiquidTestnet = {
       icon: "/images/usdc.png",
       symbol: "BTU",
       decimals: 18,
-      price: "ETH",
+      price: "TON",
       trade: "0x3a786c7345a06ad99e2d0e81a6d3a476721b3ba1",
     },
   },

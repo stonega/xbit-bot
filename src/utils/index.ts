@@ -47,7 +47,9 @@ export async function getTargetPrice(pair: string): Promise<number> {
   const requestPath = "/api/v5/market/history-index-candles";
   const headers = getHeaders(timestamp, "GET", requestPath, queryString);
   const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
-  let price = Number(data.data[0][1]) / 50;
+  let price = Number(data.data[0][1]);
+  if (price > 1000)
+    price = price / 50;
   if (Math.abs(price - lastPrice) > 0.005) {
     lastPrice = price;
   }
