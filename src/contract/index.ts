@@ -1,6 +1,7 @@
 import type { Signer, TransactionResponse } from "ethers";
 import BN from "bignumber.js";
 import { Contract } from "ethers";
+import { withRetry } from "../utils";
 import { TradeABI, TradeNativeABI } from "./abi";
 import { BaseEvmApi } from "./api";
 
@@ -37,31 +38,45 @@ export class TradeApi extends BaseEvmApi {
     signer: Signer,
     { amount, pay }: { amount: bigint; pay: bigint },
   ): Promise<TransactionResponse> {
-    const res = await this.contract
-      .getFunction("placeOrderBuyB")
-      .populateTransaction(pay, amount);
-    await signer.estimateGas(res);
-    return signer.sendTransaction(res);
+    return withRetry(
+      async () => {
+        const res = await this.contract
+          .getFunction("placeOrderBuyB")
+          .populateTransaction(pay, amount);
+        await signer.estimateGas(res);
+        return signer.sendTransaction(res);
+      },
+      3, // 3 retries
+      1000, // 2 second delay between retries
+      (error, attempt) => console.error(`Failed to create buy order (attempt ${attempt}/3):`, error.message),
+    );
   }
 
   async createSellOrder(
     signer: Signer,
     { amount, receive }: { amount: bigint; receive: bigint },
   ): Promise<TransactionResponse> {
-    let res;
-    const isNative = !this.tokenA.address;
-    if (isNative) {
-      res = await this.contract
-        .getFunction("placeOrderSellB")
-        .populateTransaction(receive, { value: amount });
-    }
-    else {
-      res = await this.contract
-        .getFunction("placeOrderSellB")
-        .populateTransaction(receive, amount);
-    }
-    await signer.estimateGas(res);
-    return signer.sendTransaction(res);
+    return withRetry(
+      async () => {
+        let res;
+        const isNative = !this.tokenA.address;
+        if (isNative) {
+          res = await this.contract
+            .getFunction("placeOrderSellB")
+            .populateTransaction(receive, { value: amount });
+        }
+        else {
+          res = await this.contract
+            .getFunction("placeOrderSellB")
+            .populateTransaction(receive, amount);
+        }
+        await signer.estimateGas(res);
+        return signer.sendTransaction(res);
+      },
+      3, // 3 retries
+      1000, // 2 second delay between retries
+      (error, attempt) => console.error(`Failed to create sell order (attempt ${attempt}/3):`, error.message),
+    );
   }
 
   async cancelOrder(

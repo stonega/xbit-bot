@@ -1,6 +1,45 @@
 import CryptoJS from "crypto-js";
 
 /**
+ * Generic retry function wrapper
+ * @param fn - Function to retry
+ * @param retries - Number of retry attempts
+ * @param delay - Delay between retries in milliseconds
+ * @param onError - Optional callback for error handling
+ * @returns Promise with the function result
+ */
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries: number = 3,
+  delay: number = 1000,
+  onError?: (error: Error, attempt: number) => void,
+): Promise<T> {
+  let lastError: Error;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    }
+    catch (error) {
+      lastError = error as Error;
+
+      if (onError) {
+        onError(lastError, attempt);
+      }
+      else {
+        console.error(`Attempt ${attempt} failed:`, lastError.message);
+      }
+
+      if (attempt < retries) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw new Error(`Failed after ${retries} attempts. Last error: ${lastError!.message}`);
+}
+
+/**
  * Get orderbook data from xbit api
  */
 export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
