@@ -5,7 +5,9 @@ import CryptoJS from "crypto-js";
  */
 export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
   const result = await fetch(`https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=${pair}`).then(a => a.json());
-  console.log({ orderbook: result });
+  if (!result.data.orderBuyBList) {
+    console.log({ error: result.msg });
+  }
   const buyPrice = result.data.orderBuyBList[0]?.price;
   const buyAmount = result.data.orderBuyBList[0]?.qty;
   const sellPrice = result.data.orderSellBList[result.data.orderSellBList.length - 1]?.price;
