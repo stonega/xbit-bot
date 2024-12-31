@@ -168,7 +168,7 @@ const task = new Task(
 );
 
 const role = Bun.env.ROLE || "maker";
-const duration = role === "MAKER" ? 15 : 20;
+const duration = role === "MAKER" ? 7 : 10;
 const job = new SimpleIntervalJob({ seconds: duration, runImmediately: true }, task);
 
 scheduler.addSimpleIntervalJob(job);
