@@ -1,5 +1,6 @@
 import { formatUnits, JsonRpcProvider, parseEther, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
+import { priceMap, tradeMap } from "./config";
 import { TradeApi } from "./contract";
 import { ultraLiquidTestnet } from "./contract/network";
 import { getPrice, getTargetPrice } from "./utils";
@@ -12,12 +13,6 @@ function getPriceMakerInscrease(): number {
   return Math.max(Math.random() * 0.04, 0.02);
 }
 
-const priceMap = {
-  "TBOL/USDC": "SOL",
-  "STK/USDC": "BNB",
-  "STK/BTU": "TON",
-};
-
 async function main(): Promise<void> {
   const currentNetwork = ultraLiquidTestnet;
   const pair = Bun.env.PAIR!;
@@ -25,8 +20,7 @@ async function main(): Promise<void> {
   const tokenB = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.split("/")[1])!;
   const trade = new TradeApi({
     rpc: currentNetwork.rpc,
-    // @ts-expect-error type error
-    contract: tokenA.trade!,
+    contract: tradeMap[pair],
     tokenA,
     tokenB,
   });
@@ -44,7 +38,7 @@ async function main(): Promise<void> {
     console.log("No orders");
     return;
   }
-  const target = await getTargetPrice(priceMap.get(pair));
+  const target = await getTargetPrice(priceMap[pair]);
   if (Number.isNaN(target)) {
     return;
   }

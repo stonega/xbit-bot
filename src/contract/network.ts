@@ -8,9 +8,6 @@ export const betaTestnet = {
   value: "beta_testnet",
   feeRate: 3000,
   explorer: "https://beta-testnet.boolscan.com",
-  contracts: {
-    trade: "0x1a66db14b533992c7e7e3df3e3959b90803621c4",
-  },
   tokens: {
     bool: {
       name: "BOOL",
@@ -37,9 +34,6 @@ export const ultraLiquidTestnet = {
   value: "ultra_liquid_testnet",
   explorer: "https://beta-testnet.boolscan.com",
   icon: "https://bool.network/bool-network-orange.png",
-  contracts: {
-    trade: "0xeca041b6ab360a1aab06c433838f295a73fb4d35",
-  },
   tokens: {
     bool: {
       name: "BOL",
@@ -47,8 +41,6 @@ export const ultraLiquidTestnet = {
       decimals: 18,
       icon: "https://bool.network/bool-orange.png",
       address: "",
-      price: "SOL",
-      trade: "0xeca041b6ab360a1aab06c433838f295a73fb4d35",
     },
     usdt: {
       name: "USDC",
@@ -64,8 +56,6 @@ export const ultraLiquidTestnet = {
       icon: "/images/usdc.png",
       symbol: "STK",
       decimals: 18,
-      price: "BNB",
-      trade: "0x721547fae7ad15b72aebfd74fefc4759345258df",
     },
     btu: {
       name: "BTU",
@@ -73,8 +63,6 @@ export const ultraLiquidTestnet = {
       icon: "/images/usdc.png",
       symbol: "BTU",
       decimals: 18,
-      price: "TON",
-      trade: "0x3a786c7345a06ad99e2d0e81a6d3a476721b3ba1",
     },
   },
 };
