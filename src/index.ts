@@ -30,6 +30,8 @@ async function main(): Promise<void> {
   const role = Bun.env.ROLE || "maker";
   const wallet = new Wallet(Bun.env.PRIVATE_KEY!);
   const provider = new JsonRpcProvider(currentNetwork.rpc);
+  // Set rpc timeout to 60s
+  provider._getConnection().timeout = 60000;
   const signer = wallet.connect(provider);
 
   const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair);
