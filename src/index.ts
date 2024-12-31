@@ -59,13 +59,11 @@ async function main(): Promise<void> {
     // Calculate price
       const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
-      const res = await trade.createBuyOrder(signer, {
+      await trade.createBuyOrder(signer, {
         amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         pay,
       });
-      res.wait().then(() => {
-        console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
-      });
+      console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
     }
     else {
       const price = nextSellPrice.toString();
@@ -84,13 +82,11 @@ async function main(): Promise<void> {
       // If no sell order, create sell order
       const price = Number(buyPrice) + getPriceMakerInscrease() * 2;
       const receive = trade.calcUsdt(price.toString(), amount.toString());
-      const sellRes = await trade.createSellOrder(signer, {
+      await trade.createSellOrder(signer, {
         amount: BigInt(parseUnits("10", tokenA.decimals)),
         receive,
       });
-      sellRes.wait().then(() => {
-        console.log(`[${new Date().toISOString()}] Sell order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
-      });
+      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
@@ -102,11 +98,10 @@ async function main(): Promise<void> {
       const buyAmount = 0.5;
       const price = buyPrice.toString();
       const receive = trade.calcUsdt(price, buyAmount.toString());
-      const sellRes = await trade.createSellOrder(signer, {
+      await trade.createSellOrder(signer, {
         amount: BigInt(parseUnits(buyAmount.toString(), tokenA.decimals)),
         receive,
       });
-      await sellRes.wait();
       console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       return;
     }
@@ -126,11 +121,10 @@ async function main(): Promise<void> {
         nextBuyPrice = target;
       }
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
-      const res = await trade.createBuyOrder(signer, {
+      await trade.createBuyOrder(signer, {
         amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         pay,
       });
-      await res.wait();
       console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.decimals}`);
     }
     else {
@@ -150,11 +144,10 @@ async function main(): Promise<void> {
       }
       const price = nextSellPrice.toString();
       const receive = trade.calcUsdt(price, amount.toString());
-      const sellRes = await trade.createSellOrder(signer, {
+      await trade.createSellOrder(signer, {
         amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         receive,
       });
-      await sellRes.wait();
       console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
     }
   }
