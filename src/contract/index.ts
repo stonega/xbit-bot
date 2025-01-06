@@ -97,4 +97,33 @@ export class TradeApi extends BaseEvmApi {
       .toFixed(0);
     return BigInt(receive);
   }
+
+  async approveToken(signer: Signer): Promise<void> {
+    if (this.tokenA.address) {
+      const isApprove = await super.isApprove({
+        contract: this.tokenA.address!,
+        approvedAddress: this.contractAddress,
+        address: await signer.getAddress(),
+        amount: 100n,
+      });
+      if (!isApprove) {
+        await super.approve(signer, {
+          contract: this.tokenA.address!,
+          approvedAddress: this.contractAddress,
+        });
+      }
+    }
+    const isApprove = await super.isApprove({
+      contract: this.tokenB.address!,
+      approvedAddress: this.contractAddress,
+      address: await signer.getAddress(),
+      amount: 100n,
+    });
+    if (!isApprove) {
+      await super.approve(signer, {
+        contract: this.tokenB.address!,
+        approvedAddress: this.contractAddress,
+      });
+    }
+  }
 }

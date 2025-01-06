@@ -1,6 +1,6 @@
 import { formatUnits, JsonRpcProvider, parseEther, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
-import { priceMap, tradeMap } from "./config";
+import { pairs } from "./config";
 import { TradeApi } from "./contract";
 import { ultraLiquidTestnet } from "./contract/network";
 import { getPrice, getTargetPrice } from "./utils";
@@ -13,41 +13,39 @@ function getPriceMakerInscrease(): number {
   return Math.max(Math.random() * 0.04, 0.02);
 }
 
-async function main(): Promise<void> {
+async function main(pair: { price: string; symbol: string; trade: string; taker?: string; maker?: string }, role: "maker" | "taker"): Promise<void> {
   const currentNetwork = ultraLiquidTestnet;
-  const pair = Bun.env.PAIR!;
-  const tokenA = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.split("/")[0])!;
-  const tokenB = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.split("/")[1])!;
+  const tokenA = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[0])!;
+  const tokenB = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[1])!;
   const trade = new TradeApi({
     rpc: currentNetwork.rpc,
-    contract: tradeMap[pair],
+    contract: pair.trade,
     tokenA,
     tokenB,
   });
-  if (!Bun.env.PRIVATE_KEY) {
-    throw new Error("PRIVATE_KEY is required");
-  }
-  const role = Bun.env.ROLE || "maker";
-  const wallet = new Wallet(Bun.env.PRIVATE_KEY!);
   const provider = new JsonRpcProvider(currentNetwork.rpc);
   // Set rpc timeout to 60s
   provider._getConnection().timeout = 10000;
-  const signer = wallet.connect(provider);
-
-  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair);
+  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
 
   if (!buyPrice && !sellPrice) {
     console.log("No orders");
     return;
   }
-  const target = await getTargetPrice(priceMap[pair]);
+  const target = await getTargetPrice(pair.price);
   if (Number.isNaN(target)) {
     return;
   }
 
-  console.debug(`[${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
+  console.debug(`[${pair.symbol} ${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
 
   if (role === "maker") {
+    if (!pair.maker) {
+      console.log(`[${pair.symbol}] No maker wallet found`);
+    }
+    const makerWallet = new Wallet(pair.maker!);
+    const maker = makerWallet.connect(provider);
+    await trade.approveToken(maker);
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       console.debug(`[${new Date().toISOString()}] No action required`);
       return;
@@ -59,20 +57,20 @@ async function main(): Promise<void> {
     // Calculate price
       const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
-      await trade.createBuyOrder(signer, {
+      await trade.createBuyOrder(maker, {
         amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         pay,
       });
-      console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol} ${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
     }
     else {
       const price = nextSellPrice.toString();
       const receive = trade.calcUsdt(price, amount.toString());
-      await trade.createSellOrder(signer, {
+      await trade.createSellOrder(maker, {
         amount: BigInt(parseEther(amount.toString())),
         receive,
       });
-      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol} ${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
@@ -80,27 +78,33 @@ async function main(): Promise<void> {
       // If no sell order, create sell order
       const price = Number(buyPrice) + getPriceMakerInscrease() * 2;
       const receive = trade.calcUsdt(price.toString(), amount.toString());
-      await trade.createSellOrder(signer, {
+      await trade.createSellOrder(maker, {
         amount: BigInt(parseUnits("10", tokenA.decimals)),
         receive,
       });
-      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol} ${new Date().toISOString()}] Sell order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 
   if (role === "taker") {
+    if (!pair.taker) {
+      console.log(`[${pair.symbol}] No taker wallet`);
+    }
+    const takerWallet = new Wallet(pair.taker!);
+    const taker = takerWallet.connect(provider);
+    await trade.approveToken(taker);
     const priceIncrease = getPriceTakerInscrease();
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
-      console.debug(`[${new Date().toISOString()}] Target price reached`);
+      console.debug(`[${pair.symbol} ${new Date().toISOString()}] Target price reached`);
       const buyAmount = 0.5;
       const price = buyPrice.toString();
       const receive = trade.calcUsdt(price, buyAmount.toString());
-      await trade.createSellOrder(signer, {
+      await trade.createSellOrder(taker, {
         amount: BigInt(parseUnits(buyAmount.toString(), tokenA.decimals)),
         receive,
       });
-      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol} ${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       return;
     }
     if (Number(buyPrice) < Number(target)) {
@@ -119,11 +123,11 @@ async function main(): Promise<void> {
         nextBuyPrice = target;
       }
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
-      await trade.createBuyOrder(signer, {
+      await trade.createBuyOrder(taker, {
         amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         pay,
       });
-      console.log(`[${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.decimals}`);
+      console.log(`[${pair.symbol} ${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.decimals}`);
     }
     else {
       // Sell bool
@@ -142,22 +146,37 @@ async function main(): Promise<void> {
       }
       const price = nextSellPrice.toString();
       const receive = trade.calcUsdt(price, amount.toString());
-      await trade.createSellOrder(signer, {
+      await trade.createSellOrder(taker, {
         amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         receive,
       });
-      console.log(`[${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol} ${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
     }
   }
 }
 
 const scheduler = new ToadScheduler();
 
-const task = new Task(
-  "simple task",
+const makerTask = new Task(
+  "maker tasks",
   () => {
-    main().catch((err: Error) => {
-      console.log(err);
+    pairs.forEach((pair) => {
+      main(pair, "maker").catch((err: Error) => {
+        console.log(err);
+      });
+    });
+  },
+  (err: Error) => {
+    console.log(err);
+  },
+);
+const takerTask = new Task(
+  "taker tasks",
+  () => {
+    pairs.forEach((pair) => {
+      main(pair, "taker").catch((err: Error) => {
+        console.log(err);
+      });
     });
   },
   (err: Error) => {
@@ -165,8 +184,8 @@ const task = new Task(
   },
 );
 
-const role = Bun.env.ROLE || "maker";
-const duration = role === "MAKER" ? 20 : 30;
-const job = new SimpleIntervalJob({ seconds: duration, runImmediately: true }, task);
+const makerJob = new SimpleIntervalJob({ seconds: 10, runImmediately: true }, makerTask);
+const takerJob = new SimpleIntervalJob({ seconds: 20, runImmediately: true }, takerTask);
 
-scheduler.addSimpleIntervalJob(job);
+scheduler.addSimpleIntervalJob(makerJob);
+scheduler.addSimpleIntervalJob(takerJob);

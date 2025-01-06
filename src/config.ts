@@ -1,11 +1,23 @@
-export const priceMap: { [key: string]: string } = {
-  "TBOL/USDC": "SOL",
-  "STK/USDC": "BNB",
-  "STK/BTU": "TON",
-};
-
-export const tradeMap: { [key: string]: string } = {
-  "TBOL/USDC": "0xeca041b6ab360a1aab06c433838f295a73fb4d35",
-  "STK/USDC": "0x721547fae7ad15b72aebfd74fefc4759345258df",
-  "STK/BTU": "0x3a786c7345a06ad99e2d0e81a6d3a476721b3ba1",
-};
+export const pairs = [
+  {
+    symbol: "TBOL/USDC",
+    price: "SOL",
+    trade: "0xc4a132639d775502e37621274959d8be877c65d0",
+    taker: Bun.env.TBOL_TAKER_PRIVATE_KEY,
+    maker: Bun.env.TBOL_MAKER_PRIVATE_KEY,
+  },
+  // {
+  //   symbol: "STK/USDC",
+  //   price: "BNB",
+  //   trade: "0x4856e15c4c2372f4a43295eeada4020a395a4340",
+  //   taker: Bun.env.STK_TAKER_PRIVATE_KEY,
+  //   maker: Bun.env.STK_MAKER_PRIVATE_KEY,
+  // },
+  // {
+  //   symbol: "STK/BTU",
+  //   price: "TON",
+  //   trade: "0x6a72e6efe3e54dcd7fb8af4ae7c7ba00189ed064",
+  //   taker: Bun.env.BTU_TAKER_PRIVATE_KEY,
+  //   maker: Bun.env.BTU_MAKER_PRIVATE_KEY,
+  // },
+];
