@@ -89,14 +89,14 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
 
   if (role === "taker") {
     if (!pair.taker) {
-      console.log(`[${pair.symbol}] No taker wallet`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] No taker wallet`);
     }
     const takerWallet = new Wallet(pair.taker!);
     const taker = takerWallet.connect(provider);
     await trade.approveToken(taker);
     const priceIncrease = getPriceTakerInscrease();
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
-      console.debug(`[${pair.symbol} ${new Date().toISOString()}] Target price reached`);
+      console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
       const buyAmount = 0.5;
       const price = buyPrice.toString();
       const receive = trade.calcUsdt(price, buyAmount.toString());
