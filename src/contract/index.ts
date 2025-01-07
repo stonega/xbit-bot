@@ -13,8 +13,8 @@ export class TradeApi extends BaseEvmApi {
     contract,
   }: {
     rpc: string;
-    tokenA: { address: string; decimals: number };
-    tokenB: { address: string; decimals: number };
+    tokenA: { address: string; decimals: number; symbol: string };
+    tokenB: { address: string; decimals: number; symbol: string };
     contract: string;
   }) {
     super(rpc);
@@ -26,6 +26,10 @@ export class TradeApi extends BaseEvmApi {
   readonly tokenA;
   readonly tokenB;
   readonly contractAddress: string;
+
+  get pair(): string {
+    return (`${this.tokenA.symbol}/${this.tokenB.symbol}`).toUpperCase();
+  }
 
   get contract(): Contract {
     if (this.tokenA.address) {
@@ -48,7 +52,7 @@ export class TradeApi extends BaseEvmApi {
       },
       3, // 3 retries
       1000, // 2 second delay between retries
-      (error, attempt) => console.error(`Failed to create buy order (attempt ${attempt}/3):`, error.message),
+      (error, attempt) => console.error(`[${this.pair}${new Date().toISOString()}] Failed to create buy order (attempt ${attempt}/3):`, error.message),
     );
   }
 
@@ -75,7 +79,7 @@ export class TradeApi extends BaseEvmApi {
       },
       3, // 3 retries
       1000, // 2 second delay between retries
-      (error, attempt) => console.error(`Failed to create sell order (attempt ${attempt}/3):`, error.message),
+      (error, attempt) => console.error(`[${this.pair}${new Date().toISOString()}] Failed to create sell order (attempt ${attempt}/3):`, error.message),
     );
   }
 

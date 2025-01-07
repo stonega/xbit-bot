@@ -29,7 +29,7 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
   const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
 
   if (!buyPrice && !sellPrice) {
-    console.log("No orders");
+    console.log(`[${pair.symbol}${new Date().toISOString()}]No orders`);
     return;
   }
   const target = await getTargetPrice(pair.price);
@@ -37,17 +37,17 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
     return;
   }
 
-  console.debug(`[${pair.symbol} ${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
+  console.debug(`[${pair.symbol}${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
 
   if (role === "maker") {
     if (!pair.maker) {
-      console.log(`[${pair.symbol}] No maker wallet found`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] No maker wallet found`);
     }
     const makerWallet = new Wallet(pair.maker!);
     const maker = makerWallet.connect(provider);
     await trade.approveToken(maker);
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
-      console.debug(`[${new Date().toISOString()}] No action required`);
+      console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
       return;
     }
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
@@ -61,7 +61,7 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
         amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         pay,
       });
-      console.log(`[${pair.symbol} ${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
     }
     else {
       const price = nextSellPrice.toString();
@@ -70,7 +70,7 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
         amount: BigInt(parseEther(amount.toString())),
         receive,
       });
-      console.log(`[${pair.symbol} ${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
@@ -82,7 +82,7 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
         amount: BigInt(parseUnits("10", tokenA.decimals)),
         receive,
       });
-      console.log(`[${pair.symbol} ${new Date().toISOString()}] Sell order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
@@ -104,7 +104,7 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
         amount: BigInt(parseUnits(buyAmount.toString(), tokenA.decimals)),
         receive,
       });
-      console.log(`[${pair.symbol} ${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       return;
     }
     if (Number(buyPrice) < Number(target)) {
@@ -127,7 +127,7 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
         amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         pay,
       });
-      console.log(`[${pair.symbol} ${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.decimals}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.decimals}`);
     }
     else {
       // Sell bool
@@ -150,7 +150,7 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
         amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
         receive,
       });
-      console.log(`[${pair.symbol} ${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
     }
   }
 }
@@ -162,7 +162,7 @@ const makerTask = new Task(
   () => {
     pairs.forEach((pair) => {
       main(pair, "maker").catch((err: Error) => {
-        console.log(err);
+        console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
       });
     });
   },
@@ -175,7 +175,7 @@ const takerTask = new Task(
   () => {
     pairs.forEach((pair) => {
       main(pair, "taker").catch((err: Error) => {
-        console.log(err);
+        console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
       });
     });
   },
