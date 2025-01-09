@@ -85,6 +85,17 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
+    if (!buyPrice) {
+      // If no buy order, create buy order
+      const price = Number(sellPrice) - getPriceMakerInscrease() * 2;
+      const pay = trade.calcUsdt(price.toString(), amount.toString());
+      await trade.createBuyOrder(maker, {
+        amount: BigInt(parseUnits("10", tokenA.decimals)),
+        pay,
+      });
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
 
   if (role === "taker") {
