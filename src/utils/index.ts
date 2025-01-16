@@ -89,6 +89,7 @@ export function getHeaders(timestamp: string, method: string, requestPath: strin
  */
 let lastPrice = 0;
 export async function getTargetPrice(pair: string): Promise<number> {
+  if(pair === 'SOL') return 100;
   const timestamp = new Date().toISOString();
   const baseUrl = "https://www.okx.com";
   const queryString = `instId=${pair}-USDT&limit=1`;
