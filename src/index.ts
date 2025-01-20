@@ -50,7 +50,6 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
 
     // If no buy order, create buy order with target price
     if (!buyPrice) {
-      // If no buy order, create buy order
       const pay = trade.calcUsdt(target.toString(), amount.toString());
       await trade.createBuyOrder(maker, {
         amount: BigInt(parseUnits("10", tokenA.decimals)),
@@ -60,6 +59,11 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
       await new Promise(resolve => setTimeout(resolve, 1000));
       return;
     }
+
+    // Compare buy price and target price
+    // If buy price less than target price, create buy order
+    // if Buy price larger than target price, create sell order
+    // if No sell order, create sell order
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
       return;
