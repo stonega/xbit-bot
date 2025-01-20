@@ -59,6 +59,16 @@ export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPr
   };
 }
 
+/**
+ * Get pair contract address from xbit api
+ */
+export async function getPairContract(pair: string): Promise<string> {
+  const result = await fetch(`https://test-api.safematrix.io/bool-stake-reward/blockchain/pairs`).then(a => a.json());
+  return result.data.find(
+    (a: any) => a.name === pair,
+  ).address;
+}
+
 export function getHeaders(timestamp: string, method: string, requestPath: string, queryString = ""): {
   [key: string]: string;
 } {

@@ -3,7 +3,7 @@ import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { pairs } from "./config";
 import { TradeApi } from "./contract";
 import { ultraLiquidTestnet } from "./contract/network";
-import { getPrice, getTargetPrice } from "./utils";
+import { getPairContract, getPrice, getTargetPrice } from "./utils";
 
 function getPriceTakerInscrease(): number {
   return Math.max(Math.random() * 0.02, 0.01);
@@ -13,10 +13,14 @@ function getPriceMakerInscrease(): number {
   return Math.max(Math.random() * 0.04, 0.02);
 }
 
-async function main(pair: { price: string; symbol: string; trade: string; taker?: string; maker?: string }, role: "maker" | "taker"): Promise<void> {
+async function main(pair: { price: string; symbol: string; trade?: string; taker?: string; maker?: string }, role: "maker" | "taker"): Promise<void> {
   const currentNetwork = ultraLiquidTestnet;
   const tokenA = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[0])!;
   const tokenB = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[1])!;
+  if (!pair.trade) {
+    pair.trade = await getPairContract(pair.symbol);
+    console.log(`[${pair.symbol}${new Date().toISOString()}]Set contract ${pair.trade}`);
+  }
   const trade = new TradeApi({
     rpc: currentNetwork.rpc,
     contract: pair.trade,
