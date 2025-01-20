@@ -47,15 +47,16 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
     const maker = makerWallet.connect(provider);
     const amount = 0.4 * Math.random() + 0.8;
     await trade.approveToken(maker);
+
+    // If no buy order, create buy order with target price
     if (!buyPrice) {
       // If no buy order, create buy order
-      const price = Number(sellPrice) - getPriceMakerInscrease() * 2;
-      const pay = trade.calcUsdt(price.toString(), amount.toString());
+      const pay = trade.calcUsdt(target.toString(), amount.toString());
       await trade.createBuyOrder(maker, {
         amount: BigInt(parseUnits("10", tokenA.decimals)),
         pay,
       });
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${target} 10 ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
       await new Promise(resolve => setTimeout(resolve, 1000));
       return;
     }
