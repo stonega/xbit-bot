@@ -45,13 +45,25 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
     }
     const makerWallet = new Wallet(pair.maker!);
     const maker = makerWallet.connect(provider);
+    const amount = 0.4 * Math.random() + 0.8;
     await trade.approveToken(maker);
+    if (!buyPrice) {
+      // If no buy order, create buy order
+      const price = Number(sellPrice) - getPriceMakerInscrease() * 2;
+      const pay = trade.calcUsdt(price.toString(), amount.toString());
+      await trade.createBuyOrder(maker, {
+        amount: BigInt(parseUnits("10", tokenA.decimals)),
+        pay,
+      });
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return;
+    }
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
       return;
     }
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
-    const amount = 0.4 * Math.random() + 0.8;
     if (Number(buyPrice) < Number(target)) {
     // Buy bool
     // Calculate price
@@ -85,17 +97,6 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    if (!buyPrice) {
-      // If no buy order, create buy order
-      const price = Number(sellPrice) - getPriceMakerInscrease() * 2;
-      const pay = trade.calcUsdt(price.toString(), amount.toString());
-      await trade.createBuyOrder(maker, {
-        amount: BigInt(parseUnits("10", tokenA.decimals)),
-        pay,
-      });
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
   }
 
   if (role === "taker") {
@@ -106,6 +107,9 @@ async function main(pair: { price: string; symbol: string; trade: string; taker?
     const taker = takerWallet.connect(provider);
     await trade.approveToken(taker);
     const priceIncrease = getPriceTakerInscrease();
+    if (!buyPrice) {
+      return;
+    }
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
       const buyAmount = 0.5;
