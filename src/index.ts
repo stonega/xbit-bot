@@ -32,10 +32,10 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   provider._getConnection().timeout = 10000;
   const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
 
-  if (!buyPrice && !sellPrice) {
-    console.log(`[${pair.symbol}${new Date().toISOString()}]No orders`);
-    return;
-  }
+  // if (!buyPrice && !sellPrice) {
+  //   console.log(`[${pair.symbol}${new Date().toISOString()}]No orders`);
+  //   return;
+  // }
   const target = await getTargetPrice(pair.price);
   if (Number.isNaN(target)) {
     return;
