@@ -36,8 +36,8 @@ export const ultraLiquidTestnet = {
   icon: "https://bool.network/bool-network-orange.png",
   tokens: {
     bool: {
-      name: "BOL",
-      symbol: "tBOL",
+      name: "TDEF",
+      symbol: "TDEF",
       decimals: 18,
       icon: "https://bool.network/bool-orange.png",
       address: "",
