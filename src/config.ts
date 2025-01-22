@@ -1,6 +1,6 @@
 export const pairs = [
   {
-    symbol: "TBOL/USDC",
+    symbol: "TDEF/USDC",
     price: "SOL",
     taker: Bun.env.TBOL_TAKER_PRIVATE_KEY,
     maker: Bun.env.TBOL_MAKER_PRIVATE_KEY,
