@@ -44,7 +44,7 @@ export const ultraLiquidTestnet = {
     },
     usdt: {
       name: "USDC",
-      address: "0xaba94d6c512f9a37a3b12ae5d3ed171c5d0b475a",
+      address: "0x3167c4d4d0d8488220ceeac8e0262cf316f82fdd",
       icon: "/images/usdc.png",
       symbol: "USDC",
       decimals: 6,
@@ -52,14 +52,14 @@ export const ultraLiquidTestnet = {
     },
     stk: {
       name: "STK",
-      address: "0xd33E0Ca3595DC843Fe68f3Fd6a269eA3eF7553aF",
+      address: "0x33df4cf5744e63d53cb62090f8fc9bed973aa055",
       icon: "/images/usdc.png",
       symbol: "STK",
       decimals: 18,
     },
     btu: {
       name: "BTU",
-      address: "0x768ba0cdb32d1c33761f2cd80f9618d69c4a53c9",
+      address: "0xa20454333c249e5c25942196b37f019d3d61926f",
       icon: "/images/usdc.png",
       symbol: "BTU",
       decimals: 18,
