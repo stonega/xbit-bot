@@ -117,17 +117,19 @@ export class TradeApi extends BaseEvmApi {
         });
       }
     }
-    const isApprove = await super.isApprove({
-      contract: this.tokenB.address!,
-      approvedAddress: this.contractAddress,
-      address: await signer.getAddress(),
-      amount: 100n,
-    });
-    if (!isApprove) {
-      await super.approve(signer, {
+    if (this.tokenB.address) {
+      const isApprove = await super.isApprove({
         contract: this.tokenB.address!,
         approvedAddress: this.contractAddress,
+        address: await signer.getAddress(),
+        amount: 100n,
       });
+      if (!isApprove) {
+        await super.approve(signer, {
+          contract: this.tokenB.address!,
+          approvedAddress: this.contractAddress,
+        });
+      }
     }
   }
 }
