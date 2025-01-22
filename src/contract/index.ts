@@ -103,7 +103,6 @@ export class TradeApi extends BaseEvmApi {
   }
 
   async approveToken(signer: Signer): Promise<void> {
-    console.log(this.tokenA, this.tokenB);
     if (this.tokenA.address) {
       const isApprove = await super.isApprove({
         contract: this.tokenA.address!,

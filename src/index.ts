@@ -48,6 +48,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
       console.log(`[${pair.symbol}${new Date().toISOString()}] No maker wallet found`);
     }
     const makerWallet = new Wallet(pair.maker!);
+    console.log(`[${pair.symbol}${new Date().toISOString()}] Maker address: ${makerWallet.address}`);
     const maker = makerWallet.connect(provider);
     const amount = 0.4 * Math.random() + 0.8;
     await trade.approveToken(maker);
@@ -114,6 +115,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     }
     const takerWallet = new Wallet(pair.taker!);
     const taker = takerWallet.connect(provider);
+    console.log(`[${pair.symbol}${new Date().toISOString()}] Taker address: ${takerWallet.address}`);
     await trade.approveToken(taker);
     const priceIncrease = getPriceTakerInscrease();
     if (!buyPrice) {
