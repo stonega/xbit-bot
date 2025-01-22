@@ -15,8 +15,8 @@ function getPriceMakerInscrease(): number {
 
 async function main(pair: { price: string; symbol: string; trade?: string; taker?: string; maker?: string }, role: "maker" | "taker"): Promise<void> {
   const currentNetwork = ultraLiquidTestnet;
-  const tokenB = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[0])!;
-  const tokenA = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[1])!;
+  const tokenA = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[0])!;
+  const tokenB = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[1])!;
   if (!pair.trade) {
     pair.trade = await getPairContract(pair.symbol);
     console.log(`[${pair.symbol}${new Date().toISOString()}]Set contract ${pair.trade}`);
@@ -32,10 +32,6 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   provider._getConnection().timeout = 10000;
   const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
 
-  // if (!buyPrice && !sellPrice) {
-  //   console.log(`[${pair.symbol}${new Date().toISOString()}]No orders`);
-  //   return;
-  // }
   const target = await getTargetPrice(pair.price);
   if (Number.isNaN(target)) {
     return;
