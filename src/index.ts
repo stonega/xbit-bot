@@ -19,7 +19,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   const tokenB = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[1])!;
   if (!pair.trade) {
     pair.trade = await getPairContract(pair.symbol);
-    console.log(`[${pair.symbol}${new Date().toISOString()}]Set contract ${pair.trade}`);
+    console.log(`[${pair.symbol}${new Date().toISOString()}] Set contract ${pair.trade}`);
   }
   const trade = new TradeApi({
     rpc: currentNetwork.rpc,

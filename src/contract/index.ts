@@ -48,7 +48,7 @@ export class TradeApi extends BaseEvmApi {
           .getFunction("placeOrderBuyB")
           .populateTransaction(pay, amount);
         await signer.estimateGas(res);
-        return signer.sendTransaction(res);
+        return signer.sendTransaction({ ...res, gasLimit: 500000 });
       },
       3, // 3 retries
       1000, // 2 second delay between retries
@@ -75,7 +75,7 @@ export class TradeApi extends BaseEvmApi {
             .populateTransaction(receive, amount);
         }
         await signer.estimateGas(res);
-        return signer.sendTransaction(res);
+        return signer.sendTransaction({ ...res, gasLimit: 500000 });
       },
       3, // 3 retries
       1000, // 2 second delay between retries
