@@ -107,15 +107,16 @@ export async function getTargetPrice(pair: string): Promise<number> {
   const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
   let price = Number(data.data[0][1]);
 
+  // To avoid the price being too high
+  if (price > 100)
+    price = price / 50;
+
   // Add 0.2 to price per day based on 2025/02/14
   const startDate = new Date("2025-02-14");
   const currentDate = new Date();
   const diffInDays = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
   price += diffInDays * 0.2;
 
-  // To avoid the price being too high
-  if (price > 100)
-    price = price / 50;
   // Force update price if price unchanged
   if (Math.abs(price - lastPrice) > 0.005) {
     lastPrice = price;
