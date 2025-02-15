@@ -133,11 +133,11 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
       // Buy bool to increase price
       let amount = 4 + Math.random() * 4;
       if (priceIncrease > 0 && !Number.isNaN(Number(sellAmount))) {
-        if (Number(sellAmount) < 500) {
+        if (Number(sellAmount) < 200) {
           amount = Math.max(Number(sellAmount), amount);
         }
         else {
-          amount = 500;
+          amount = 200;
         }
       }
       let nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + priceIncrease);
