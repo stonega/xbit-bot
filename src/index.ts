@@ -1,6 +1,6 @@
 import { formatUnits, JsonRpcProvider, parseEther, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
-import { pairs } from "./config";
+import { PAIRS, TAKER_CAPACITY } from "./config";
 import { TradeApi } from "./contract";
 import { ultraLiquidTestnet } from "./contract/network";
 import { getPairContract, getPrice, getTargetPrice } from "./utils";
@@ -133,11 +133,11 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
       // Buy bool to increase price
       let amount = 4 + Math.random() * 4;
       if (priceIncrease > 0 && !Number.isNaN(Number(sellAmount))) {
-        if (Number(sellAmount) < 300) {
+        if (Number(sellAmount) < TAKER_CAPACITY) {
           amount = Math.max(Number(sellAmount), amount);
         }
         else {
-          amount = 300;
+          amount = TAKER_CAPACITY;
         }
       }
       let nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + priceIncrease);
@@ -155,11 +155,11 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
       // Sell bool
       let amount = 4 + Math.random() * 4;
       if (priceIncrease > 0 && !Number.isNaN(Number(buyAmount))) {
-        if (Number(buyAmount) < 100) {
+        if (Number(buyAmount) < TAKER_CAPACITY) {
           amount = Math.max(Number(buyAmount), amount);
         }
         else {
-          amount = 100;
+          amount = TAKER_CAPACITY;
         }
       }
       let nextSellPrice = Math.abs(Number(buyPrice) - priceIncrease);
@@ -182,7 +182,7 @@ const scheduler = new ToadScheduler();
 const makerTask = new Task(
   "maker tasks",
   () => {
-    pairs.forEach((pair) => {
+    PAIRS.forEach((pair) => {
       main(pair, "maker").catch((err: Error) => {
         console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
       });
@@ -195,7 +195,7 @@ const makerTask = new Task(
 const takerTask = new Task(
   "taker tasks",
   () => {
-    pairs.forEach((pair) => {
+    PAIRS.forEach((pair) => {
       main(pair, "taker").catch((err: Error) => {
         console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
       });
@@ -207,7 +207,7 @@ const takerTask = new Task(
 );
 
 const makerJob = new SimpleIntervalJob({ seconds: 10, runImmediately: true }, makerTask);
-const takerJob = new SimpleIntervalJob({ seconds: 20, runImmediately: true }, takerTask);
+const takerJob = new SimpleIntervalJob({ seconds: 15, runImmediately: true }, takerTask);
 
 scheduler.addSimpleIntervalJob(makerJob);
 scheduler.addSimpleIntervalJob(takerJob);

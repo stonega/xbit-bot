@@ -114,8 +114,8 @@ export async function getTargetPrice(pair: string): Promise<number> {
   // Add 0.2 to price per day based on 2025/02/14
   const startDate = new Date("2025-02-14");
   const currentDate = new Date();
-  const diffInDays = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 24));
-  price += diffInDays * 0.2;
+  const diffInDays = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 5.8));
+  price += diffInDays * 0.05;
 
   // Force update price if price unchanged
   if (Math.abs(price - lastPrice) > 0.005) {
