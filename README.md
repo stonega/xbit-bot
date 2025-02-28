@@ -2,7 +2,7 @@
 
 Install bun
 
-```shell
+```bash
 curl -fsSL https://bun.sh/install | bash
 ```
 
@@ -16,10 +16,9 @@ Configure the bot by copy .env.example to .env and fill in the required values.
 To run:
 
 ```bash
-
-```bash
 bun run index.ts
 ```
+
 
 Maker 功能：创建流动性，通过在订单簿两侧放置订单来维持市场深度
 - 当价格低于目标时，创建买单推高价格
