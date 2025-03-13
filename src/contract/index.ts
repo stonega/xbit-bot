@@ -2,8 +2,10 @@ import type { Signer, TransactionResponse } from "ethers";
 import BN from "bignumber.js";
 import { Contract } from "ethers";
 import { withRetry } from "../utils";
-import { TradeABI, TradeNativeABI } from "./abi";
+import { OrderABI, TradeABI, TradeNativeABI } from "./abi";
 import { BaseEvmApi } from "./api";
+
+const CONTRACT = "0x000000000000000000000000000000000000044d";
 
 export class TradeApi extends BaseEvmApi {
   constructor({
@@ -11,8 +13,10 @@ export class TradeApi extends BaseEvmApi {
     tokenA,
     tokenB,
     contract,
+    pairId,
   }: {
     rpc: string;
+    pairId?: string;
     tokenA: { address: string; decimals: number; symbol: string };
     tokenB: { address: string; decimals: number; symbol: string };
     contract: string;
@@ -21,17 +25,22 @@ export class TradeApi extends BaseEvmApi {
     this.contractAddress = contract;
     this.tokenA = tokenA;
     this.tokenB = tokenB;
+    this.pairId = pairId;
   }
 
   readonly tokenA;
   readonly tokenB;
   readonly contractAddress: string;
+  readonly pairId: string | undefined;
 
   get pair(): string {
     return (`${this.tokenA.symbol}/${this.tokenB.symbol}`).toUpperCase();
   }
 
   get contract(): Contract {
+    if (this.contractAddress === CONTRACT) {
+      return new Contract(this.contractAddress, OrderABI, this.provider);
+    }
     if (this.tokenA.address) {
       return new Contract(this.contractAddress, TradeABI, this.provider);
     }
@@ -44,9 +53,17 @@ export class TradeApi extends BaseEvmApi {
   ): Promise<TransactionResponse> {
     return withRetry(
       async () => {
-        const res = await this.contract
-          .getFunction("placeOrderBuyB")
-          .populateTransaction(pay, amount);
+        let res;
+        if (this.contractAddress === CONTRACT) {
+          res = await this.contract
+            .getFunction("placeOrderBuyB")
+            .populateTransaction(this.pairId, pay, amount);
+        }
+        else {
+          res = await this.contract
+            .getFunction("placeOrderBuyB")
+            .populateTransaction(pay, amount);
+        }
         await signer.estimateGas(res);
         return signer.sendTransaction({ ...res, gasLimit: 500000 });
       },
@@ -64,6 +81,12 @@ export class TradeApi extends BaseEvmApi {
       async () => {
         let res;
         const isNative = !this.tokenA.address;
+        if (this.contractAddress === CONTRACT) {
+          res = await this.contract
+            .getFunction("placeOrderSellB")
+            .populateTransaction(this.pairId, receive, amount);
+          console.log(res, this.pairId);
+        }
         if (isNative) {
           res = await this.contract
             .getFunction("placeOrderSellB")
@@ -87,9 +110,17 @@ export class TradeApi extends BaseEvmApi {
     signer: Signer,
     { orderId, type }: { orderId: bigint; type: "buy" | "sell" },
   ): Promise<TransactionResponse> {
-    const res = await this.contract
-      .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
-      .populateTransaction(orderId);
+    let res;
+    if (this.contractAddress === CONTRACT) {
+      res = await this.contract
+        .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
+        .populateTransaction(this.pairId, orderId);
+    }
+    else {
+      res = await this.contract
+        .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
+        .populateTransaction(orderId);
+    }
     await signer.estimateGas(res);
     return signer.sendTransaction(res);
   }
@@ -104,31 +135,32 @@ export class TradeApi extends BaseEvmApi {
 
   async approveToken(signer: Signer): Promise<void> {
     const address = await signer.getAddress();
+    const contract = this.contractAddress === CONTRACT ? address : this.contractAddress;
     if (this.tokenA.address) {
       const isApprove = await super.isApprove({
         contract: this.tokenA.address!,
-        approvedAddress: this.contractAddress,
+        approvedAddress: contract!,
         address,
         amount: 100000000000n,
       });
       if (!isApprove) {
         await super.approve(signer, {
           contract: this.tokenA.address!,
-          approvedAddress: this.contractAddress,
+          approvedAddress: contract!,
         });
       }
     }
     if (this.tokenB.address) {
       const isApprove = await super.isApprove({
         contract: this.tokenB.address!,
-        approvedAddress: this.contractAddress,
+        approvedAddress: contract!,
         address,
         amount: 1000000000000n,
       });
       if (!isApprove) {
         await super.approve(signer, {
           contract: this.tokenB.address!,
-          approvedAddress: this.contractAddress,
+          approvedAddress: contract!,
         });
       }
     }

@@ -62,11 +62,13 @@ export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPr
 /**
  * Get pair contract address from xbit api
  */
-export async function getPairContract(pair: string): Promise<string> {
+export async function getPairContract(pair: string): Promise<{ address: string; pairId: string | undefined }> {
   const result = await fetch(`https://test-api.safematrix.io/bool-stake-reward/blockchain/pairs`).then(a => a.json());
-  return result.data.find(
-    (a: any) => a.name === pair,
-  ).address;
+  const pairInfo = result.data.find((a: any) => a.name === pair)!;
+  return {
+    address: pairInfo.address,
+    pairId: pairInfo.pairId,
+  };
 }
 
 export function getHeaders(timestamp: string, method: string, requestPath: string, queryString = ""): {
@@ -98,7 +100,7 @@ export function getHeaders(timestamp: string, method: string, requestPath: strin
  * Fetch price from okx api
  */
 let lastPrice = 0;
-export async function getTargetPrice(pair: string): Promise<number> {
+export async function getTargetPrice(pair: string, date = "2025-02-14"): Promise<number> {
   const timestamp = new Date().toISOString();
   const baseUrl = "https://www.okx.com";
   const queryString = `instId=${pair}-USDT&limit=1`;
@@ -112,7 +114,7 @@ export async function getTargetPrice(pair: string): Promise<number> {
     price = price / 50;
 
   // Add 0.2 to price per day based on 2025/02/14
-  const startDate = new Date("2025-02-14");
+  const startDate = new Date(date);
   const currentDate = new Date();
   const diffInDays = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 5.8));
   price += diffInDays * 0.05;

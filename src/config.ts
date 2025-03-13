@@ -5,12 +5,19 @@ export const PAIRS = [
     taker: Bun.env.TBOL_TAKER_PRIVATE_KEY,
     maker: Bun.env.TBOL_MAKER_PRIVATE_KEY,
   },
-  // {
-  //   symbol: "STK/USDC",
-  //   price: "BNB",
-  //   taker: Bun.env.STK_TAKER_PRIVATE_KEY,
-  //   maker: Bun.env.STK_MAKER_PRIVATE_KEY,
-  // },
+  {
+    symbol: "STK/USDC1",
+    price: "SOL",
+    taker: Bun.env.P_STK_TAKER_PRIVATE_KEY,
+    maker: Bun.env.P_STK_MAKER_PRIVATE_KEY,
+    startDate: "2025-03-12",
+  },
+  {
+    symbol: "STK/USDC",
+    price: "BNB",
+    taker: Bun.env.STK_TAKER_PRIVATE_KEY,
+    maker: Bun.env.STK_MAKER_PRIVATE_KEY,
+  },
   {
     symbol: "STK/BTU",
     price: "TON",

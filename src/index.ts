@@ -29,7 +29,7 @@ function getPriceMakerInscrease(): number {
  * @param {"maker" | "taker"} role - Trading role (maker creates liquidity, taker takes liquidity)
  * @returns {Promise<void>}
  */
-async function main(pair: { price: string; symbol: string; trade?: string; taker?: string; maker?: string }, role: "maker" | "taker"): Promise<void> {
+async function main(pair: { price: string; symbol: string; trade?: string; taker?: string; maker?: string; pairId?: string; startDate?: string }, role: "maker" | "taker"): Promise<void> {
   // Get network configuration
   const currentNetwork = ultraLiquidTestnet;
 
@@ -39,14 +39,17 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
 
   // Get trading contract address if not already set
   if (!pair.trade) {
-    pair.trade = await getPairContract(pair.symbol);
-    console.log(`[${pair.symbol}${new Date().toISOString()}] Set contract ${pair.trade}`);
+    const pairInfo = await getPairContract(pair.symbol);
+    pair.trade = pairInfo.address;
+    pair.pairId = pairInfo.pairId;
+    console.log(`[${pair.symbol}${new Date().toISOString()}] Set contract ${pair.trade} pairId ${pair.pairId}`);
   }
 
   // Initialize trading API with contract and token information
   const trade = new TradeApi({
     rpc: currentNetwork.rpc,
     contract: pair.trade,
+    pairId: pair.pairId,
     tokenA,
     tokenB,
   });
@@ -60,7 +63,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
 
   // Get target price for this trading pair
-  const target = await getTargetPrice(pair.price);
+  const target = await getTargetPrice(pair.price, pair.startDate);
   if (Number.isNaN(target)) {
     return; // Exit if target price is invalid
   }

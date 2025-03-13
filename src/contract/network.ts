@@ -50,6 +50,14 @@ export const ultraLiquidTestnet = {
       decimals: 6,
       price: "USDC",
     },
+    usdc1: {
+      name: "USDC",
+      address: "0x3167c4d4d0d8488220ceeac8e0262cf316f82fdd",
+      icon: "/images/usdc.png",
+      symbol: "USDC1",
+      decimals: 6,
+      price: "USDC",
+    },
     stk: {
       name: "STK",
       address: "0x33df4cf5744e63d53cb62090f8fc9bed973aa055",
