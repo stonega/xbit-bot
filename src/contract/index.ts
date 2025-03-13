@@ -85,9 +85,8 @@ export class TradeApi extends BaseEvmApi {
           res = await this.contract
             .getFunction("placeOrderSellB")
             .populateTransaction(this.pairId, receive, amount);
-          console.log(res, this.pairId);
         }
-        if (isNative) {
+        else if (isNative) {
           res = await this.contract
             .getFunction("placeOrderSellB")
             .populateTransaction(receive, { value: amount });
