@@ -111,8 +111,8 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     // Calculate next sell price with increase
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
 
-    // If buy price is above target, create buy order
-    if (Number(buyPrice) > Number(target)) {
+    // If buy price is below target, create buy order
+    if (Number(buyPrice) < Number(target)) {
       // Calculate a new buy price slightly below current buy price
       const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
       const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
@@ -125,7 +125,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
     }
     else {
-      // If buy price is below target, create sell order
+      // If buy price is above target, create sell order
       const price = nextSellPrice.toString();
       const receive = trade.calcUsdt(price, amount.toString());
 
