@@ -100,7 +100,7 @@ export function getHeaders(timestamp: string, method: string, requestPath: strin
  * Fetch price from okx api
  */
 let lastPrice = 0;
-export async function getTargetPrice(pair: string, date = "2025-02-14"): Promise<number> {
+export async function getTargetPrice(pair: string, increase = true): Promise<number> {
   const timestamp = new Date().toISOString();
   const baseUrl = "https://www.okx.com";
   const queryString = `instId=${pair}-USDT&limit=1`;
@@ -114,10 +114,12 @@ export async function getTargetPrice(pair: string, date = "2025-02-14"): Promise
     price = price / 50;
 
   // Add 0.2 to price per day based on 2025/02/14
-  const startDate = new Date(date);
-  const currentDate = new Date();
-  const diffInDays = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 5.8));
-  price += diffInDays * 0.05;
+  if (increase) {
+    const startDate = new Date("2025-02-14");
+    const currentDate = new Date();
+    const diffInDays = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 5.8));
+    price += diffInDays * 0.05;
+  }
 
   // Force update price if price unchanged
   if (Math.abs(price - lastPrice) > 0.005) {
