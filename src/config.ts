@@ -6,13 +6,13 @@ export const PAIRS = [
     maker: Bun.env.TBOL_MAKER_PRIVATE_KEY,
     increase: true,
   },
-  // {
-  //   symbol: "STK/USDC1",
-  //   price: "SOL",
-  //   taker: Bun.env.P_STK_TAKER_PRIVATE_KEY,
-  //   maker: Bun.env.P_STK_MAKER_PRIVATE_KEY,
-  //   increase: false,
-  // },
+  {
+    symbol: "STK/USDC1",
+    price: "SOL",
+    taker: Bun.env.P_STK_TAKER_PRIVATE_KEY,
+    maker: Bun.env.P_STK_MAKER_PRIVATE_KEY,
+    increase: false,
+  },
   {
     symbol: "STK/USDC",
     price: "BNB",
