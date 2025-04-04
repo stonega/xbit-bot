@@ -26,21 +26,21 @@ export const betaTestnet = {
   },
 };
 
-export const ultraLiquidTestnet = {
-  rpc: "https://ultra-test-node-rpc.bool.network",
-  chainId: 483,
-  symbol: "tBOL",
-  name: "Ultra Liquid Testnet",
-  value: "ultra_liquid_testnet",
-  explorer: "https://beta-testnet.boolscan.com",
+export const ultraLiquid = {
+  rpc: "https://node-rpc.safeliquid.ai",
+  chainId: 11101,
+  symbol: "GAS",
+  name: "SafeLiquid Alpha Mainnet",
+  value: "safeliquid_alpha_mainnet",
+  explorer: "https://scan.safeliquid.ai/",
   icon: "https://bool.network/bool-network-orange.png",
   tokens: {
-    bool: {
-      name: "TDEF",
-      symbol: "TDEF",
+    con: {
+      name: "CON",
+      symbol: "CON",
       decimals: 18,
-      icon: "https://bool.network/bool-orange.png",
-      address: "",
+      icon: "",
+      address: "0xEe894F7816e633828eF3ADea553F79C4d066b75f",
     },
     usdt: {
       name: "USDC",
@@ -49,28 +49,6 @@ export const ultraLiquidTestnet = {
       symbol: "USDC",
       decimals: 6,
       price: "USDC",
-    },
-    usdc1: {
-      name: "USDC",
-      address: "0x3167c4d4d0d8488220ceeac8e0262cf316f82fdd",
-      icon: "/images/usdc.png",
-      symbol: "USDC1",
-      decimals: 6,
-      price: "USDC",
-    },
-    stk: {
-      name: "STK",
-      address: "0x33df4cf5744e63d53cb62090f8fc9bed973aa055",
-      icon: "/images/usdc.png",
-      symbol: "STK",
-      decimals: 18,
-    },
-    btu: {
-      name: "BTU",
-      address: "0xa20454333c249e5c25942196b37f019d3d61926f",
-      icon: "/images/usdc.png",
-      symbol: "BTU",
-      decimals: 18,
     },
   },
 };

@@ -110,9 +110,7 @@ export async function getTargetPrice(pair: string, increase = true): Promise<num
   let price = Number(data.data[0][1]);
 
   // To avoid the price being too high
-  if (price > 100)
-    price = price / 50;
-
+  price = price / 50000;
   // Add 0.2 to price per day based on 2025/02/14
   if (increase) {
     const startDate = new Date("2025-02-14");

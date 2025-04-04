@@ -2,7 +2,7 @@ import { formatUnits, JsonRpcProvider, parseEther, parseUnits, Wallet } from "et
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY } from "./config";
 import { TradeApi } from "./contract";
-import { ultraLiquidTestnet } from "./contract/network";
+import { ultraLiquid } from "./contract/network";
 import { getPairContract, getPrice, getTargetPrice } from "./utils";
 
 /**
@@ -31,7 +31,7 @@ function getPriceMakerInscrease(): number {
  */
 async function main(pair: { price: string; symbol: string; trade?: string; taker?: string; maker?: string; pairId?: string; increase?: boolean }, role: "maker" | "taker"): Promise<void> {
   // Get network configuration
-  const currentNetwork = ultraLiquidTestnet;
+  const currentNetwork = ultraLiquid;
 
   // Find token information from pair symbol
   const tokenA = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[0])!;
