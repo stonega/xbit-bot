@@ -43,7 +43,7 @@ export async function withRetry<T>(
  * Get orderbook data from xbit api
  */
 export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const result = await fetch(`https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=${pair}`).then(a => a.json());
+  const result = await fetch(`https://app.safeliquid.ai/backend/bool-stake-reward/blockchain/order-books?pair=${pair}`).then(a => a.json());
   if (!result.data.orderBuyBList) {
     console.log({ error: result.msg });
   }
@@ -63,7 +63,7 @@ export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPr
  * Get pair contract address from xbit api
  */
 export async function getPairContract(pair: string): Promise<{ address: string; pairId: string | undefined }> {
-  const result = await fetch(`https://test-api.safematrix.io/bool-stake-reward/blockchain/pairs`).then(a => a.json());
+  const result = await fetch(`https://app.safeliquid.ai/backend/bool-stake-reward/blockchain/pairs`).then(a => a.json());
   const pairInfo = result.data.find((a: any) => a.name === pair)!;
   return {
     address: pairInfo.address,
@@ -110,7 +110,7 @@ export async function getTargetPrice(pair: string, increase = true): Promise<num
   let price = Number(data.data[0][1]);
 
   // To avoid the price being too high
-  price = price / 50000;
+  price = 0.0011 + ((price - 100) / 100 * 0.0004);
   // Add 0.2 to price per day based on 2025/02/14
   if (increase) {
     const startDate = new Date("2025-02-14");
@@ -120,12 +120,13 @@ export async function getTargetPrice(pair: string, increase = true): Promise<num
   }
 
   // Force update price if price unchanged
-  if (Math.abs(price - lastPrice) > 0.005) {
+  if (Math.abs(price - lastPrice) > 0.0001) {
     lastPrice = price;
   }
   else {
     lastPrice = price;
-    price += (price > lastPrice ? 0.005 : -0.005);
+    price += (price > lastPrice ? 0.0001 : -0.0001);
   }
+  console.log(price);
   return price;
 }

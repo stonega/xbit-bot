@@ -22,6 +22,7 @@ export class TradeApi extends BaseEvmApi {
     contract: string;
   }) {
     super(rpc);
+    console.log(rpc);
     this.contractAddress = contract;
     this.tokenA = tokenA;
     this.tokenB = tokenB;

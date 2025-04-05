@@ -43,10 +43,10 @@ export const ultraLiquid = {
       address: "0xEe894F7816e633828eF3ADea553F79C4d066b75f",
     },
     usdt: {
-      name: "USDC",
-      address: "0x3167c4d4d0d8488220ceeac8e0262cf316f82fdd",
+      name: "USDT",
+      address: "0x0aE4644f26B16cB51b56fa7c3150d48d61e4c573",
       icon: "/images/usdc.png",
-      symbol: "USDC",
+      symbol: "USDT",
       decimals: 6,
       price: "USDC",
     },

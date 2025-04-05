@@ -1,9 +1,9 @@
 export const PAIRS = [
   {
-    symbol: "STK/USDC1",
+    symbol: "CON/USDT",
     price: "SOL",
-    taker: Bun.env.TON_TAKER_PRIVATE_KEY,
-    maker: Bun.env.TON_MAKER_PRIVATE_KEY,
+    taker: Bun.env.CON_TAKER_PRIVATE_KEY,
+    maker: Bun.env.CON_MAKER_PRIVATE_KEY,
     increase: false,
   },
 ];
