@@ -103,7 +103,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     }
 
     // If current price is very close to target, no action needed
-    if (Math.abs(Number(buyPrice) - target) < 0.0001) {
+    if (Math.abs(Number(buyPrice) - target) < 0.00005) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
       return;
     }
