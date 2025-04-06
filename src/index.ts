@@ -85,7 +85,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     const maker = makerWallet.connect(provider);
 
     // Generate random order amount between 0.8 and 1.2
-    const amount = 20 * Math.random() + 10;
+    const amount = 20 * Math.random() + 30;
 
     // Approve token spending for trading
     await trade.approveToken(maker);
