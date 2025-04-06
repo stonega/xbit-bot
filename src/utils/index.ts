@@ -1,5 +1,5 @@
+import { Database } from "bun:sqlite";
 import CryptoJS from "crypto-js";
-
 /**
  * Generic retry function wrapper
  * @param fn - Function to retry
@@ -96,38 +96,65 @@ export function getHeaders(timestamp: string, method: string, requestPath: strin
   };
 }
 
+// Initialize SQLite database
+const db = new Database("prices.sqlite");
+// Simplified table: only store the timestamp and the price fetched from the API
+db.run(`
+  CREATE TABLE IF NOT EXISTS prices (
+    timestamp INTEGER PRIMARY KEY,
+    apiPrice REAL NOT NULL,
+    price REAL
+  );
+`);
+
 /**
- * Fetch price from okx api
+ * Fetch price from okx api, store it in SQLite, and return it.
  */
-let lastPrice = 0;
-export async function getTargetPrice(pair: string, increase = true): Promise<number> {
-  const timestamp = new Date().toISOString();
-  const baseUrl = "https://www.okx.com";
-  const queryString = `instId=${pair}-USDT&limit=1`;
-  const requestPath = "/api/v5/market/history-index-candles";
-  const headers = getHeaders(timestamp, "GET", requestPath, queryString);
-  const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
-  let price = Number(data.data[0][1]);
+export async function getTargetPrice(pair: string): Promise<number> {
+  const currentMinute = Math.floor(new Date().valueOf() / 1000 / 60);
+  // Insert current API price into database
+  try {
+    const currentPriceData = db.query<{ apiPrice: number; price: number }, [number]>(
+      "SELECT apiPrice FROM prices WHERE timestamp = ?",
+    ).get(currentMinute);
+    let currentApiPrice = currentPriceData?.apiPrice;
+    if (!currentApiPrice) {
+      const timestamp = new Date().toISOString();
+      const baseUrl = "https://www.okx.com";
+      const queryString = `instId=${pair}-USDT&limit=1`;
+      const requestPath = "/api/v5/market/history-index-candles";
+      const headers = getHeaders(timestamp, "GET", requestPath, queryString);
+      const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
+      currentApiPrice = Number(data.data[0][1]);
 
-  // To avoid the price being too high
-  price = 0.0011 + ((price - 0.1) / 0.1 * 0.0008);
-  // Add 0.2 to price per day based on 2025/02/14
-  if (increase) {
-    const startDate = new Date("2025-02-14");
-    const currentDate = new Date();
-    const diffInDays = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 5.8));
-    price += diffInDays * 0.05;
+      db.run(
+        "INSERT OR IGNORE INTO prices (timestamp, apiPrice) VALUES (?, ?)",
+        [currentMinute, currentApiPrice],
+      );
+    }
+    // Log the price being saved and returned
+    console.log(`Saved price ${currentApiPrice} for timestamp ${currentMinute}`);
+    // Read previous price from database
+    const previousPriceData = db.query<{ apiPrice: number; price: number }, [number]>(
+      "SELECT apiPrice, price FROM prices WHERE timestamp = ?",
+    ).get(currentMinute - 1);
+    const previousApiPrice = previousPriceData?.apiPrice;
+    const priceChangePercentage = previousApiPrice ? ((currentApiPrice - previousApiPrice) / previousApiPrice) : 0;
+    if (previousApiPrice) {
+      const previousPrice = Number(previousPriceData?.price) || 0.0012;
+      console.log(`Price change percentage: ${(priceChangePercentage * 100).toFixed(4)}%`, previousPrice);
+      const targetPrice = previousPrice + (priceChangePercentage * previousPrice * 100);
+      // Update the price in the database
+      db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
+      return targetPrice;
+    }
+    else {
+      console.log("No previous price found to calculate change.");
+      return 0.0012;
+    }
   }
-  console.log(price);
-
-  // Force update price if price unchanged
-  if (Math.abs(price - lastPrice) > 0.00005) {
-    lastPrice = price;
+  catch (e) {
+    console.error("Database insert error:", e);
+    return 0.0012;
   }
-  else {
-    lastPrice = price;
-    price += (price > lastPrice ? 0.0005 : -0.00005);
-  }
-  console.log(price);
-  return price;
 }

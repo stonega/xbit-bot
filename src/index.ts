@@ -20,7 +20,7 @@ function getPriceTakerInscrease(): number {
  * @returns {number} Price increase percentage
  */
 function getPriceMakerInscrease(): number {
-  return Math.max(Math.random() * 0.0001, 0.0005);
+  return Math.max(Math.random() * 0.0001, 0.00005);
 }
 
 /**
@@ -63,7 +63,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
 
   // Get target price for this trading pair
-  const target = await getTargetPrice(pair.price, pair.increase);
+  const target = await getTargetPrice(pair.price);
   if (Number.isNaN(target)) {
     return; // Exit if target price is invalid
   }
@@ -103,10 +103,10 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     }
 
     // If current price is very close to target, no action needed
-    if (Math.abs(Number(buyPrice) - target) < 0.00005) {
-      console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
-      return;
-    }
+    // if (Math.abs(Number(buyPrice) - target) < 0.00001) {
+    //   console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
+    //   return;
+    // }
 
     // Calculate next sell price with increase
     const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
@@ -179,7 +179,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     }
 
     // If current price is very close to target, create a small sell order to maintain price
-    if (Math.abs(Number(buyPrice) - target) < 0.0001) {
+    if (Math.abs(Number(buyPrice) - target) < 0.00001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
       const buyAmount = 0.5;
       const price = buyPrice.toString();
