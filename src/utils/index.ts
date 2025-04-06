@@ -110,7 +110,7 @@ db.run(`
 /**
  * Fetch price from okx api, store it in SQLite, and return it.
  */
-export async function getTargetPrice(pair: string): Promise<number> {
+export async function getTargetPrice(pair: string, latestPrice: number): Promise<number> {
   const currentMinute = Math.floor(new Date().valueOf() / 1000 / 60);
   // Insert current API price into database
   try {
@@ -141,20 +141,20 @@ export async function getTargetPrice(pair: string): Promise<number> {
     const previousApiPrice = previousPriceData?.apiPrice;
     const priceChangePercentage = previousApiPrice ? ((currentApiPrice - previousApiPrice) / previousApiPrice) : 0;
     if (previousApiPrice) {
-      const previousPrice = Number(previousPriceData?.price) || 0.0012;
+      const previousPrice = Number(previousPriceData?.price) || latestPrice;
       console.log(`Price change percentage: ${(priceChangePercentage * 100).toFixed(4)}%`, previousPrice);
-      const targetPrice = previousPrice + (priceChangePercentage * previousPrice * 100);
+      const targetPrice = previousPrice - (priceChangePercentage * previousPrice * 100);
       // Update the price in the database
       db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
       return targetPrice;
     }
     else {
       console.log("No previous price found to calculate change.");
-      return 0.0012;
+      return latestPrice;
     }
   }
   catch (e) {
     console.error("Database insert error:", e);
-    return 0.0012;
+    return latestPrice;
   }
 }

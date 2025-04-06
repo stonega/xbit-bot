@@ -63,7 +63,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
 
   // Get target price for this trading pair
-  const target = await getTargetPrice(pair.price);
+  const target = await getTargetPrice(pair.price, Number(buyPrice ?? 0.0012));
   if (Number.isNaN(target)) {
     return; // Exit if target price is invalid
   }
