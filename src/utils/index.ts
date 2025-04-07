@@ -1,5 +1,7 @@
 import { Database } from "bun:sqlite";
 import CryptoJS from "crypto-js";
+import { minutesInDay } from "date-fns/constants";
+import { generateStockData } from "./price";
 /**
  * Generic retry function wrapper
  * @param fn - Function to retry
@@ -159,4 +161,26 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     console.error("Database insert error:", e);
     return latestPrice;
   }
+}
+
+export function getMinutePrice(): number {
+  const startDate = "2025-04-07T00:00:00.000Z";
+  // Generate 30 days of stock data
+  const data = generateStockData({
+    days: 30,
+    priceRange: [0.001, 0.002],
+    seed: Number(Bun.env.PRICE_SEED!),
+    trend: 0.001,
+    volatility: 0.15,
+    startDate,
+  });
+
+  // Access different timeframes
+  const minuteData = data["1m"];
+  const currentDate = new Date();
+  currentDate.setSeconds(0, 0);
+  const currentMinuteTimeString = currentDate.toISOString();
+  console.log(currentMinuteTimeString);
+  const currentMinute = minuteData.findIndex(a => a.timestamp.toISOString() === currentMinuteTimeString);
+  return minuteData[currentMinute].high;
 }

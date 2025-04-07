@@ -3,7 +3,7 @@ import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY } from "./config";
 import { TradeApi } from "./contract";
 import { ultraLiquid } from "./contract/network";
-import { getPairContract, getPrice, getTargetPrice } from "./utils";
+import { getMinutePrice, getPairContract, getPrice } from "./utils";
 
 /**
  * Generates a random price increase for taker orders
@@ -11,7 +11,7 @@ import { getPairContract, getPrice, getTargetPrice } from "./utils";
  * @returns {number} Price increase percentage
  */
 function getPriceTakerInscrease(): number {
-  return Math.max(Math.random() * 0.0001, 0.00005);
+  return Math.max(Math.random() * 0.0001, 0.00001);
 }
 
 /**
@@ -20,7 +20,7 @@ function getPriceTakerInscrease(): number {
  * @returns {number} Price increase percentage
  */
 function getPriceMakerInscrease(): number {
-  return Math.max(Math.random() * 0.0001, 0.0005);
+  return Math.max(Math.random() * 0.0001, 0.00001);
 }
 
 /**
@@ -60,10 +60,10 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   provider._getConnection().timeout = 10000;
 
   // Get current market prices and order book information
-  const { buyPrice, sellPrice, buyAmount, sellAmount, latestPrice } = await getPrice(pair.symbol);
+  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
 
   // Get target price for this trading pair
-  const target = await getTargetPrice(pair.price, Number(latestPrice));
+  const target = getMinutePrice();
   if (Number.isNaN(target)) {
     return; // Exit if target price is invalid
   }
