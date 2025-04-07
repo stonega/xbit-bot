@@ -42,7 +42,7 @@ export async function withRetry<T>(
 /**
  * Get orderbook data from xbit api
  */
-export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
+export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string; latestPrice: string }> {
   const result = await fetch(`https://app.safeliquid.ai/backend/bool-stake-reward/blockchain/order-books?pair=${pair}`).then(a => a.json());
   if (!result.data.orderBuyBList) {
     console.log({ error: result.msg });
@@ -51,11 +51,13 @@ export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPr
   const buyAmount = result.data.orderBuyBList[0]?.qty;
   const sellPrice = result.data.orderSellBList[result.data.orderSellBList.length - 1]?.price;
   const sellAmount = result.data.orderSellBList[result.data.orderSellBList.length - 1]?.qty;
+  const latestPrice = result.data.latestPrice;
   return {
     buyPrice,
     buyAmount,
     sellPrice,
     sellAmount,
+    latestPrice,
   };
 }
 
@@ -142,8 +144,8 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     const priceChangePercentage = previousApiPrice ? ((currentApiPrice - previousApiPrice) / previousApiPrice) : 0;
     if (previousApiPrice) {
       const previousPrice = Number(previousPriceData?.price) || latestPrice;
-      console.log(`Price change percentage: ${(priceChangePercentage * 100).toFixed(4)}%`, previousPrice);
-      const targetPrice = previousPrice - (priceChangePercentage * previousPrice * 100);
+      const targetPrice = previousPrice + (priceChangePercentage * previousPrice * 100);
+      console.log(`Price change percentage: ${(priceChangePercentage * 100).toFixed(4)}%`, previousPrice, targetPrice);
       // Update the price in the database
       db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
       return targetPrice;

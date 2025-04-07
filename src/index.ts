@@ -60,10 +60,10 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   provider._getConnection().timeout = 10000;
 
   // Get current market prices and order book information
-  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
+  const { buyPrice, sellPrice, buyAmount, sellAmount, latestPrice } = await getPrice(pair.symbol);
 
   // Get target price for this trading pair
-  const target = await getTargetPrice(pair.price, Number(buyPrice ?? 0.0012));
+  const target = await getTargetPrice(pair.price, Number(latestPrice));
   if (Number.isNaN(target)) {
     return; // Exit if target price is invalid
   }
