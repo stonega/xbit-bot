@@ -1,5 +1,6 @@
 import { Database } from "bun:sqlite";
 import CryptoJS from "crypto-js";
+import { differenceInMilliseconds } from "date-fns";
 import { minutesInDay } from "date-fns/constants";
 import { generateStockData } from "./price";
 /**
@@ -128,8 +129,9 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     let currentApiPrice = currentPriceData?.apiPrice;
     if (!currentApiPrice) {
       const timestamp = new Date().toISOString();
+      const after = new Date().valueOf() - differenceInMilliseconds(new Date(2024, 8, 24), new Date(2025, 4, 8));
       const baseUrl = "https://www.okx.com";
-      const queryString = `instId=${pair}-USDT&limit=1`;
+      const queryString = `instId=${pair}-USDT&limit=1&after=${after}`;
       const requestPath = "/api/v5/market/history-index-candles";
       const headers = getHeaders(timestamp, "GET", requestPath, queryString);
       const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
@@ -150,12 +152,11 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     const priceChangePercentage = previousApiPrice ? ((currentApiPrice - previousApiPrice) / previousApiPrice) : 0;
     if (previousApiPrice) {
       const previousPrice = Number(previousPriceData?.price) || latestPrice;
-      let targetPrice = previousPrice + (priceChangePercentage * previousPrice * 50);
+      let targetPrice = previousPrice + (priceChangePercentage * previousPrice * 10);
       if (targetPrice < range.low && targetPrice > range.high) {
-        targetPrice = previousPrice - (priceChangePercentage * previousPrice * 50);
+        targetPrice = previousPrice - (priceChangePercentage * previousPrice * 10);
       }
-      console.log(`Price change percentage: ${(priceChangePercentage * 50).toFixed(4)}%`, previousPrice, targetPrice);
-      // Update the price in the database
+      console.log(`Price change percentage: ${(priceChangePercentage * 10).toFixed(4)}%`, previousPrice, targetPrice); // Update the price in the database
       db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
       return targetPrice;
     }
