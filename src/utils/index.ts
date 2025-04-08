@@ -150,11 +150,11 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     const priceChangePercentage = previousApiPrice ? ((currentApiPrice - previousApiPrice) / previousApiPrice) : 0;
     if (previousApiPrice) {
       const previousPrice = Number(previousPriceData?.price) || latestPrice;
-      let targetPrice = previousPrice + (priceChangePercentage * previousPrice * 100);
+      let targetPrice = previousPrice + (priceChangePercentage * previousPrice * 50);
       if (targetPrice < range.low && targetPrice > range.high) {
-        targetPrice = previousPrice - (priceChangePercentage * previousPrice * 100);
+        targetPrice = previousPrice - (priceChangePercentage * previousPrice * 50);
       }
-      console.log(`Price change percentage: ${(priceChangePercentage * 100).toFixed(4)}%`, previousPrice, targetPrice);
+      console.log(`Price change percentage: ${(priceChangePercentage * 50).toFixed(4)}%`, previousPrice, targetPrice);
       // Update the price in the database
       db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
       return targetPrice;
