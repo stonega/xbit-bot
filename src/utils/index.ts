@@ -116,6 +116,10 @@ db.run(`
  */
 export async function getTargetPrice(pair: string, latestPrice: number): Promise<number> {
   const currentMinute = Math.floor(new Date().valueOf() / 1000 / 60);
+  const range = {
+    low: 0.001,
+    high: 0.002,
+  };
   // Insert current API price into database
   try {
     const currentPriceData = db.query<{ apiPrice: number; price: number }, [number]>(
@@ -146,7 +150,10 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     const priceChangePercentage = previousApiPrice ? ((currentApiPrice - previousApiPrice) / previousApiPrice) : 0;
     if (previousApiPrice) {
       const previousPrice = Number(previousPriceData?.price) || latestPrice;
-      const targetPrice = previousPrice + (priceChangePercentage * previousPrice * 100);
+      let targetPrice = previousPrice + (priceChangePercentage * previousPrice * 100);
+      if (targetPrice < range.low && targetPrice > range.high) {
+        targetPrice = previousPrice - (priceChangePercentage * previousPrice * 100);
+      }
       console.log(`Price change percentage: ${(priceChangePercentage * 100).toFixed(4)}%`, previousPrice, targetPrice);
       // Update the price in the database
       db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
