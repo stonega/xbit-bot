@@ -7,7 +7,7 @@ test("get tartget price", async () => {
   const price = generateStockData({
     days: 7,
     startDate,
-    volatility: 0.15,
+    volatility: 0.05,
     seed: 42,
     trend: 0.001,
   });
@@ -15,7 +15,7 @@ test("get tartget price", async () => {
     days: 7,
     startDate,
     seed: 42,
-    volatility: 0.15,
+    volatility: 0.05,
     trend: 0.001,
   });
   console.log({ price: price["1m"] });

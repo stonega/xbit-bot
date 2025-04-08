@@ -171,7 +171,7 @@ export function getMinutePrice(): number {
     priceRange: [0.001, 0.002],
     seed: Number(Bun.env.PRICE_SEED!),
     trend: 0.001,
-    volatility: 0.15,
+    volatility: 0.05,
     startDate,
   });
 
