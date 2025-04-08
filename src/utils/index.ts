@@ -140,11 +140,17 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     // Log the price being saved and returned
     console.log(`Saved price ${currentApiPrice} for timestamp ${currentMinute}`);
     const previousApiPrice = db.query<{ apiPrice: number }, [number]>("SELECT apiPrice FROM prices WHERE timestamp = ?", [currentMinute - 1]).get(currentMinute - 1)?.apiPrice;
+    const previousPrice = db.query<{ price: number }, [number]>("SELECT price FROM prices WHERE timestamp = ?", [currentMinute - 1]).get(currentMinute - 1)?.price;
     let targetPrice = 0;
     if (previousApiPrice) {
       const change = (currentApiPrice - previousApiPrice) / previousApiPrice;
       console.log(`Change: ${change}`);
-      targetPrice = (previousApiPrice * (1 + Math.max(change, 0.0001) * 30)) / 100;
+      if (change === 0) {
+        targetPrice = previousPrice! * 1.003;
+      }
+      else {
+        targetPrice = (previousApiPrice * (1 + change * 30)) / 100;
+      }
     }
     else {
       targetPrice = currentApiPrice / 100;
