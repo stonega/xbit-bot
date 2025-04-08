@@ -1,7 +1,6 @@
 import { Database } from "bun:sqlite";
 import CryptoJS from "crypto-js";
 import { differenceInMilliseconds } from "date-fns";
-import { minutesInDay } from "date-fns/constants";
 import { generateStockData } from "./price";
 /**
  * Generic retry function wrapper
@@ -117,10 +116,6 @@ db.run(`
  */
 export async function getTargetPrice(pair: string, latestPrice: number): Promise<number> {
   const currentMinute = Math.floor(new Date().valueOf() / 1000 / 60);
-  const range = {
-    low: 0.001,
-    high: 0.002,
-  };
   // Insert current API price into database
   try {
     const currentPriceData = db.query<{ apiPrice: number; price: number }, [number]>(
@@ -129,9 +124,9 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     let currentApiPrice = currentPriceData?.apiPrice;
     if (!currentApiPrice) {
       const timestamp = new Date().toISOString();
-      const after = new Date().valueOf() - differenceInMilliseconds(new Date(2024, 8, 24), new Date(2025, 4, 8));
+      // const after = new Date().valueOf() - differenceInMilliseconds(new Date(2024, 8, 24), new Date(2025, 4, 8));
       const baseUrl = "https://www.okx.com";
-      const queryString = `instId=${pair}-USDT&limit=1&after=${after}`;
+      const queryString = `instId=${pair}-USDT&limit=1`;
       const requestPath = "/api/v5/market/history-index-candles";
       const headers = getHeaders(timestamp, "GET", requestPath, queryString);
       const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
@@ -144,26 +139,18 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     }
     // Log the price being saved and returned
     console.log(`Saved price ${currentApiPrice} for timestamp ${currentMinute}`);
-    // Read previous price from database
-    const previousPriceData = db.query<{ apiPrice: number; price: number }, [number]>(
-      "SELECT apiPrice, price FROM prices WHERE timestamp = ?",
-    ).get(currentMinute - 1);
-    const previousApiPrice = previousPriceData?.apiPrice;
-    const priceChangePercentage = previousApiPrice ? ((currentApiPrice - previousApiPrice) / previousApiPrice) : 0;
+    const previousApiPrice = db.query<{ apiPrice: number }, [number]>("SELECT apiPrice FROM prices WHERE timestamp = ?", [currentMinute - 1]).get(currentMinute - 1)?.apiPrice;
+    let targetPrice = 0;
     if (previousApiPrice) {
-      const previousPrice = Number(previousPriceData?.price) || latestPrice;
-      let targetPrice = previousPrice + (priceChangePercentage * previousPrice * 2);
-      if (targetPrice < range.low && targetPrice > range.high) {
-        targetPrice = previousPrice - (priceChangePercentage * previousPrice * 2);
-      }
-      console.log(`Price change percentage: ${(priceChangePercentage * 10).toFixed(4)}%`, previousPrice, targetPrice); // Update the price in the database
-      db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
-      return targetPrice;
+      const change = (currentApiPrice - previousApiPrice) / previousApiPrice;
+      console.log(`Change: ${change}`);
+      targetPrice = (previousApiPrice * (1 + Math.max(change, 0.0001) * 30)) / 100;
     }
     else {
-      console.log("No previous price found to calculate change.");
-      return latestPrice;
+      targetPrice = currentApiPrice / 100;
     }
+    db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
+    return targetPrice;
   }
   catch (e) {
     console.error("Database insert error:", e);

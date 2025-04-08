@@ -11,7 +11,7 @@ import { getPairContract, getPrice, getTargetPrice } from "./utils";
  * @returns {number} Price increase percentage
  */
 function getPriceTakerInscrease(): number {
-  return Math.max(Math.random() * 0.0001, 0.00001);
+  return Math.max(Math.random() * 0.00003, 0.00001);
 }
 
 /**
@@ -20,7 +20,7 @@ function getPriceTakerInscrease(): number {
  * @returns {number} Price increase percentage
  */
 function getPriceMakerInscrease(): number {
-  return Math.max(Math.random() * 0.0001, 0.00001);
+  return Math.max(Math.random() * 0.00003, 0.00001);
 }
 
 /**
@@ -63,7 +63,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   const { buyPrice, sellPrice, buyAmount, sellAmount, latestPrice } = await getPrice(pair.symbol);
 
   // Get target price for this trading pair
-  const target = getTargetPrice(pair.price, Number(latestPrice));
+  const target = await getTargetPrice(pair.price, Number(latestPrice));
   if (Number.isNaN(target)) {
     return; // Exit if target price is invalid
   }
