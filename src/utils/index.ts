@@ -146,10 +146,10 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       const change = (currentApiPrice - previousApiPrice) / previousApiPrice;
       console.log(`Change: ${change}`);
       if (change === 0) {
-        targetPrice = previousPrice! * 1.003;
+        targetPrice = previousPrice! + 0.00001;
       }
       else {
-        targetPrice = (previousApiPrice * (1 + change * 30)) / 100;
+        targetPrice = (previousApiPrice * (1 + change * 10)) / 100;
       }
     }
     else {
