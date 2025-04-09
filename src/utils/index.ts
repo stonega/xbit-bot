@@ -149,8 +149,8 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
         targetPrice = previousPrice! + 0.00001;
       }
       else {
-        targetPrice = (previousApiPrice * (1 + change * 10)) / 100;
-        targetPrice = (Math.ceil(targetPrice / 100000)) * 100000;
+        targetPrice = (previousApiPrice * (1 + change * 15)) / 100;
+        targetPrice = (Math.ceil(targetPrice * 100000)) / 100000;
       }
     }
     else {
