@@ -144,18 +144,19 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     let targetPrice = 0;
     if (previousApiPrice) {
       const change = (currentApiPrice - previousApiPrice) / previousApiPrice;
-      console.log(`Change: ${change}`);
+      console.log(change * 30);
       if (change === 0) {
-        targetPrice = previousPrice! + 0.00001;
+        targetPrice = previousPrice! + 0.00002;
       }
       else {
-        targetPrice = (previousApiPrice * (1 + change * 15)) / 100;
-        targetPrice = (Math.ceil(targetPrice * 100000)) / 100000;
+        // Limit max change rate to 0.02
+        targetPrice = (previousApiPrice * (1 + Math.min(change * 30, 0.1))) / 80000;
       }
     }
     else {
-      targetPrice = currentApiPrice / 100;
+      targetPrice = currentApiPrice / 80000;
     }
+    targetPrice = (Math.ceil(targetPrice * 100000)) / 100000;
     db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
     return targetPrice;
   }
