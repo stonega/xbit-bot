@@ -11,7 +11,7 @@ import { getPairContract, getPrice, getTargetPrice } from "./utils";
  * @returns {number} Price increase percentage
  */
 function getPriceTakerInscrease(): number {
-  return Math.max(0.00006 * Math.random(), 0.00002);
+  return Math.max(0.00008 * Math.random(), 0.00004);
 }
 
 /**
@@ -20,7 +20,7 @@ function getPriceTakerInscrease(): number {
  * @returns {number} Price increase percentage
  */
 function getPriceMakerInscrease(): number {
-  return Math.max(0.00004 * Math.random(), 0.00001);
+  return Math.max(0.00004 * Math.random(), 0.00002);
 }
 
 /**
