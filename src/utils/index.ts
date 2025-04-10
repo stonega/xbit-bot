@@ -144,13 +144,14 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     let targetPrice = 0;
     if (previousApiPrice) {
       const change = (currentApiPrice - previousApiPrice) / previousApiPrice;
-      console.log(change * 30);
       if (change === 0) {
         targetPrice = previousPrice! + 0.00002;
       }
       else {
         // Limit max change rate to 0.02
-        targetPrice = (previousApiPrice * (1 + Math.min(change * 30, 0.1))) / 80000;
+        const changeRate = change * 30 < -0.1 ? -0.1 : change * 30 > 0.1 ? 0.1 : change * 30;
+        targetPrice = (previousApiPrice * (1 + changeRate)) / 80000;
+        console.log(change * 30, { previousApiPrice, currentApiPrice, targetPrice });
       }
     }
     else {
