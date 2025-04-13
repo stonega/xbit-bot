@@ -159,8 +159,8 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       targetPrice = currentApiPrice / 80000;
     }
     targetPrice = (Math.ceil(targetPrice * 100000)) / 100000;
-    if (targetPrice < 0.001 || targetPrice > 0.002) {
-      targetPrice = 0.0015;
+    if (targetPrice < 0.0015 || targetPrice > 0.003) {
+      targetPrice = 0.002;
     }
     db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
     return targetPrice;
