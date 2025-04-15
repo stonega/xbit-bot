@@ -149,7 +149,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       }
       else {
         // Limit max change rate to 0.02
-        const scaledChangeRate = change * 20;
+        const scaledChangeRate = change * 30;
         const changeRate = scaledChangeRate < -0.1 ? -0.1 : scaledChangeRate > 0.1 ? 0.1 : scaledChangeRate;
         targetPrice = previousPrice * (1 + changeRate);
         console.log(change * 30, { previousApiPrice, currentApiPrice, previousPrice, targetPrice });
