@@ -106,7 +106,7 @@ const db = new Database("prices.sqlite");
 db.run(`
   CREATE TABLE IF NOT EXISTS prices (
     timestamp INTEGER PRIMARY KEY,
-    apiPrice REAL NOT NULL,
+    apiPrice REAL,
     price REAL
   );
 `);
@@ -116,6 +116,7 @@ db.run(`
  */
 export async function getTargetPrice(pair: string, latestPrice: number): Promise<number> {
   const currentMinute = Math.floor(new Date().valueOf() / 1000 / 60);
+  const currentDay = Math.floor(new Date().valueOf() / 1000 / 60 / 60 / 24) * 24 * 60;
   // Insert current API price into database
   try {
     const currentPriceData = db.query<{ apiPrice: number; price: number }, [number]>(
@@ -149,21 +150,33 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       }
       else {
         // Limit max change rate to 0.02
-        const scaledChangeRate = change * 30;
-        const changeRate = scaledChangeRate < -0.1 ? -0.1 : scaledChangeRate > 0.1 ? 0.1 : scaledChangeRate;
+        const scaledChangeRate = change * 20;
+        const changeRate = scaledChangeRate < -0.05 ? -0.05 : scaledChangeRate > 0.05 ? 0.05 : scaledChangeRate;
         targetPrice = previousPrice * (1 + changeRate);
         console.log(change * 30, { previousApiPrice, currentApiPrice, previousPrice, targetPrice });
       }
     }
     else {
-      targetPrice = currentApiPrice / 60000;
+      targetPrice = latestPrice;
     }
     targetPrice = (Math.ceil(targetPrice * 100000)) / 100000;
-    if (targetPrice < 0.0005) {
-      targetPrice = 0.001;
+    let currentDayPrice = db.query<{ price: number }, [number]>("SELECT price FROM prices WHERE timestamp = ?", [currentDay]).get(currentDay)?.price;
+    if (!currentDayPrice) {
+      db.run(
+        "INSERT OR IGNORE INTO prices (timestamp, price) VALUES (?, ?)",
+        [currentDay, targetPrice],
+      );
+      currentDayPrice = targetPrice;
     }
-    else if (targetPrice > 0.005) {
-      targetPrice = 0.0031;
+    const range = [
+      currentDayPrice * 0.9,
+      currentDayPrice * 1.1,
+    ];
+    if (targetPrice < range[0]) {
+      targetPrice = (range[0] + range[1]) / 2;
+    }
+    else if (targetPrice > range[1]) {
+      targetPrice = (range[0] + range[1]) / 2;
     }
     db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
     return targetPrice;
