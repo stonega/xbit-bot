@@ -162,8 +162,8 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     if (targetPrice < 0.0005) {
       targetPrice = 0.001;
     }
-    else if (targetPrice > 0.05) {
-      targetPrice = 0.041;
+    else if (targetPrice > 0.005) {
+      targetPrice = 0.0031;
     }
     db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
     return targetPrice;
