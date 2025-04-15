@@ -156,7 +156,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       }
     }
     else {
-      targetPrice = currentApiPrice / 80000;
+      targetPrice = currentApiPrice / 60000;
     }
     targetPrice = (Math.ceil(targetPrice * 100000)) / 100000;
     if (targetPrice < 0.0005) {
