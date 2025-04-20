@@ -85,7 +85,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     const maker = makerWallet.connect(provider);
 
     // Generate random order amount between 0.8 and 1.2
-    const amount = 20 * Math.random() + 30;
+    const amount = 4 * Math.random() + 4;
 
     // Approve token spending for trading
     await trade.approveToken(maker);
@@ -196,7 +196,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     // If buy price is below target, create buy order to push price up
     if (Number(buyPrice) < Number(target)) {
       // Calculate order amount (between 4-8 or based on available sell amount)
-      let amount = 4 + Math.random() * 4;
+      let amount = 20 * Math.random() + 30;
 
       // Adjust amount based on available sell orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && !Number.isNaN(Number(sellAmount))) {
