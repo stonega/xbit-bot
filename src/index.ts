@@ -229,7 +229,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     else {
       // If buy price is above target, create sell order to push price down
       // Calculate order amount (between 4-8 or based on available buy amount)
-      let amount = 4 + Math.random() * 4;
+      let amount = 20 * Math.random() + 30;
 
       // Adjust amount based on available buy orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && !Number.isNaN(Number(buyAmount))) {
