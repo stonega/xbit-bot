@@ -243,6 +243,7 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
 
       // Calculate next sell price (lower than current buy price)
       let nextSellPrice = Math.abs(Number(buyPrice) - priceIncrease);
+      console.log({ nextSellPrice, buyPrice, priceIncrease, target });
 
       // Don't go below target price
       if (target > nextSellPrice) {
