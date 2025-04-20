@@ -149,7 +149,6 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
         targetPrice = previousPrice + 0.00002;
       }
       else {
-        // Limit max change rate to 0.02
         const scaledChangeRate = change * 10;
         const changeRate = scaledChangeRate < -0.05 ? -0.05 : scaledChangeRate > 0.05 ? 0.05 : scaledChangeRate;
         targetPrice = previousPrice * (1 + changeRate);
@@ -169,8 +168,8 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       currentDayPrice = targetPrice;
     }
     const range = [
+      currentDayPrice,
       currentDayPrice * 0.9,
-      currentDayPrice * 1.1,
     ];
     if (targetPrice < range[0]) {
       targetPrice = (range[0] + range[1]) / 2;
