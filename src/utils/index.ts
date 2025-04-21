@@ -176,7 +176,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     else if (targetPrice > range[1]) {
       targetPrice = (range[0] + range[1]) / 2;
     }
-    console.log(`[${pair.symbol}${new Date().toISOString()}]`, { previousApiPrice, currentApiPrice, previousPrice, targetPrice, currentDayPrice });
+    console.log(`[${new Date().toISOString()}]`, { previousApiPrice, currentApiPrice, previousPrice, targetPrice, currentDayPrice });
     db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
     return targetPrice;
   }
