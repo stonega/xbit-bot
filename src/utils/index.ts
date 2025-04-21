@@ -152,7 +152,6 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
         const scaledChangeRate = change * 10;
         const changeRate = scaledChangeRate < -0.05 ? -0.05 : scaledChangeRate > 0.05 ? 0.05 : scaledChangeRate;
         targetPrice = previousPrice * (1 + changeRate);
-        console.log(change * 30, { previousApiPrice, currentApiPrice, previousPrice, targetPrice });
       }
     }
     else {
@@ -168,8 +167,8 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       currentDayPrice = targetPrice;
     }
     const range = [
-      currentDayPrice,
       currentDayPrice * 0.9,
+      currentDayPrice,
     ];
     if (targetPrice < range[0]) {
       targetPrice = (range[0] + range[1]) / 2;
@@ -177,6 +176,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     else if (targetPrice > range[1]) {
       targetPrice = (range[0] + range[1]) / 2;
     }
+    console.log(`[${pair.symbol}${new Date().toISOString()}]`, { previousApiPrice, currentApiPrice, previousPrice, targetPrice, currentDayPrice });
     db.run("UPDATE prices SET price = ? WHERE timestamp = ?", [targetPrice, currentMinute]);
     return targetPrice;
   }
