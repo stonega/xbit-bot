@@ -134,7 +134,7 @@ export class TradeApi extends BaseEvmApi {
 
   async approveToken(signer: Signer): Promise<void> {
     const address = await signer.getAddress();
-    const contract = this.contractAddress === CONTRACT ? address : this.contractAddress;
+    const contract = this.contractAddress;
     if (this.tokenA.address) {
       const isApprove = await super.isApprove({
         contract: this.tokenA.address!,
