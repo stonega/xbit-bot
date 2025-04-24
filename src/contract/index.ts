@@ -6,6 +6,7 @@ import { OrderABI, TradeABI, TradeNativeABI } from "./abi";
 import { BaseEvmApi } from "./api";
 
 const CONTRACT = "0x000000000000000000000000000000000000044d";
+const SPENDER_ADDRESS = "0x6d6F646C617070726F76652f0000000000000000";
 
 export class TradeApi extends BaseEvmApi {
   constructor({
@@ -134,32 +135,32 @@ export class TradeApi extends BaseEvmApi {
 
   async approveToken(signer: Signer): Promise<void> {
     const address = await signer.getAddress();
-    const contract = this.contractAddress;
+    const contract = this.contractAddress === CONTRACT ? SPENDER_ADDRESS : this.contractAddress;
     if (this.tokenA.address) {
       const isApprove = await super.isApprove({
-        contract: this.tokenA.address!,
-        approvedAddress: contract!,
+        contract: this.tokenA.address,
+        approvedAddress: contract,
         address,
         amount: 100000000000n,
       });
       if (!isApprove) {
         await super.approve(signer, {
-          contract: this.tokenA.address!,
-          approvedAddress: contract!,
+          contract: this.tokenA.address,
+          approvedAddress: contract,
         });
       }
     }
     if (this.tokenB.address) {
       const isApprove = await super.isApprove({
-        contract: this.tokenB.address!,
-        approvedAddress: contract!,
+        contract: this.tokenB.address,
+        approvedAddress: contract,
         address,
         amount: 1000000000000n,
       });
       if (!isApprove) {
         await super.approve(signer, {
-          contract: this.tokenB.address!,
-          approvedAddress: contract!,
+          contract: this.tokenB.address,
+          approvedAddress: contract,
         });
       }
     }
