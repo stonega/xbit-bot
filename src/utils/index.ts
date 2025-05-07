@@ -168,7 +168,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
     }
     const range = [
       currentDayPrice * 0.9,
-      currentDayPrice,
+      currentDayPrice * 1.1,
     ];
     if (targetPrice < range[0]) {
       targetPrice = (range[0] + range[1]) / 2;
