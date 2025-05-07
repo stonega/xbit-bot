@@ -149,7 +149,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
         targetPrice = previousPrice + 0.00002;
       }
       else {
-        const scaledChangeRate = change * 10;
+        const scaledChangeRate = change * 12;
         const changeRate = scaledChangeRate < -0.05 ? -0.05 : scaledChangeRate > 0.05 ? 0.05 : scaledChangeRate;
         targetPrice = previousPrice * (1 + changeRate);
       }
