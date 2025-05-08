@@ -107,7 +107,8 @@ db.run(`
   CREATE TABLE IF NOT EXISTS prices (
     timestamp INTEGER PRIMARY KEY,
     apiPrice REAL,
-    price REAL
+    price REAL,
+    range REAL
   );
 `);
 
@@ -166,9 +167,18 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       );
       currentDayPrice = targetPrice;
     }
+    let changeRate = db.query<{ range: number }, [number]>("SELECT range FROM prices WHERE timestamp = ?", [currentDay]).get(currentDay)?.range;
+    if (!changeRate) {
+      const random = Math.random() * 0.1 + 0.5;
+      db.run(
+        "INSERT OR IGNORE INTO prices (timestamp, range) VALUES (?, ?)",
+        [currentDay, random],
+      );
+      changeRate = random;
+    }
     const range = [
-      currentDayPrice * 0.9,
-      currentDayPrice * 1.1,
+      currentDayPrice * (1 - changeRate),
+      currentDayPrice * (1 + changeRate),
     ];
     if (targetPrice < range[0]) {
       targetPrice = (range[0] + range[1]) / 2;
