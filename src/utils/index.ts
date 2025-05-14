@@ -156,7 +156,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       }
     }
     else {
-      targetPrice = latestPrice;
+      targetPrice = Math.max(latestPrice, 0.002);
     }
     targetPrice = (Math.ceil(targetPrice * 100000)) / 100000;
     let currentDayPrice = db.query<{ price: number }, [number]>("SELECT price FROM prices WHERE timestamp = ?", [currentDay]).get(currentDay)?.price;

@@ -108,19 +108,20 @@ export class TradeApi extends BaseEvmApi {
   async cancelOrder(
     signer: Signer,
     { orderId, type }: { orderId: bigint; type: "buy" | "sell" },
+    { nonce }: { nonce: number },
   ): Promise<TransactionResponse> {
     let res;
     if (this.contractAddress === CONTRACT) {
       res = await this.contract
         .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
-        .populateTransaction(this.pairId, orderId);
+        .populateTransaction(this.pairId, orderId, { gasLimit: 500000, nonce });
     }
     else {
       res = await this.contract
         .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
-        .populateTransaction(orderId);
+        .populateTransaction(orderId, { gasLimit: 500000, nonce });
     }
-    await signer.estimateGas(res);
+    // await signer.estimateGas(res);
     return signer.sendTransaction(res);
   }
 
