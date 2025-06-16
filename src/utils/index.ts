@@ -151,7 +151,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       }
       else {
         const scaledChangeRate = change * 12;
-        const changeRate = scaledChangeRate < -0.05 ? -0.05 : scaledChangeRate > 0.05 ? 0.05 : scaledChangeRate;
+        const changeRate = scaledChangeRate < -0.02 ? -0.02 : scaledChangeRate > 0.02 ? 0.02 : scaledChangeRate;
         targetPrice = previousPrice * (1 + changeRate);
       }
     }
@@ -159,6 +159,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       targetPrice = Math.max(latestPrice, 0.002);
     }
     targetPrice = (Math.ceil(targetPrice * 100000)) / 100000;
+    // Save the day price to the database
     let currentDayPrice = db.query<{ price: number }, [number]>("SELECT price FROM prices WHERE timestamp = ?", [currentDay]).get(currentDay)?.price;
     if (!currentDayPrice) {
       db.run(
