@@ -156,7 +156,7 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
       }
     }
     else {
-      targetPrice = Math.max(latestPrice, 0.002);
+      targetPrice = Math.max(latestPrice, 0.0015);
     }
     targetPrice = (Math.ceil(targetPrice * 100000)) / 100000;
     // Save the day price to the database
@@ -166,11 +166,11 @@ export async function getTargetPrice(pair: string, latestPrice: number): Promise
         "INSERT OR IGNORE INTO prices (timestamp, price) VALUES (?, ?)",
         [currentDay, targetPrice],
       );
-      currentDayPrice = targetPrice;
+      currentDayPrice = Math.min(targetPrice, 0.0025);
     }
     let changeRate = db.query<{ range: number }, [number]>("SELECT range FROM prices WHERE timestamp = ?", [currentDay]).get(currentDay)?.range;
     if (!changeRate) {
-      const random = Math.random() * 0.1 + 0.5;
+      const random = Math.random() * 0.1 + 0.05;
       db.run(
         "INSERT OR IGNORE INTO prices (timestamp, range) VALUES (?, ?)",
         [currentDay, random],
