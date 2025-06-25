@@ -1,11 +1,11 @@
 export const PAIRS = [
-  {
-    symbol: "TDEF/USDC",
-    price: "SOL",
-    taker: Bun.env.TBOL_TAKER_PRIVATE_KEY,
-    maker: Bun.env.TBOL_MAKER_PRIVATE_KEY,
-    increase: true,
-  },
+  // {
+  //   symbol: "TDEF/USDC",
+  //   price: "SOL",
+  //   taker: Bun.env.TBOL_TAKER_PRIVATE_KEY,
+  //   maker: Bun.env.TBOL_MAKER_PRIVATE_KEY,
+  //   increase: true,
+  // },
   {
     symbol: "STK/USDC1",
     price: "SOL",
