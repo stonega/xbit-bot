@@ -42,15 +42,15 @@ export async function withRetry<T>(
 /**
  * Get orderbook data from xbit api
  */
-export async function getPrice(pair: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const result = await fetch(`https://test-api.safematrix.io/bool-stake-reward/blockchain/order-books?pair=${pair}`).then(a => a.json());
-  if (!result.data.orderBuyBList) {
+export async function getPrice(marketId: number): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
+  const result = await fetch(`https://testnet.xbit.finance/perp/blockchain/perp/order-books?market_id=${marketId}`).then(a => a.json());
+  if (!result.data.orderLimitBuyBList) {
     console.log({ error: result.msg });
   }
-  const buyPrice = result.data.orderBuyBList[0]?.price;
-  const buyAmount = result.data.orderBuyBList[0]?.qty;
-  const sellPrice = result.data.orderSellBList[result.data.orderSellBList.length - 1]?.price;
-  const sellAmount = result.data.orderSellBList[result.data.orderSellBList.length - 1]?.qty;
+  const buyPrice = result.data.orderLimitBuyBList[0]?.price;
+  const buyAmount = result.data.orderLimitBuyBList[0]?.qty;
+  const sellPrice = result.data.orderLimitSellBList[result.data.orderLimitSellBList.length - 1]?.price;
+  const sellAmount = result.data.orderLimitSellBList[result.data.orderLimitSellBList.length - 1]?.qty;
   return {
     buyPrice,
     buyAmount,
@@ -99,35 +99,13 @@ export function getHeaders(timestamp: string, method: string, requestPath: strin
 /**
  * Fetch price from okx api
  */
-let lastPrice = 0;
-export async function getTargetPrice(pair: string, increase = true): Promise<number> {
+export async function getTargetPrice(pair: string): Promise<number> {
   const timestamp = new Date().toISOString();
   const baseUrl = "https://www.okx.com";
   const queryString = `instId=${pair}-USDT&limit=1`;
   const requestPath = "/api/v5/market/history-index-candles";
   const headers = getHeaders(timestamp, "GET", requestPath, queryString);
   const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
-  let price = Number(data.data[0][1]);
-
-  // To avoid the price being too high
-  if (price > 100)
-    price = price / 50;
-
-  // Add 0.2 to price per day based on 2025/02/14
-  if (increase) {
-    const startDate = new Date("2025-02-14");
-    const currentDate = new Date();
-    const diffInDays = Math.floor((currentDate.getTime() - startDate.getTime()) / (1000 * 3600 * 5.8));
-    price += diffInDays * 0.05;
-  }
-
-  // Force update price if price unchanged
-  if (Math.abs(price - lastPrice) > 0.005) {
-    lastPrice = price;
-  }
-  else {
-    lastPrice = price;
-    price += (price > lastPrice ? 0.005 : -0.005);
-  }
-  return price;
+  const price = Number(data.data[0][1]);
+  return Number(price.toFixed(4));
 }

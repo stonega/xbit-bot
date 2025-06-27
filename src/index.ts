@@ -1,9 +1,9 @@
 import { formatUnits, JsonRpcProvider, parseEther, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY } from "./config";
-import { TradeApi } from "./contract";
 import { ultraLiquidTestnet } from "./contract/network";
-import { getPairContract, getPrice, getTargetPrice } from "./utils";
+import { PerpApi } from "./contract/perpApi";
+import { getPrice, getTargetPrice } from "./utils";
 
 /**
  * Generates a random price increase for taker orders
@@ -11,7 +11,7 @@ import { getPairContract, getPrice, getTargetPrice } from "./utils";
  * @returns {number} Price increase percentage
  */
 function getPriceTakerInscrease(): number {
-  return Math.max(Math.random() * 0.02, 0.01);
+  return Number(Math.max(Math.random() * 0.02, 0.01).toFixed(4));
 }
 
 /**
@@ -20,7 +20,7 @@ function getPriceTakerInscrease(): number {
  * @returns {number} Price increase percentage
  */
 function getPriceMakerInscrease(): number {
-  return Math.max(Math.random() * 0.04, 0.02);
+  return Number(Math.max(Math.random() * 0.04, 0.02).toFixed(4));
 }
 
 /**
@@ -29,29 +29,35 @@ function getPriceMakerInscrease(): number {
  * @param {"maker" | "taker"} role - Trading role (maker creates liquidity, taker takes liquidity)
  * @returns {Promise<void>}
  */
-async function main(pair: { price: string; symbol: string; trade?: string; taker?: string; maker?: string; pairId?: string; increase?: boolean }, role: "maker" | "taker"): Promise<void> {
+async function main(
+  pair: {
+    price: string;
+    symbol: string;
+    makerPrivateKey?: string;
+    takerPrivateKey?: string;
+    takerAccount?: string;
+    makerAccount?: string;
+    marketId?: number;
+    increase?: boolean;
+  },
+  role: "maker" | "taker",
+): Promise<void> {
   // Get network configuration
   const currentNetwork = ultraLiquidTestnet;
 
   // Find token information from pair symbol
-  const tokenA = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[0])!;
-  const tokenB = Object.values(currentNetwork.tokens).find(t => t.symbol.toUpperCase() === pair.symbol.split("/")[1])!;
+  const collateralToken = currentNetwork.tokens.usdt;
 
-  // Get trading contract address if not already set
-  if (!pair.trade) {
-    const pairInfo = await getPairContract(pair.symbol);
-    pair.trade = pairInfo.address;
-    pair.pairId = pairInfo.pairId;
-    console.log(`[${pair.symbol}${new Date().toISOString()}] Set contract ${pair.trade} pairId ${pair.pairId}`);
+  if (!pair.marketId) {
+    console.log(`[${pair.symbol}${new Date().toISOString()}] No marketId found`);
+    return;
   }
 
   // Initialize trading API with contract and token information
-  const trade = new TradeApi({
+  const perpApi = new PerpApi({
     rpc: currentNetwork.rpc,
-    contract: pair.trade,
-    pairId: pair.pairId,
-    tokenA,
-    tokenB,
+    marketId: pair.marketId,
+    token: collateralToken,
   });
 
   // Setup provider with timeout
@@ -60,10 +66,10 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   provider._getConnection().timeout = 10000;
 
   // Get current market prices and order book information
-  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
+  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.marketId);
 
   // Get target price for this trading pair
-  const target = await getTargetPrice(pair.price, pair.increase);
+  const target = await getTargetPrice(pair.price);
   if (Number.isNaN(target)) {
     return; // Exit if target price is invalid
   }
@@ -71,33 +77,39 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   // Log current market conditions for debugging
   console.debug(`[${pair.symbol}${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
 
+  const account = role === "maker" ? pair.makerAccount : pair.takerAccount;
+  const privateKey = role === "maker" ? pair.makerPrivateKey : pair.takerPrivateKey;
+
+  if (!account) {
+    console.log(`[${pair.symbol}${new Date().toISOString()}] No ${role} account found`);
+    return;
+  }
+  if (!privateKey) {
+    console.log(`[${pair.symbol}${new Date().toISOString()}] No private key found for ${role}`);
+    return;
+  }
+
+  const wallet = new Wallet(privateKey, provider);
+  console.log(`[${pair.symbol}${new Date().toISOString()}] ${role} address: ${wallet.address}, sub-account: ${account}`);
   // === MAKER STRATEGY ===
   // Makers create liquidity by placing orders on both sides of the order book
   if (role === "maker") {
-    // Check if maker wallet is configured
-    if (!pair.maker) {
-      console.log(`[${pair.symbol}${new Date().toISOString()}] No maker wallet found`);
-    }
-
-    // Initialize maker wallet
-    const makerWallet = new Wallet(pair.maker!);
-    console.log(`[${pair.symbol}${new Date().toISOString()}] Maker address: ${makerWallet.address}`);
-    const maker = makerWallet.connect(provider);
-
     // Generate random order amount between 0.8 and 1.2
     const amount = 0.4 * Math.random() + 0.8;
 
-    // Approve token spending for trading
-    await trade.approveToken(maker);
-
     // If no buy orders exist in the order book, create one at target price
     if (!buyPrice) {
-      const pay = trade.calcUsdt(target.toString(), amount.toString());
-      await trade.createBuyOrder(maker, {
-        amount: BigInt(parseUnits("10", tokenA.decimals)),
-        pay,
+      await perpApi.placePerpOrder(wallet, {
+        subaccount: account,
+        isLong: true,
+        size: parseUnits(amount.toString(), 18),
+        price: parseUnits(target.toString(), 6),
+        orderType: 0, // Limit order
+        leverage: 10,
+        takeProfit: 0n,
+        stopLoss: 0n,
       });
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${target} 10 ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${target} ${amount}`);
       await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid rate limits
       return;
     }
@@ -115,26 +127,34 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     if (Number(buyPrice) < Number(target)) {
       // Calculate a new buy price slightly below current buy price
       const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
-      const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
 
       // Create buy order
-      await trade.createBuyOrder(maker, {
-        amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
-        pay,
+      await perpApi.placePerpOrder(wallet, {
+        subaccount: account,
+        isLong: true,
+        size: parseUnits(amount.toString(), 18),
+        price: parseUnits(nextBuyPrice.toString(), 6),
+        orderType: 0,
+        leverage: 10,
+        takeProfit: 0n,
+        stopLoss: 0n,
       });
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount}`);
     }
     else {
       // If buy price is above target, create sell order
-      const price = nextSellPrice.toString();
-      const receive = trade.calcUsdt(price, amount.toString());
-
       // Create sell order
-      await trade.createSellOrder(maker, {
-        amount: BigInt(parseEther(amount.toString())),
-        receive,
+      await perpApi.placePerpOrder(wallet, {
+        subaccount: account,
+        isLong: false,
+        size: parseUnits(amount.toString(), 18),
+        price: parseUnits(nextSellPrice.toString(), 6),
+        orderType: 0,
+        leverage: 10,
+        takeProfit: 0n,
+        stopLoss: 0n,
       });
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice} ${amount}`);
 
       await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid rate limits
     }
@@ -143,13 +163,18 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
     if (!sellPrice) {
       // Create sell order at a price higher than current buy price
       const price = Number(buyPrice) + getPriceMakerInscrease() * 2;
-      const receive = trade.calcUsdt(price.toString(), amount.toString());
-
-      await trade.createSellOrder(maker, {
-        amount: BigInt(parseUnits("10", tokenA.decimals)),
-        receive,
+      await perpApi.placePerpOrder(wallet, {
+        subaccount: account,
+        isLong: false,
+        size: parseUnits("10", 18),
+        price: parseUnits(price.toString(), 6),
+        orderType: 0,
+        leverage: 10,
+        takeProfit: 0n,
+        stopLoss: 0n,
       });
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} 10 ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} 10`);
       await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid rate limits
     }
   }
@@ -157,19 +182,6 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
   // === TAKER STRATEGY ===
   // Takers consume liquidity by taking existing orders to move price toward target
   if (role === "taker") {
-    // Check if taker wallet is configured
-    if (!pair.taker) {
-      console.log(`[${pair.symbol}${new Date().toISOString()}] No taker wallet`);
-    }
-
-    // Initialize taker wallet
-    const takerWallet = new Wallet(pair.taker!);
-    const taker = takerWallet.connect(provider);
-    console.log(`[${pair.symbol}${new Date().toISOString()}] Taker address: ${takerWallet.address}`);
-
-    // Approve token spending for trading
-    await trade.approveToken(taker);
-
     // Calculate price adjustment
     const priceIncrease = getPriceTakerInscrease();
 
@@ -183,13 +195,18 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
       console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
       const buyAmount = 0.5;
       const price = buyPrice.toString();
-      const receive = trade.calcUsdt(price, buyAmount.toString());
 
-      await trade.createSellOrder(taker, {
-        amount: BigInt(parseUnits(buyAmount.toString(), tokenA.decimals)),
-        receive,
+      await perpApi.placePerpOrder(wallet, {
+        subaccount: account,
+        isLong: false,
+        size: parseUnits(buyAmount.toString(), 18),
+        price: parseUnits(price.toString(), 6),
+        orderType: 0,
+        leverage: 10,
+        takeProfit: 0n,
+        stopLoss: 0n,
       });
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount}`);
       return;
     }
 
@@ -216,15 +233,21 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
         nextBuyPrice = target;
       }
 
-      // Calculate payment amount
-      const pay = trade.calcUsdt(nextBuyPrice.toString(), amount.toString());
+      const takeProfitPrice = parseUnits(target.toString(), 6);
+      const stopLossPrice = parseUnits((nextBuyPrice * 0.99).toFixed(4), 6);
 
       // Create buy order
-      await trade.createBuyOrder(taker, {
-        amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
-        pay,
+      await perpApi.placePerpOrder(wallet, {
+        subaccount: account,
+        isLong: true,
+        size: parseUnits(amount.toString(), 18),
+        price: parseUnits(nextBuyPrice.toString(), 6),
+        orderType: 0,
+        leverage: 10,
+        takeProfit: takeProfitPrice,
+        stopLoss: stopLossPrice,
       });
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount} ${tokenA.symbol}, ${formatUnits(pay, tokenB.decimals)} ${tokenB.decimals}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount}`);
     }
     else {
       // If buy price is above target, create sell order to push price down
@@ -249,16 +272,21 @@ async function main(pair: { price: string; symbol: string; trade?: string; taker
         nextSellPrice = target;
       }
 
-      // Calculate expected receive amount
-      const price = nextSellPrice.toString();
-      const receive = trade.calcUsdt(price, amount.toString());
+      const takeProfitPrice = parseUnits((nextSellPrice * 0.95).toFixed(4), 6);
+      const stopLossPrice = parseUnits((nextSellPrice * 1.01).toFixed(4), 6);
 
       // Create sell order
-      await trade.createSellOrder(taker, {
-        amount: BigInt(parseUnits(amount.toString(), tokenA.decimals)),
-        receive,
+      await perpApi.placePerpOrder(wallet, {
+        subaccount: account,
+        isLong: false,
+        size: parseUnits(amount.toString(), 18),
+        price: parseUnits(nextSellPrice.toFixed(4), 6),
+        orderType: 0,
+        leverage: 10,
+        takeProfit: takeProfitPrice,
+        stopLoss: stopLossPrice,
       });
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} ${amount} ${tokenA.symbol}, ${formatUnits(receive, tokenB.decimals)} ${tokenB.symbol}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice} ${amount}`);
     }
   }
 }

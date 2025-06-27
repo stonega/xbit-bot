@@ -5,7 +5,7 @@ import { withRetry } from "../utils";
 import { OrderABI, TradeABI, TradeNativeABI } from "./abi";
 import { BaseEvmApi } from "./api";
 
-const CONTRACT = "0x000000000000000000000000000000000000044d";
+const CONTRACT = "0x000000000000000000000000000000000000044E";
 const SPENDER_ADDRESS = "0x6d6F646C617070726F76652f0000000000000000";
 
 export class TradeApi extends BaseEvmApi {

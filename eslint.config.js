@@ -12,6 +12,6 @@ export default antfu(
   },
   {
     files: ["**/*.ts"],
-    rules: { "no-console": "off" },
+    rules: { "no-console": "off", "ts/explicit-function-return-type": "off" },
   },
 );
