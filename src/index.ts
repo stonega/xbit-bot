@@ -91,9 +91,26 @@ async function main(
 
   const wallet = new Wallet(privateKey, provider);
   console.log(`[${pair.symbol}${new Date().toISOString()}] ${role} address: ${wallet.address}, sub-account: ${account}`);
+
+  const position = await perpApi.userPerpPositions(account);
   // === MAKER STRATEGY ===
   // Makers create liquidity by placing orders on both sides of the order book
   if (role === "maker") {
+    // Cancel all active orders before placing new ones
+    const activeOrders = await perpApi.userActiveOrders(account);
+    if (activeOrders.length > 0) {
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
+      const cancelPromises = activeOrders.map(order =>
+        perpApi.cancelOrder(wallet, {
+          subaccount: account,
+          orderId: order.order_id,
+        }),
+      );
+      await Promise.all(cancelPromises);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled all active orders.`);
+      // Wait a bit after canceling before placing new orders
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
     // Generate random order amount between 0.8 and 1.2
     const amount = 0.4 * Math.random() + 0.8;
 
@@ -182,6 +199,52 @@ async function main(
   // === TAKER STRATEGY ===
   // Takers consume liquidity by taking existing orders to move price toward target
   if (role === "taker") {
+    if (position && position.base_asset_amount > 0n) {
+      const positionSize = Number(formatUnits(position.base_asset_amount, 18));
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Current position size: ${positionSize}, isLong: ${position.is_long}`);
+
+      const MAX_POSITION_SIZE = TAKER_CAPACITY;
+
+      if (positionSize > MAX_POSITION_SIZE) {
+        console.log(`[${pair.symbol}${new Date().toISOString()}] Position (${positionSize}) exceeds max size (${MAX_POSITION_SIZE}). Reducing position.`);
+
+        // We want to reduce the position, so we place an order in the opposite direction.
+        const reduceAmount = positionSize / 2;
+
+        if (position.is_long) {
+          // To reduce a long position, we sell.
+          const nextSellPrice = Math.abs(Number(buyPrice) - getPriceTakerInscrease());
+          await perpApi.placePerpOrder(wallet, {
+            subaccount: account,
+            isLong: false,
+            size: parseUnits(reduceAmount.toFixed(4), 18),
+            price: parseUnits(nextSellPrice.toFixed(4), 6),
+            orderType: 0,
+            leverage: 10,
+            takeProfit: 0n,
+            stopLoss: 0n,
+          });
+          console.log(`[${pair.symbol}${new Date().toISOString()}] Reducing long position. Sell order created, price ${nextSellPrice} ${reduceAmount}`);
+        }
+        else {
+          // To reduce a short position, we buy.
+          const nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + getPriceTakerInscrease());
+          await perpApi.placePerpOrder(wallet, {
+            subaccount: account,
+            isLong: true,
+            size: parseUnits(reduceAmount.toFixed(4), 18),
+            price: parseUnits(nextBuyPrice.toFixed(4), 6),
+            orderType: 0,
+            leverage: 10,
+            takeProfit: 0n,
+            stopLoss: 0n,
+          });
+          console.log(`[${pair.symbol}${new Date().toISOString()}] Reducing short position. Buy order created, price ${nextBuyPrice} ${reduceAmount}`);
+        }
+
+        return; // End taker's turn.
+      }
+    }
     // Calculate price adjustment
     const priceIncrease = getPriceTakerInscrease();
 
