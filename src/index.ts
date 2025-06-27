@@ -296,8 +296,8 @@ async function main(
         nextBuyPrice = target;
       }
 
-      const takeProfitPrice = parseUnits(target.toString(), 6);
-      const stopLossPrice = parseUnits((nextBuyPrice * 0.99).toFixed(4), 6);
+      const takeProfitPrice = parseUnits((nextBuyPrice * 1.05).toFixed(4), 6);
+      const stopLossPrice = parseUnits((nextBuyPrice * 0.95).toFixed(4), 6);
 
       // Create buy order
       await perpApi.placePerpOrder(wallet, {
