@@ -99,17 +99,26 @@ async function main(
     // Cancel all active orders before placing new ones
     const activeOrders = await perpApi.userActiveOrders(account);
     if (activeOrders.length > 0) {
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
-      const cancelPromises = activeOrders.map(order =>
-        perpApi.cancelOrder(wallet, {
-          subaccount: account,
-          orderId: order.order_id,
-        }),
-      );
-      await Promise.all(cancelPromises);
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled all active orders.`);
-      // Wait a bit after canceling before placing new orders
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const ordersToCancel = activeOrders.filter((order) => {
+        const orderPrice = Number(formatUnits(order.price, 6));
+        const priceDifference = Math.abs(orderPrice - target);
+        const percentageDifference = priceDifference / target;
+        return percentageDifference > 0.05; // 5%
+      });
+
+      if (ordersToCancel.length > 0) {
+        console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${ordersToCancel.length} active orders to cancel.`);
+        const cancelPromises = ordersToCancel.map(order =>
+          perpApi.cancelOrder(wallet, {
+            subaccount: account,
+            orderId: order.order_id,
+          }),
+        );
+        await Promise.all(cancelPromises);
+        console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled ${ordersToCancel.length} orders.`);
+        // Wait a bit after canceling before placing new orders
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
     // Generate random order amount between 0.8 and 1.2
     const amount = 0.4 * Math.random() + 0.8;
@@ -296,8 +305,8 @@ async function main(
         nextBuyPrice = target;
       }
 
-      const takeProfitPrice = parseUnits((nextBuyPrice * 1.05).toFixed(4), 6);
-      const stopLossPrice = parseUnits((nextBuyPrice * 0.95).toFixed(4), 6);
+      const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(4), 6);
+      const stopLossPrice = parseUnits((nextBuyPrice * 0.98).toFixed(4), 6);
 
       // Create buy order
       await perpApi.placePerpOrder(wallet, {
@@ -335,8 +344,8 @@ async function main(
         nextSellPrice = target;
       }
 
-      const takeProfitPrice = parseUnits((nextSellPrice * 0.95).toFixed(4), 6);
-      const stopLossPrice = parseUnits((nextSellPrice * 1.05).toFixed(4), 6);
+      const takeProfitPrice = parseUnits((nextSellPrice * 0.98).toFixed(4), 6);
+      const stopLossPrice = parseUnits((nextSellPrice * 1.02).toFixed(4), 6);
 
       // Create sell order
       await perpApi.placePerpOrder(wallet, {
