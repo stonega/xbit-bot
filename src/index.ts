@@ -98,27 +98,15 @@ async function main(
   if (role === "maker") {
     // Cancel all active orders before placing new ones
     const activeOrders = await perpApi.userActiveOrders(account);
-    if (activeOrders.length > 0) {
-      const ordersToCancel = activeOrders.filter((order) => {
-        const orderPrice = Number(formatUnits(order.price, 6));
-        const priceDifference = Math.abs(orderPrice - target);
-        const percentageDifference = priceDifference / target;
-        return percentageDifference > 0.05; // 5%
+    if (activeOrders.length > 20) {
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
+      await perpApi.cancelOrder(wallet, {
+        subaccount: account,
+        orderId: activeOrders[0].order_id,
       });
-
-      if (ordersToCancel.length > 0) {
-        console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${ordersToCancel.length} active orders to cancel.`);
-        const cancelPromises = ordersToCancel.map(order =>
-          perpApi.cancelOrder(wallet, {
-            subaccount: account,
-            orderId: order.order_id,
-          }),
-        );
-        await Promise.all(cancelPromises);
-        console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled ${ordersToCancel.length} orders.`);
-        // Wait a bit after canceling before placing new orders
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled 1 order.`);
+      // Wait a bit after canceling before placing new orders
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
     // Generate random order amount between 0.8 and 1.2
     const amount = 0.4 * Math.random() + 0.8;
@@ -208,6 +196,18 @@ async function main(
   // === TAKER STRATEGY ===
   // Takers consume liquidity by taking existing orders to move price toward target
   if (role === "taker") {
+    // Cancel all active orders before placing new ones
+    const activeOrders = await perpApi.userActiveOrders(account);
+    if (activeOrders.length > 20) {
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
+      await perpApi.cancelOrder(wallet, {
+        subaccount: account,
+        orderId: activeOrders[0].order_id,
+      });
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled 1 order.`);
+      // Wait a bit after canceling before placing new orders
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
     if (position && position.base_asset_amount > 0n) {
       const positionSize = Number(formatUnits(position.base_asset_amount, 18));
       console.log(`[${pair.symbol}${new Date().toISOString()}] Current position size: ${positionSize}, isLong: ${position.is_long}`);
