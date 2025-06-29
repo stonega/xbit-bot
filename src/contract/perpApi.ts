@@ -164,7 +164,7 @@ export class PerpApi extends BaseEvmApi {
   }
 
   async closePosition(
-    provider: BrowserProvider,
+    signer: Signer,
     {
       subaccount,
       price,
@@ -178,7 +178,6 @@ export class PerpApi extends BaseEvmApi {
     const res = await this.contract
       .getFunction("closePosition")
       .populateTransaction(subaccount, this.marketId, price, slippage);
-    const signer = await provider.getSigner();
     // const limit = await signer.estimateGas(res);
     return signer.sendTransaction({ ...res, gasLimit: 1000000n });
   }
