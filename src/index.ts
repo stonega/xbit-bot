@@ -3,7 +3,7 @@ import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY } from "./config";
 import { ultraLiquidTestnet } from "./contract/network";
 import { PerpApi } from "./contract/perpApi";
-import { getPrice, getTargetPrice } from "./utils";
+import { getPrice, getTargetPrice, withRetry } from "./utils";
 
 /**
  * Generates a random price increase for taker orders
@@ -99,11 +99,13 @@ async function main(
 
     const MAX_POSITION_SIZE = TAKER_CAPACITY;
     if (positionSize > MAX_POSITION_SIZE / 2) {
-      await perpApi.closePosition(wallet, {
-        subaccount: account,
-        price: 0n,
-        slippage: 20n,
-      });
+      await withRetry(() =>
+        perpApi.closePosition(wallet, {
+          subaccount: account,
+          price: 0n,
+          slippage: 20n,
+        }),
+      );
       await new Promise(resolve => setTimeout(resolve, 1000));
       console.log(`[${pair.symbol}${new Date().toISOString()}] Closed position.`);
     }
@@ -115,10 +117,12 @@ async function main(
     const activeOrders = await perpApi.userActiveOrders(account);
     if (activeOrders.length > 20) {
       console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
-      await perpApi.cancelOrder(wallet, {
-        subaccount: account,
-        orderId: activeOrders[activeOrders.length - 1].order_id,
-      });
+      await withRetry(() =>
+        perpApi.cancelOrder(wallet, {
+          subaccount: account,
+          orderId: activeOrders[activeOrders.length - 1].order_id,
+        }),
+      );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled 1 order.`);
       // Wait a bit after canceling before placing new orders
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -128,16 +132,18 @@ async function main(
 
     // If no buy orders exist in the order book, create one at target price
     if (!buyPrice) {
-      await perpApi.placePerpOrder(wallet, {
-        subaccount: account,
-        isLong: true,
-        size: parseUnits(amount.toString(), 18),
-        price: parseUnits(target.toString(), 6),
-        orderType: 0, // Limit order
-        leverage: 10,
-        takeProfit: 0n,
-        stopLoss: 0n,
-      });
+      await withRetry(() =>
+        perpApi.placePerpOrder(wallet, {
+          subaccount: account,
+          isLong: true,
+          size: parseUnits(amount.toString(), 18),
+          price: parseUnits(target.toString(), 6),
+          orderType: 0, // Limit order
+          leverage: 10,
+          takeProfit: 0n,
+          stopLoss: 0n,
+        }),
+      );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${target} ${amount}`);
       await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid rate limits
       return;
@@ -158,31 +164,35 @@ async function main(
       const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
 
       // Create buy order
-      await perpApi.placePerpOrder(wallet, {
-        subaccount: account,
-        isLong: true,
-        size: parseUnits(amount.toString(), 18),
-        price: parseUnits(nextBuyPrice.toString(), 6),
-        orderType: 0,
-        leverage: 10,
-        takeProfit: 0n,
-        stopLoss: 0n,
-      });
+      await withRetry(() =>
+        perpApi.placePerpOrder(wallet, {
+          subaccount: account,
+          isLong: true,
+          size: parseUnits(amount.toString(), 18),
+          price: parseUnits(nextBuyPrice.toString(), 6),
+          orderType: 0,
+          leverage: 10,
+          takeProfit: 0n,
+          stopLoss: 0n,
+        }),
+      );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount}`);
     }
     else {
       // If buy price is above target, create sell order
       // Create sell order
-      await perpApi.placePerpOrder(wallet, {
-        subaccount: account,
-        isLong: false,
-        size: parseUnits(amount.toString(), 18),
-        price: parseUnits(nextSellPrice.toString(), 6),
-        orderType: 0,
-        leverage: 10,
-        takeProfit: 0n,
-        stopLoss: 0n,
-      });
+      await withRetry(() =>
+        perpApi.placePerpOrder(wallet, {
+          subaccount: account,
+          isLong: false,
+          size: parseUnits(amount.toString(), 18),
+          price: parseUnits(nextSellPrice.toString(), 6),
+          orderType: 0,
+          leverage: 10,
+          takeProfit: 0n,
+          stopLoss: 0n,
+        }),
+      );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice} ${amount}`);
 
       await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid rate limits
@@ -192,16 +202,18 @@ async function main(
     if (!sellPrice) {
       // Create sell order at a price higher than current buy price
       const price = Number(buyPrice) + getPriceMakerInscrease() * 2;
-      await perpApi.placePerpOrder(wallet, {
-        subaccount: account,
-        isLong: false,
-        size: parseUnits("10", 18),
-        price: parseUnits(price.toString(), 6),
-        orderType: 0,
-        leverage: 10,
-        takeProfit: 0n,
-        stopLoss: 0n,
-      });
+      await withRetry(() =>
+        perpApi.placePerpOrder(wallet, {
+          subaccount: account,
+          isLong: false,
+          size: parseUnits("10", 18),
+          price: parseUnits(price.toString(), 6),
+          orderType: 0,
+          leverage: 10,
+          takeProfit: 0n,
+          stopLoss: 0n,
+        }),
+      );
 
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} 10`);
       await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid rate limits
@@ -215,10 +227,12 @@ async function main(
     const activeOrders = await perpApi.userActiveOrders(account);
     if (activeOrders.length > 20) {
       console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
-      await perpApi.cancelOrder(wallet, {
-        subaccount: account,
-        orderId: activeOrders[activeOrders.length - 1].order_id,
-      });
+      await withRetry(() =>
+        perpApi.cancelOrder(wallet, {
+          subaccount: account,
+          orderId: activeOrders[activeOrders.length - 1].order_id,
+        }),
+      );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled 1 order.`);
       // Wait a bit after canceling before placing new orders
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -237,16 +251,18 @@ async function main(
       const buyAmount = 1.5;
       const price = Number(buyPrice).toFixed(4);
 
-      await perpApi.placePerpOrder(wallet, {
-        subaccount: account,
-        isLong: false,
-        size: parseUnits(buyAmount.toString(), 18),
-        price: parseUnits(price.toString(), 6),
-        orderType: 0,
-        leverage: 10,
-        takeProfit: 0n,
-        stopLoss: 0n,
-      });
+      await withRetry(() =>
+        perpApi.placePerpOrder(wallet, {
+          subaccount: account,
+          isLong: false,
+          size: parseUnits(buyAmount.toString(), 18),
+          price: parseUnits(price.toString(), 6),
+          orderType: 0,
+          leverage: 10,
+          takeProfit: 0n,
+          stopLoss: 0n,
+        }),
+      );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount}`);
       return;
     }
@@ -278,16 +294,18 @@ async function main(
       const stopLossPrice = parseUnits((nextBuyPrice * 0.98).toFixed(4), 6);
 
       // Create buy order
-      await perpApi.placePerpOrder(wallet, {
-        subaccount: account,
-        isLong: true,
-        size: parseUnits(amount.toString(), 18),
-        price: parseUnits(nextBuyPrice.toFixed(4), 6),
-        orderType: 0,
-        leverage: 10,
-        takeProfit: takeProfitPrice,
-        stopLoss: stopLossPrice,
-      });
+      await withRetry(() =>
+        perpApi.placePerpOrder(wallet, {
+          subaccount: account,
+          isLong: true,
+          size: parseUnits(amount.toString(), 18),
+          price: parseUnits(nextBuyPrice.toFixed(4), 6),
+          orderType: 0,
+          leverage: 10,
+          takeProfit: takeProfitPrice,
+          stopLoss: stopLossPrice,
+        }),
+      );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount}`);
     }
     else {
@@ -317,16 +335,18 @@ async function main(
       const stopLossPrice = parseUnits((nextSellPrice * 1.02).toFixed(4), 6);
 
       // Create sell order
-      await perpApi.placePerpOrder(wallet, {
-        subaccount: account,
-        isLong: false,
-        size: parseUnits(amount.toString(), 18),
-        price: parseUnits(nextSellPrice.toFixed(4), 6),
-        orderType: 0,
-        leverage: 10,
-        takeProfit: takeProfitPrice,
-        stopLoss: stopLossPrice,
-      });
+      await withRetry(() =>
+        perpApi.placePerpOrder(wallet, {
+          subaccount: account,
+          isLong: false,
+          size: parseUnits(amount.toString(), 18),
+          price: parseUnits(nextSellPrice.toFixed(4), 6),
+          orderType: 0,
+          leverage: 10,
+          takeProfit: takeProfitPrice,
+          stopLoss: stopLossPrice,
+        }),
+      );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice} ${amount}`);
     }
   }

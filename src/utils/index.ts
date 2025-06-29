@@ -47,8 +47,8 @@ export async function getPrice(marketId: number): Promise<{ buyPrice: string; se
   if (!result.data.orderLimitBuyBList) {
     console.log({ error: result.msg });
   }
-  const buyList = [...result.data.orderLimitBuyBList, ...result.data.orderMarketBuyBList].sort((a: any, b: any) => a.price - b.price);
-  const sellList = [...result.data.orderLimitSellBList, ...result.data.orderMarketSellBList].sort((a: any, b: any) => b.price - a.price);
+  const buyList = [...result.data.orderLimitBuyBList, ...result.data.orderMarketBuyBList].sort((a: any, b: any) => b.price - a.price);
+  const sellList = [...result.data.orderLimitSellBList, ...result.data.orderMarketSellBList].sort((a: any, b: any) => a.price - b.price);
   const buyPrice = buyList[0]?.price;
   const buyAmount = buyList[0]?.qty;
   const sellPrice = sellList[0]?.price;
