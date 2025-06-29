@@ -98,11 +98,11 @@ async function main(
     console.log(`[${pair.symbol}${new Date().toISOString()}] Current position size: ${positionSize}, isLong: ${position.is_long}`);
 
     const MAX_POSITION_SIZE = TAKER_CAPACITY;
-    if (positionSize > MAX_POSITION_SIZE) {
+    if (positionSize > MAX_POSITION_SIZE / 2) {
       await perpApi.closePosition(wallet, {
         subaccount: account,
         price: 0n,
-        slippage: 10n,
+        slippage: 20n,
       });
       await new Promise(resolve => setTimeout(resolve, 1000));
       console.log(`[${pair.symbol}${new Date().toISOString()}] Closed position.`);
