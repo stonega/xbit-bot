@@ -234,8 +234,8 @@ async function main(
     // If current price is very close to target, create a small sell order to maintain price
     if (Math.abs(Number(buyPrice) - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
-      const buyAmount = 0.5;
-      const price = buyPrice.toString();
+      const buyAmount = 1.5;
+      const price = Number(buyPrice).toFixed(4);
 
       await perpApi.placePerpOrder(wallet, {
         subaccount: account,
@@ -282,7 +282,7 @@ async function main(
         subaccount: account,
         isLong: true,
         size: parseUnits(amount.toString(), 18),
-        price: parseUnits(nextBuyPrice.toString(), 6),
+        price: parseUnits(nextBuyPrice.toFixed(4), 6),
         orderType: 0,
         leverage: 10,
         takeProfit: takeProfitPrice,
