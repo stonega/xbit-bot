@@ -117,7 +117,7 @@ async function main(
       console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
       await perpApi.cancelOrder(wallet, {
         subaccount: account,
-        orderId: activeOrders[0].order_id,
+        orderId: activeOrders[activeOrders.length - 1].order_id,
       });
       console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled 1 order.`);
       // Wait a bit after canceling before placing new orders
@@ -217,7 +217,7 @@ async function main(
       console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
       await perpApi.cancelOrder(wallet, {
         subaccount: account,
-        orderId: activeOrders[0].order_id,
+        orderId: activeOrders[activeOrders.length - 1].order_id,
       });
       console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled 1 order.`);
       // Wait a bit after canceling before placing new orders
