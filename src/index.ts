@@ -230,7 +230,44 @@ async function main(
     const priceIncrease = getPriceTakerInscrease();
 
     // Exit if no buy orders exist
-    if (!buyPrice) {
+    if (!buyPrice && sellPrice) {
+      let amount = 8 + Math.random() * 4;
+
+      // Adjust amount based on available sell orders, but cap at TAKER_CAPACITY
+      if (priceIncrease > 0 && !Number.isNaN(Number(sellAmount))) {
+        if (Number(sellAmount) < TAKER_CAPACITY) {
+          amount = Math.max(Number(sellAmount), amount);
+        }
+        else {
+          amount = TAKER_CAPACITY;
+        }
+      }
+
+      // Calculate next buy price (higher than current sell price)
+      let nextBuyPrice = Math.abs(Number(sellPrice) + priceIncrease);
+
+      // Don't exceed target price
+      if (target < nextBuyPrice) {
+        nextBuyPrice = target + 0.0001;
+      }
+
+      const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(4), 6);
+      const stopLossPrice = parseUnits((nextBuyPrice * 0.98).toFixed(4), 6);
+
+      // Create buy order
+      await withRetry(() =>
+        perpApi.placePerpOrder(wallet, {
+          subaccount: account,
+          isLong: true,
+          size: parseUnits(amount.toString(), 18),
+          price: parseUnits(nextBuyPrice.toFixed(4), 6),
+          orderType: 0,
+          leverage: 10,
+          takeProfit: takeProfitPrice,
+          stopLoss: stopLossPrice,
+        }),
+      );
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount}`);
       return;
     }
 
@@ -257,7 +294,7 @@ async function main(
     }
 
     // If buy price is below target, create buy order to push price up
-    if (Number(buyPrice) < Number(target)) {
+    if (Number(buyPrice) < Number(target) || !buyPrice) {
       // Calculate order amount (between 4-8 or based on available sell amount)
       let amount = 8 + Math.random() * 4;
 
