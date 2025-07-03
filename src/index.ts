@@ -141,7 +141,7 @@ async function main(
           subaccount: account,
           isLong: true,
           size: parseUnits(amount.toString(), 18),
-          price: parseUnits(target.toString(), 6),
+          price: parseUnits((target - 0.0001).toFixed(6), 6),
           orderType: 0, // Limit order
           leverage: 10,
           takeProfit: 0n,
