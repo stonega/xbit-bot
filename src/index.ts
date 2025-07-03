@@ -291,7 +291,7 @@ async function main(
 
       // Don't exceed target price
       if (target < nextBuyPrice) {
-        nextBuyPrice = target;
+        nextBuyPrice = target + 0.0001;
       }
 
       const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(4), 6);
@@ -332,11 +332,10 @@ async function main(
 
       // Don't go below target price
       if (target > nextSellPrice) {
-        nextSellPrice = target;
+        nextSellPrice = target - 0.0001;
       }
 
       const takeProfitPrice = parseUnits((nextSellPrice * 0.98).toFixed(4), 6);
-      const stopLossPrice = parseUnits((nextSellPrice * 1.02).toFixed(4), 6);
 
       // Create sell order
       await withRetry(() =>
@@ -348,7 +347,7 @@ async function main(
           orderType: 0,
           leverage: 10,
           takeProfit: takeProfitPrice,
-          stopLoss: stopLossPrice,
+          stopLoss: 0n,
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice} ${amount}`);
