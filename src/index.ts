@@ -114,23 +114,23 @@ async function main(
   catch (error) {
     console.log(`[${pair.symbol}${new Date().toISOString()}] Error: ${error}`);
   }
+  const activeOrders = await perpApi.userActiveOrders(account);
+  if (activeOrders.length > 20) {
+    console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
+    await withRetry(() =>
+      perpApi.cancelOrder(wallet, {
+        subaccount: account,
+        orderId: activeOrders[0].order_id,
+      }),
+    );
+    console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled 1 order.`);
+    // Wait a bit after canceling before placing new orders
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
   // === MAKER STRATEGY ===
   // Makers create liquidity by placing orders on both sides of the order book
   if (role === "maker") {
     // Cancel all active orders before placing new ones
-    const activeOrders = await perpApi.userActiveOrders(account);
-    if (activeOrders.length > 20) {
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
-      await withRetry(() =>
-        perpApi.cancelOrder(wallet, {
-          subaccount: account,
-          orderId: activeOrders[activeOrders.length - 1].order_id,
-        }),
-      );
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled 1 order.`);
-      // Wait a bit after canceling before placing new orders
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
     // Generate random order amount between 0.8 and 1.2
     const amount = 0.4 * Math.random() + 0.8;
 
@@ -159,9 +159,6 @@ async function main(
       return;
     }
 
-    // Calculate next sell price with increase
-    const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
-
     // If buy price is below target, create buy order
     if (Number(buyPrice) < Number(target)) {
       // Calculate a new buy price slightly below current buy price
@@ -185,6 +182,8 @@ async function main(
     else {
       // If buy price is above target, create sell order
       // Create sell order
+      // Calculate next sell price with increase
+      const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
@@ -227,20 +226,6 @@ async function main(
   // === TAKER STRATEGY ===
   // Takers consume liquidity by taking existing orders to move price toward target
   if (role === "taker") {
-    // Cancel all active orders before placing new ones
-    const activeOrders = await perpApi.userActiveOrders(account);
-    if (activeOrders.length > 20) {
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
-      await withRetry(() =>
-        perpApi.cancelOrder(wallet, {
-          subaccount: account,
-          orderId: activeOrders[activeOrders.length - 1].order_id,
-        }),
-      );
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Canceled 1 order.`);
-      // Wait a bit after canceling before placing new orders
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
     // Calculate price adjustment
     const priceIncrease = getPriceTakerInscrease();
 
