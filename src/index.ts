@@ -162,7 +162,7 @@ async function main(
     // If buy price is below target, create buy order
     if (Number(buyPrice) < Number(target)) {
       // Calculate a new buy price slightly below current buy price
-      const nextBuyPrice = Math.abs(Number(buyPrice) - getPriceMakerInscrease());
+      const nextBuyPrice = Math.min(Math.abs(Number(buyPrice) - getPriceMakerInscrease()), Number(sellPrice)) - 0.0001;
 
       // Create buy order
       await withRetry(() =>
@@ -183,7 +183,7 @@ async function main(
       // If buy price is above target, create sell order
       // Create sell order
       // Calculate next sell price with increase
-      const nextSellPrice = Math.abs(Number(buyPrice) + getPriceMakerInscrease());
+      const nextSellPrice = Math.max(Math.abs(Number(buyPrice) + getPriceMakerInscrease()), Number(buyPrice)) + 0.0001;
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
