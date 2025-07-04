@@ -24,6 +24,17 @@ function getPriceMakerInscrease(): number {
 }
 
 /**
+ * Helper function to validate and convert price values
+ */
+function validatePrice(price: string | undefined, fallback: number = 0): number {
+  if (!price || price === undefined || price === null) {
+    return fallback;
+  }
+  const numPrice = Number(price);
+  return Number.isNaN(numPrice) ? fallback : numPrice;
+}
+
+/**
  * Main function to execute trading strategy for a specific trading pair
  * @param {object} pair - Trading pair information
  * @param {"maker" | "taker"} role - Trading role (maker creates liquidity, taker takes liquidity)
@@ -68,6 +79,12 @@ async function main(
   // Get current market prices and order book information
   const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.marketId);
 
+  // Validate prices before using them
+  const validBuyPrice = validatePrice(buyPrice);
+  const validSellPrice = validatePrice(sellPrice);
+  const validBuyAmount = validatePrice(buyAmount);
+  const validSellAmount = validatePrice(sellAmount);
+
   // Get target price for this trading pair
   const target = await getTargetPrice(pair.price);
   if (Number.isNaN(target)) {
@@ -75,7 +92,7 @@ async function main(
   }
 
   // Log current market conditions for debugging
-  console.debug(`[${pair.symbol}${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${buyPrice} BuyAmount: ${buyAmount} SellPrice: ${sellPrice} SellAmount: ${sellAmount}`);
+  console.debug(`[${pair.symbol}${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${validBuyPrice} BuyAmount: ${validBuyAmount} SellPrice: ${validSellPrice} SellAmount: ${validSellAmount}`);
 
   const account = role === "maker" ? pair.makerAccount : pair.takerAccount;
   const privateKey = role === "maker" ? pair.makerPrivateKey : pair.takerPrivateKey;
@@ -135,13 +152,13 @@ async function main(
     const amount = 0.4 * Math.random() + 0.8;
 
     // If no buy orders exist in the order book, create one at target price
-    if (!buyPrice) {
+    if (!buyPrice || validBuyPrice === 0) {
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
           isLong: true,
           size: parseUnits(amount.toString(), 18),
-          price: parseUnits((Math.min(target, Number(sellPrice)) - 0.0001).toFixed(6), 6),
+          price: parseUnits((Math.min(target, validSellPrice > 0 ? validSellPrice : target + 0.1) - 0.0001).toFixed(6), 6),
           orderType: 0, // Limit order
           leverage: 10,
           takeProfit: 0n,
@@ -149,20 +166,26 @@ async function main(
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${target} ${amount}`);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return;
     }
 
     // If current price is very close to target, no action needed
-    if (Math.abs(Number(buyPrice) - target) < 0.0001) {
+    if (Math.abs(validBuyPrice - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
       return;
     }
 
     // If buy price is below target, create buy order
-    if (Number(buyPrice) < Number(target)) {
+    if (validBuyPrice < target) {
       // Calculate a new buy price slightly below current buy price
-      const nextBuyPrice = Math.min(Math.abs(Number(buyPrice) - getPriceMakerInscrease()), Number(sellPrice)) - 0.0001;
+      const nextBuyPrice = Math.min(Math.abs(validBuyPrice - getPriceMakerInscrease()), validSellPrice > 0 ? validSellPrice : target + 0.1) - 0.0001;
+
+      // Validate nextBuyPrice before using it
+      if (Number.isNaN(nextBuyPrice) || nextBuyPrice <= 0) {
+        console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextBuyPrice: ${nextBuyPrice}`);
+        return;
+      }
 
       // Create buy order
       await withRetry(() =>
@@ -181,9 +204,13 @@ async function main(
     }
     else {
       // If buy price is above target, create sell order
-      // Create sell order
-      // Calculate next sell price with increase
-      const nextSellPrice = Math.max(Math.abs(Number(buyPrice) + getPriceMakerInscrease()), Number(buyPrice)) + 0.0001;
+      const nextSellPrice = Math.max(Math.abs(validBuyPrice + getPriceMakerInscrease()), validBuyPrice) + 0.0001;
+      // Validate nextSellPrice before using it
+      if (Number.isNaN(nextSellPrice) || nextSellPrice <= 0) {
+        console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextSellPrice: ${nextSellPrice}`);
+        return;
+      }
+
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
@@ -197,14 +224,13 @@ async function main(
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice} ${amount}`);
-
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     // If no sell orders exist in the order book, create one
-    if (!sellPrice) {
+    if (!sellPrice || validSellPrice === 0) {
       // Create sell order at a price higher than current buy price
-      const price = Number(buyPrice) + getPriceMakerInscrease() * 2;
+      const price = validBuyPrice + getPriceMakerInscrease() * 2;
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
@@ -217,9 +243,8 @@ async function main(
           stopLoss: 0n,
         }),
       );
-
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} 10`);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
 
@@ -230,13 +255,13 @@ async function main(
     const priceIncrease = getPriceTakerInscrease();
 
     // Exit if no buy orders exist
-    if (!buyPrice && sellPrice) {
+    if ((!buyPrice || validBuyPrice === 0) && (sellPrice && validSellPrice > 0)) {
       let amount = 8 + Math.random() * 4;
 
       // Adjust amount based on available sell orders, but cap at TAKER_CAPACITY
-      if (priceIncrease > 0 && !Number.isNaN(Number(sellAmount))) {
-        if (Number(sellAmount) < TAKER_CAPACITY) {
-          amount = Math.max(Number(sellAmount), amount);
+      if (priceIncrease > 0 && validSellAmount > 0) {
+        if (validSellAmount < TAKER_CAPACITY) {
+          amount = Math.max(validSellAmount, amount);
         }
         else {
           amount = TAKER_CAPACITY;
@@ -244,11 +269,17 @@ async function main(
       }
 
       // Calculate next buy price (higher than current sell price)
-      let nextBuyPrice = Math.abs(Number(sellPrice) + priceIncrease);
+      let nextBuyPrice = Math.abs(validSellPrice + priceIncrease);
 
       // Don't exceed target price
       if (target < nextBuyPrice) {
         nextBuyPrice = target + 0.0001;
+      }
+
+      // Validate nextBuyPrice before using it
+      if (Number.isNaN(nextBuyPrice) || nextBuyPrice <= 0) {
+        console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextBuyPrice: ${nextBuyPrice}`);
+        return;
       }
 
       const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(4), 6);
@@ -272,10 +303,10 @@ async function main(
     }
 
     // If current price is very close to target, create a small sell order to maintain price
-    if (Math.abs(Number(buyPrice) - target) < 0.0001) {
+    if (validBuyPrice > 0 && Math.abs(validBuyPrice - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
       const buyAmount = 1.5;
-      const price = Number(buyPrice).toFixed(4);
+      const price = validBuyPrice.toFixed(4);
 
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
@@ -294,14 +325,14 @@ async function main(
     }
 
     // If buy price is below target, create buy order to push price up
-    if (Number(buyPrice) < Number(target) || !buyPrice) {
+    if (validBuyPrice < target || validBuyPrice === 0) {
       // Calculate order amount (between 4-8 or based on available sell amount)
       let amount = 8 + Math.random() * 4;
 
       // Adjust amount based on available sell orders, but cap at TAKER_CAPACITY
-      if (priceIncrease > 0 && !Number.isNaN(Number(sellAmount))) {
-        if (Number(sellAmount) < TAKER_CAPACITY) {
-          amount = Math.max(Number(sellAmount), amount);
+      if (priceIncrease > 0 && validSellAmount > 0) {
+        if (validSellAmount < TAKER_CAPACITY) {
+          amount = Math.max(validSellAmount, amount);
         }
         else {
           amount = TAKER_CAPACITY;
@@ -309,11 +340,18 @@ async function main(
       }
 
       // Calculate next buy price (higher than current sell price)
-      let nextBuyPrice = Math.abs(Number(sellPrice ?? buyPrice) + priceIncrease);
+      const basePrice = validSellPrice > 0 ? validSellPrice : (validBuyPrice > 0 ? validBuyPrice : target);
+      let nextBuyPrice = Math.abs(basePrice + priceIncrease);
 
       // Don't exceed target price
       if (target < nextBuyPrice) {
         nextBuyPrice = target + 0.0001;
+      }
+
+      // Validate nextBuyPrice before using it
+      if (Number.isNaN(nextBuyPrice) || nextBuyPrice <= 0) {
+        console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextBuyPrice: ${nextBuyPrice}`);
+        return;
       }
 
       const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(4), 6);
@@ -340,9 +378,9 @@ async function main(
       let amount = 4 + Math.random() * 4;
 
       // Adjust amount based on available buy orders, but cap at TAKER_CAPACITY
-      if (priceIncrease > 0 && !Number.isNaN(Number(buyAmount))) {
-        if (Number(buyAmount) < TAKER_CAPACITY) {
-          amount = Math.max(Number(buyAmount), amount);
+      if (priceIncrease > 0 && validBuyAmount > 0) {
+        if (validBuyAmount < TAKER_CAPACITY) {
+          amount = Math.max(validBuyAmount, amount);
         }
         else {
           amount = TAKER_CAPACITY;
@@ -350,11 +388,17 @@ async function main(
       }
 
       // Calculate next sell price (lower than current buy price)
-      let nextSellPrice = Math.abs(Number(buyPrice) - priceIncrease);
+      let nextSellPrice = Math.abs(validBuyPrice - priceIncrease);
 
       // Don't go below target price
       if (target > nextSellPrice) {
         nextSellPrice = target - 0.0001;
+      }
+
+      // Validate nextSellPrice before using it
+      if (Number.isNaN(nextSellPrice) || nextSellPrice <= 0) {
+        console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextSellPrice: ${nextSellPrice}`);
+        return;
       }
 
       const takeProfitPrice = parseUnits((nextSellPrice * 0.98).toFixed(4), 6);
