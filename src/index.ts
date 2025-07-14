@@ -449,7 +449,7 @@ const makerTask = new Task(
 const takerTask = new Task(
   "taker tasks",
   () => {
-    PAIRS.forEach((pair) => {
+    PAIRS.filter(pair => pair.makerPrivateKey).forEach((pair) => {
       main(pair, "taker").catch((err: Error) => {
         console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
       });
