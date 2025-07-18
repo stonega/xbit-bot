@@ -114,7 +114,7 @@ async function main(
       const positionSize = Number(formatUnits(position.base_asset_amount, 18));
       console.log(`[${pair.symbol}${new Date().toISOString()}] Current position size: ${positionSize}, isLong: ${position.is_long}`);
 
-      const MAX_POSITION_SIZE = TAKER_CAPACITY;
+      const MAX_POSITION_SIZE = TAKER_CAPACITY * 2;
       if (positionSize > MAX_POSITION_SIZE / 2) {
         await withRetry(() =>
           perpApi.closePosition(wallet, {
