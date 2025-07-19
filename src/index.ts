@@ -158,7 +158,7 @@ async function main(
           subaccount: account,
           isLong: true,
           size: parseUnits(amount.toString(), 18),
-          price: parseUnits((Math.min(target, validSellPrice > 0 ? validSellPrice : target + 0.1) - 0.0001).toFixed(6), 6),
+          price: parseUnits((Math.min(target, validSellPrice > 0 ? validSellPrice : target + 0.1) - 0.0001).toFixed(2), 6),
           orderType: 0, // Limit order
           leverage: 10,
           takeProfit: 0n,
@@ -193,7 +193,7 @@ async function main(
           subaccount: account,
           isLong: true,
           size: parseUnits(amount.toString(), 18),
-          price: parseUnits(nextBuyPrice.toFixed(6), 6),
+          price: parseUnits(nextBuyPrice.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
           takeProfit: 0n,
@@ -216,7 +216,7 @@ async function main(
           subaccount: account,
           isLong: false,
           size: parseUnits(amount.toString(), 18),
-          price: parseUnits(nextSellPrice.toFixed(6), 6),
+          price: parseUnits(nextSellPrice.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
           takeProfit: 0n,
@@ -236,7 +236,7 @@ async function main(
           subaccount: account,
           isLong: false,
           size: parseUnits("10", 18),
-          price: parseUnits(price.toFixed(6), 6),
+          price: parseUnits(price.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
           takeProfit: 0n,
@@ -282,8 +282,8 @@ async function main(
         return;
       }
 
-      const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(4), 6);
-      const stopLossPrice = parseUnits((nextBuyPrice * 0.98).toFixed(4), 6);
+      const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(2), 6);
+      const stopLossPrice = parseUnits((nextBuyPrice * 0.98).toFixed(2), 6);
 
       // Create buy order
       await withRetry(() =>
@@ -291,7 +291,7 @@ async function main(
           subaccount: account,
           isLong: true,
           size: parseUnits(amount.toString(), 18),
-          price: parseUnits(nextBuyPrice.toFixed(4), 6),
+          price: parseUnits(nextBuyPrice.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
           takeProfit: takeProfitPrice,
@@ -306,7 +306,7 @@ async function main(
     if (validBuyPrice > 0 && Math.abs(validBuyPrice - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
       const buyAmount = 1.5;
-      const price = validBuyPrice.toFixed(4);
+      const price = validBuyPrice.toFixed(2);
 
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
@@ -354,8 +354,8 @@ async function main(
         return;
       }
 
-      const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(4), 6);
-      const stopLossPrice = parseUnits((nextBuyPrice * 0.98).toFixed(4), 6);
+      const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(2), 6);
+      const stopLossPrice = parseUnits((nextBuyPrice * 0.98).toFixed(2), 6);
 
       // Create buy order
       await withRetry(() =>
@@ -363,7 +363,7 @@ async function main(
           subaccount: account,
           isLong: true,
           size: parseUnits(amount.toString(), 18),
-          price: parseUnits(nextBuyPrice.toFixed(4), 6),
+          price: parseUnits(nextBuyPrice.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
           takeProfit: takeProfitPrice,
@@ -401,7 +401,7 @@ async function main(
         return;
       }
 
-      const takeProfitPrice = parseUnits((nextSellPrice * 0.98).toFixed(4), 6);
+      const takeProfitPrice = parseUnits((nextSellPrice * 0.98).toFixed(2), 6);
 
       // Create sell order
       await withRetry(() =>
@@ -409,7 +409,7 @@ async function main(
           subaccount: account,
           isLong: false,
           size: parseUnits(amount.toString(), 18),
-          price: parseUnits(nextSellPrice.toFixed(4), 6),
+          price: parseUnits(nextSellPrice.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
           takeProfit: takeProfitPrice,
