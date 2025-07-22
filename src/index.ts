@@ -156,7 +156,7 @@ async function main(
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
           isLong: true,
-          size: parseUnits(amount.toString(), pair.decimals),
+          size: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
           price: parseUnits(target.toFixed(2), 6),
           orderType: 0, // Limit order
           leverage: 10,
@@ -191,7 +191,7 @@ async function main(
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
           isLong: true,
-          size: parseUnits(amount.toString(), pair.decimals),
+          size: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
           price: parseUnits(target.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
@@ -214,7 +214,7 @@ async function main(
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
           isLong: false,
-          size: parseUnits(amount.toString(), pair.decimals),
+          size: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
           price: parseUnits(target.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
@@ -289,7 +289,7 @@ async function main(
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
           isLong: true,
-          size: parseUnits(amount.toString(), pair.decimals),
+          size: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
           price: parseUnits(nextBuyPrice.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
@@ -311,7 +311,7 @@ async function main(
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
           isLong: false,
-          size: parseUnits(buyAmount.toString(), pair.decimals),
+          size: parseUnits(buyAmount.toFixed(pair.decimals), pair.decimals),
           price: parseUnits(price, 6),
           orderType: 0,
           leverage: 10,
@@ -361,7 +361,7 @@ async function main(
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
           isLong: true,
-          size: parseUnits(amount.toString(), pair.decimals),
+          size: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
           price: parseUnits(nextBuyPrice.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
@@ -407,7 +407,7 @@ async function main(
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
           isLong: false,
-          size: parseUnits(amount.toString(), pair.decimals),
+          size: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
           price: parseUnits(nextSellPrice.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
