@@ -7,6 +7,7 @@ export const PAIRS = [
     marketId: 1,
     takerAccount: Bun.env.TAKER_ACCOUNT,
     makerAccount: Bun.env.MAKER_ACCOUNT,
+    decimals: 18,
   },
   {
     symbol: "SOL/USDT",
@@ -16,6 +17,7 @@ export const PAIRS = [
     marketId: 3,
     takerAccount: Bun.env.TAKER_ACCOUNT_SOL,
     makerAccount: Bun.env.MAKER_ACCOUNT_SOL,
+    decimals: 9,
   },
 ];
 
