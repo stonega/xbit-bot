@@ -86,10 +86,8 @@ async function main(
   const validSellAmount = validatePrice(sellAmount);
 
   // Get target price for this trading pair
-  const target = await getTargetPrice(pair.price);
-  if (Number.isNaN(target)) {
-    return; // Exit if target price is invalid
-  }
+  const targetInBigInt = await perpApi.perpMarkets().then(res => res.oracle_price);
+  const target = Number(formatUnits(targetInBigInt, 6));
 
   // Log current market conditions for debugging
   console.debug(`[${pair.symbol}${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${validBuyPrice} BuyAmount: ${validBuyAmount} SellPrice: ${validSellPrice} SellAmount: ${validSellAmount}`);
