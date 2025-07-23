@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { getPrice, getTargetPrice } from "../src/utils";
+import { getPrice, getTargetPrice } from ".";
 
 test("get tartget price", async () => {
   const price = await getTargetPrice("SOL");
@@ -7,6 +7,6 @@ test("get tartget price", async () => {
 }, { timeout: 60000 });
 
 test("get order book", async () => {
-  const price = await getPrice("STK/USDC");
+  const price = await getPrice(1);
   console.log({ price });
 }, { timeout: 60000 });

@@ -5,3 +5,10 @@ export interface Token {
   decimals: number;
   name: string;
 }
+
+export interface UserStats {
+  subaccounts: {
+    name: string;
+    subaccount: string;
+  }[];
+}
