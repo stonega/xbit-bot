@@ -42,13 +42,13 @@ export async function withRetry<T>(
 /**
  * Get orderbook data from xbit api
  */
-export async function getPrice(marketId: number): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const result = await fetch(`https://testnet.xbit.finance/perp/blockchain/perp/order-books?market_id=${marketId}`).then(a => a.json());
-  if (!result.data.orderLimitBuyBList) {
+export async function getPrice(symbol: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
+  const result = await fetch(`https://testnet.xbit.finance/perp/blockchain/order-books?pair=${symbol}`).then(a => a.json());
+  if (!result.data.orderBuyBList) {
     console.log({ error: result.msg });
   }
-  const buyList = [...result.data.orderLimitBuyBList, ...result.data.orderMarketBuyBList].sort((a: any, b: any) => b.price - a.price);
-  const sellList = [...result.data.orderLimitSellBList, ...result.data.orderMarketSellBList].sort((a: any, b: any) => a.price - b.price);
+  const buyList = [...result.data.orderBuyBList].sort((a: any, b: any) => b.price - a.price);
+  const sellList = [...result.data.orderSellBList].sort((a: any, b: any) => a.price - b.price);
   const buyPrice = buyList[0]?.price;
   const buyAmount = buyList[0]?.qty;
   const sellPrice = sellList[0]?.price;

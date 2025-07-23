@@ -5,7 +5,7 @@ import { withRetry } from "../utils";
 import { OrderABI, TradeABI, TradeNativeABI } from "./abi";
 import { BaseEvmApi } from "./api";
 
-const CONTRACT = "0x000000000000000000000000000000000000044E";
+const CONTRACT = "0x000000000000000000000000000000000000044d";
 const SPENDER_ADDRESS = "0x6d6F646C617070726F76652f0000000000000000";
 
 export class TradeApi extends BaseEvmApi {
@@ -15,24 +15,28 @@ export class TradeApi extends BaseEvmApi {
     tokenB,
     contract,
     pairId,
+    subaccount,
   }: {
     rpc: string;
     pairId?: string;
     tokenA: { address: string; decimals: number; symbol: string };
     tokenB: { address: string; decimals: number; symbol: string };
     contract: string;
+    subaccount?: string;
   }) {
     super(rpc);
     this.contractAddress = contract;
     this.tokenA = tokenA;
     this.tokenB = tokenB;
     this.pairId = pairId;
+    this.subaccount = subaccount;
   }
 
   readonly tokenA;
   readonly tokenB;
   readonly contractAddress: string;
   readonly pairId: string | undefined;
+  readonly subaccount: string | undefined;
 
   get pair(): string {
     return (`${this.tokenA.symbol}/${this.tokenB.symbol}`).toUpperCase();
@@ -56,9 +60,16 @@ export class TradeApi extends BaseEvmApi {
       async () => {
         let res;
         if (this.contractAddress === CONTRACT) {
-          res = await this.contract
-            .getFunction("placeOrderBuyB")
-            .populateTransaction(this.pairId, pay, amount);
+          if (this.subaccount) {
+            res = await this.contract
+              .getFunction("subaccountPlaceOrderBuyB")
+              .populateTransaction(this.subaccount, this.pairId, pay, amount);
+          }
+          else {
+            res = await this.contract
+              .getFunction("placeOrderBuyB")
+              .populateTransaction(this.pairId, pay, amount);
+          }
         }
         else {
           res = await this.contract
@@ -83,9 +94,16 @@ export class TradeApi extends BaseEvmApi {
         let res;
         const isNative = !this.tokenA.address;
         if (this.contractAddress === CONTRACT) {
-          res = await this.contract
-            .getFunction("placeOrderSellB")
-            .populateTransaction(this.pairId, receive, amount);
+          if (this.subaccount) {
+            res = await this.contract
+              .getFunction("subaccountPlaceOrderSellB")
+              .populateTransaction(this.subaccount, this.pairId, receive, amount);
+          }
+          else {
+            res = await this.contract
+              .getFunction("placeOrderSellB")
+              .populateTransaction(this.pairId, receive, amount);
+          }
         }
         else if (isNative) {
           res = await this.contract
@@ -112,9 +130,16 @@ export class TradeApi extends BaseEvmApi {
   ): Promise<TransactionResponse> {
     let res;
     if (this.contractAddress === CONTRACT) {
-      res = await this.contract
-        .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
-        .populateTransaction(this.pairId, orderId);
+      if (this.subaccount) {
+        res = await this.contract
+          .getFunction(type === "buy" ? "subaccountCancelOrderBuyB" : "subaccountCancelOrderSellB")
+          .populateTransaction(this.subaccount, this.pairId, orderId);
+      }
+      else {
+        res = await this.contract
+          .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
+          .populateTransaction(this.pairId, orderId);
+      }
     }
     else {
       res = await this.contract
@@ -123,6 +148,12 @@ export class TradeApi extends BaseEvmApi {
     }
     await signer.estimateGas(res);
     return signer.sendTransaction(res);
+  }
+
+  async userActiveSpotOrders(user: string): Promise<any[]> {
+    return this.contract
+      .getFunction("userActiveSpotOrders")
+      .staticCall(user, this.pairId);
   }
 
   calcUsdt(price: string, bool: string): bigint {

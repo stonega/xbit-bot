@@ -175,3 +175,5 @@ dist
 .DS_Store
 
 prices.sqlite
+
+.env.perp
