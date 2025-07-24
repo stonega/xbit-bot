@@ -20,9 +20,9 @@ function getPriceTakerInscrease(): number {
  * Returns a value between 0.02 and 0.04
  * @returns {number} Price increase percentage
  */
-function getPriceMakerInscrease(): number {
-  return Number(Math.max(Math.random() * 0.04, 0.02).toFixed(4));
-}
+// function getPriceMakerInscrease(): number {
+//   return Number(Math.max(Math.random() * 0.04, 0.02).toFixed(4));
+// }
 
 /**
  * Helper function to validate and convert price values
@@ -190,12 +190,7 @@ async function main(
     // If buy price is below target, create buy order
     if (validBuyPrice < target) {
       // Calculate a new buy price slightly below current buy price
-      let nextBuyPrice = Math.min(Math.abs(validBuyPrice - getPriceMakerInscrease()), validSellPrice > 0 ? validSellPrice : target + 0.1) - 0.0001;
-
-      // If buy price exceeds 10% of target price, use target price directly
-      if (nextBuyPrice > target * 1.05 || nextBuyPrice < target * 0.95) {
-        nextBuyPrice = target;
-      }
+      const nextBuyPrice = target;
 
       // Validate nextBuyPrice before using it
       if (Number.isNaN(nextBuyPrice) || nextBuyPrice <= 0) {
@@ -207,19 +202,14 @@ async function main(
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
           amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(pair.decimals)),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toString(), amount.toFixed(pair.decimals)),
         }),
       );
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(2)} ${amount}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(4)} ${amount}`);
     }
     else {
       // If buy price is above target, create sell order
-      let nextSellPrice = Math.max(Math.abs(validBuyPrice + getPriceMakerInscrease()), validBuyPrice) + 0.0001;
-
-      // If sell price exceeds 10% of target price, use target price directly
-      if (nextSellPrice > target * 1.05 || nextSellPrice < target * 0.95) {
-        nextSellPrice = target;
-      }
+      const nextSellPrice = target;
 
       // Validate nextSellPrice before using it
       if (Number.isNaN(nextSellPrice) || nextSellPrice <= 0) {
@@ -230,30 +220,25 @@ async function main(
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
           amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          receive: tradeApi.calcUsdt(nextSellPrice.toFixed(2), amount.toFixed(pair.decimals)),
+          receive: tradeApi.calcUsdt(nextSellPrice.toString(), amount.toFixed(pair.decimals)),
         }),
       );
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice.toFixed(2)} ${amount}`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice.toFixed(4)} ${amount}`);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     // If no sell orders exist in the order book, create one
     if (!sellPrice || validSellPrice === 0) {
       // Create sell order at a price higher than current buy price
-      let price = validBuyPrice + getPriceMakerInscrease() * 2;
-
-      // If sell price exceeds 10% of target price, use target price directly
-      if (price > target * 1.05 || price < target * 0.95) {
-        price = target;
-      }
+      const price = target;
 
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
           amount: parseUnits("10", pair.decimals),
-          receive: tradeApi.calcUsdt(price.toFixed(2), "10"),
+          receive: tradeApi.calcUsdt(price.toString(), "10"),
         }),
       );
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price.toFixed(2)} 10`);
+      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price.toFixed(4)} 10`);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
   }
