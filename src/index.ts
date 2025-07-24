@@ -4,7 +4,7 @@ import { PAIRS, TAKER_CAPACITY, TOKENS } from "./config";
 import { TradeApi } from "./contract";
 import { ultraLiquidTestnet } from "./contract/network";
 import { PerpApi } from "./contract/perpApi";
-import { getPrice, withRetry } from "./utils";
+import { getPrice, getTargetPrice, withRetry } from "./utils";
 
 /**
  * Generates a random price increase for taker orders
@@ -114,13 +114,14 @@ async function main(
   const validSellAmount = validatePrice(sellAmount);
 
   // Get target price for this trading pair
-  const perpApi = new PerpApi({
-    rpc: currentNetwork.rpc,
-    marketId: pair.marketId,
-    token: tradeToken,
-  });
-  const targetInBigInt = await perpApi.perpMarkets().then(res => res.oracle_price);
-  const target = Number(formatUnits(targetInBigInt, 6));
+  // const perpApi = new PerpApi({
+  //   rpc: currentNetwork.rpc,
+  //   marketId: pair.marketId,
+  //   token: tradeToken,
+  // });
+  // const targetInBigInt = await perpApi.perpMarkets().then(res => res.oracle_price);
+  // const target = Number(formatUnits(targetInBigInt, 6));
+  const target = await getTargetPrice(pair.price);
 
   // Log current market conditions for debugging
   console.debug(`[${pair.symbol}${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${validBuyPrice} BuyAmount: ${validBuyAmount} SellPrice: ${validSellPrice} SellAmount: ${validSellAmount}`);
