@@ -183,7 +183,7 @@ async function main(
     }
 
     // If current price is very close to target, no action needed
-    if (Math.abs(validBuyPrice - target) < 0.0001) {
+    if (Math.abs(validBuyPrice - target) < 0.01) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
       return;
     }
@@ -203,7 +203,7 @@ async function main(
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
           amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          pay: tradeApi.calcUsdt(nextBuyPrice.toString(), amount.toFixed(pair.decimals)),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(pair.decimals)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(4)} ${amount}`);
@@ -266,6 +266,9 @@ async function main(
 
       // Calculate next buy price (higher than current sell price)
       let nextBuyPrice = Math.abs(validSellPrice + priceIncrease);
+      console.log({
+        validSellPrice,
+      });
 
       // If buy price exceeds 10% of target price, use target price directly
       if (nextBuyPrice > target * 1.05 || nextBuyPrice < target * 0.95) {
@@ -274,7 +277,7 @@ async function main(
 
       // Don't exceed target price
       if (target < nextBuyPrice) {
-        nextBuyPrice = target + 0.0001;
+        nextBuyPrice = target + 0.01;
       }
 
       // Validate nextBuyPrice before using it
@@ -287,7 +290,7 @@ async function main(
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
           amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          pay: parseUnits(nextBuyPrice.toFixed(2), 6),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(pair.decimals)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(2)} ${amount}`);
@@ -301,7 +304,7 @@ async function main(
       // If buy price exceeds 10% of target price, use target price directly
       let price = validBuyPrice;
       if (validBuyPrice > target * 1.05 || validBuyPrice < target * 0.95) {
-        price = target;
+        price = target + 0.01;
       }
 
       await withRetry(() =>
@@ -335,12 +338,12 @@ async function main(
 
       // If buy price exceeds 10% of target price, use target price directly
       if (nextBuyPrice > target * 1.05 || nextBuyPrice < target * 0.95) {
-        nextBuyPrice = target;
+        nextBuyPrice = target + 0.01;
       }
 
       // Don't exceed target price
       if (target < nextBuyPrice) {
-        nextBuyPrice = target + 0.0001;
+        nextBuyPrice = target + 0.01;
       }
 
       // Validate nextBuyPrice before using it
@@ -353,7 +356,7 @@ async function main(
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
           amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          pay: parseUnits(nextBuyPrice.toFixed(2), 6),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(pair.decimals)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(2)} ${amount}`);
@@ -378,12 +381,12 @@ async function main(
 
       // If sell price exceeds 10% of target price, use target price directly
       if (nextSellPrice > target * 1.05 || nextSellPrice < target * 0.95) {
-        nextSellPrice = target;
+        nextSellPrice = target - 0.01;
       }
 
       // Don't go below target price
       if (target > nextSellPrice) {
-        nextSellPrice = target - 0.0001;
+        nextSellPrice = target - 0.01;
       }
 
       // Validate nextSellPrice before using it
@@ -396,7 +399,7 @@ async function main(
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
           amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          receive: parseUnits(nextSellPrice.toFixed(2), 6),
+          receive: tradeApi.calcUsdt(nextSellPrice.toFixed(2), amount.toFixed(pair.decimals)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice.toFixed(2)} ${amount}`);
