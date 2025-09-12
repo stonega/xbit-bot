@@ -157,8 +157,9 @@ export class TradeApi extends BaseEvmApi {
   }
 
   calcUsdt(price: string, bool: string): bigint {
-    const p = BN(price).toFixed(2);
-    const receive = BN(bool)
+    const p = BN(price).toFixed(2, BN.ROUND_UP);
+    const amount = BN(bool).toFixed(2, BN.ROUND_UP);
+    const receive = BN(amount)
       .times(BN(p))
       .div(100)
       .times(10 ** this.tokenB.decimals)

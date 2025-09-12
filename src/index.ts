@@ -1,3 +1,4 @@
+import BN from "bignumber.js";
 import { formatUnits, JsonRpcProvider, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY, TOKENS } from "./config";
@@ -170,10 +171,10 @@ async function main(
 
     // If no buy orders exist in the order book, create one at target price
     if (!buyPrice || validBuyPrice === 0) {
-      const pay = tradeApi.calcUsdt(target.toFixed(2), amount.toFixed(2));
+      const pay = tradeApi.calcUsdt(target.toString(), amount.toString());
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
-          amount: parseUnits(amount.toFixed(2), pair.decimals),
+          amount: parseUnits(BN(amount).toFixed(2, BN.ROUND_UP).toString(), pair.decimals),
           pay,
         }),
       );
@@ -202,8 +203,8 @@ async function main(
       // Create buy order
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
-          amount: parseUnits(amount.toFixed(2), pair.decimals),
-          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(2)),
+          amount: parseUnits(BN(amount).toFixed(2, BN.ROUND_UP).toString(), pair.decimals),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toString(), amount.toString()),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(4)} ${amount}`);
@@ -220,8 +221,8 @@ async function main(
 
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
-          amount: parseUnits(amount.toFixed(2), pair.decimals),
-          receive: tradeApi.calcUsdt(nextSellPrice.toString(), amount.toFixed(2)),
+          amount: parseUnits(BN(amount).toFixed(2, BN.ROUND_UP).toString(), pair.decimals),
+          receive: tradeApi.calcUsdt(nextSellPrice.toString(), amount.toString()),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice.toFixed(4)} ${amount}`);
@@ -289,8 +290,8 @@ async function main(
       // Create buy order
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
-          amount: parseUnits(amount.toFixed(2), pair.decimals),
-          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(2)),
+          amount: parseUnits(BN(amount).toFixed(2, BN.ROUND_UP).toString(), pair.decimals),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toString(), amount.toString()),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(2)} ${amount}`);
@@ -309,8 +310,8 @@ async function main(
 
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
-          amount: parseUnits(buyAmount.toFixed(2), pair.decimals),
-          receive: tradeApi.calcUsdt(price.toFixed(2), buyAmount.toFixed(2)),
+          amount: parseUnits(BN(buyAmount).toFixed(2, BN.ROUND_UP).toString(), pair.decimals),
+          receive: tradeApi.calcUsdt(price.toString(), buyAmount.toString()),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price.toFixed(2)} ${buyAmount}`);
@@ -355,8 +356,8 @@ async function main(
       // Create buy order
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
-          amount: parseUnits(amount.toFixed(2), pair.decimals),
-          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(2)),
+          amount: parseUnits(BN(amount).toFixed(2, BN.ROUND_UP).toString(), pair.decimals),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toString(), amount.toString()),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(2)} ${amount}`);
@@ -398,8 +399,8 @@ async function main(
       // Create sell order
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
-          amount: parseUnits(amount.toFixed(2), pair.decimals),
-          receive: tradeApi.calcUsdt(nextSellPrice.toFixed(2), amount.toFixed(2)),
+          amount: parseUnits(BN(amount).toFixed(2, BN.ROUND_UP).toString(), pair.decimals),
+          receive: tradeApi.calcUsdt(nextSellPrice.toString(), amount.toString()),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice.toFixed(2)} ${amount}`);
