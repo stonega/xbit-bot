@@ -161,7 +161,6 @@ export class TradeApi extends BaseEvmApi {
     const amount = BN(bool).toFixed(2, BN.ROUND_UP);
     const receive = BN(amount)
       .times(BN(p))
-      .div(100)
       .times(10 ** this.tokenB.decimals)
       .toFixed(0);
     return BigInt(receive);
