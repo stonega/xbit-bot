@@ -170,10 +170,10 @@ async function main(
 
     // If no buy orders exist in the order book, create one at target price
     if (!buyPrice || validBuyPrice === 0) {
-      const pay = tradeApi.calcUsdt(target.toFixed(2), amount.toFixed(pair.decimals));
+      const pay = tradeApi.calcUsdt(target.toFixed(2), amount.toFixed(2));
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
-          amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
+          amount: parseUnits(amount.toFixed(2), pair.decimals),
           pay,
         }),
       );
@@ -202,8 +202,8 @@ async function main(
       // Create buy order
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
-          amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(pair.decimals)),
+          amount: parseUnits(amount.toFixed(2), pair.decimals),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(2)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(4)} ${amount}`);
@@ -220,8 +220,8 @@ async function main(
 
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
-          amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          receive: tradeApi.calcUsdt(nextSellPrice.toString(), amount.toFixed(pair.decimals)),
+          amount: parseUnits(amount.toFixed(2), pair.decimals),
+          receive: tradeApi.calcUsdt(nextSellPrice.toString(), amount.toFixed(2)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice.toFixed(4)} ${amount}`);
@@ -289,8 +289,8 @@ async function main(
       // Create buy order
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
-          amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(pair.decimals)),
+          amount: parseUnits(amount.toFixed(2), pair.decimals),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(2)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(2)} ${amount}`);
@@ -309,8 +309,8 @@ async function main(
 
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
-          amount: parseUnits(buyAmount.toFixed(pair.decimals), pair.decimals),
-          receive: tradeApi.calcUsdt(price.toFixed(2), buyAmount.toFixed(pair.decimals)),
+          amount: parseUnits(buyAmount.toFixed(2), pair.decimals),
+          receive: tradeApi.calcUsdt(price.toFixed(2), buyAmount.toFixed(2)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price.toFixed(2)} ${buyAmount}`);
@@ -355,8 +355,8 @@ async function main(
       // Create buy order
       await withRetry(() =>
         tradeApi.createBuyOrder(wallet, {
-          amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(pair.decimals)),
+          amount: parseUnits(amount.toFixed(2), pair.decimals),
+          pay: tradeApi.calcUsdt(nextBuyPrice.toFixed(2), amount.toFixed(2)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice.toFixed(2)} ${amount}`);
@@ -398,8 +398,8 @@ async function main(
       // Create sell order
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
-          amount: parseUnits(amount.toFixed(pair.decimals), pair.decimals),
-          receive: tradeApi.calcUsdt(nextSellPrice.toFixed(2), amount.toFixed(pair.decimals)),
+          amount: parseUnits(amount.toFixed(2), pair.decimals),
+          receive: tradeApi.calcUsdt(nextSellPrice.toFixed(2), amount.toFixed(2)),
         }),
       );
       console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${nextSellPrice.toFixed(2)} ${amount}`);
