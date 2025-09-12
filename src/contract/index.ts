@@ -159,9 +159,12 @@ export class TradeApi extends BaseEvmApi {
   calcUsdt(price: string, bool: string): bigint {
     const receive = BN(bool)
       .times(BN(price))
+      .div(100)
+      .toFixed(2);
+    const receiveAmount = BN(receive)
       .times(10 ** this.tokenB.decimals)
       .toFixed(0);
-    return BigInt(receive);
+    return BigInt(receiveAmount);
   }
 
   async approveToken(signer: Signer): Promise<void> {
