@@ -8,6 +8,7 @@ export const PAIRS = [
     takerAccount: Bun.env.TAKER_ACCOUNT,
     makerAccount: Bun.env.MAKER_ACCOUNT,
     decimals: 18,
+    minSizeDecimals: 3,
   },
   {
     symbol: "SOL-USDT",
@@ -18,6 +19,7 @@ export const PAIRS = [
     takerAccount: Bun.env.TAKER_ACCOUNT_SOL,
     makerAccount: Bun.env.MAKER_ACCOUNT_SOL,
     decimals: 9,
+    minSizeDecimals: 2,
   },
 ];
 

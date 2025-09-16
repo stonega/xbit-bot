@@ -225,8 +225,8 @@ export class PerpApi extends BaseEvmApi {
   }
 
   calcValue(price: string, amount: string, leverage: number) {
-    const priceFixed = BN(price).toFixed(2, BN.ROUND_DOWN);
-    const amountFixed = BN(amount).toFixed(2, BN.ROUND_DOWN);
+    const priceFixed = BN(price).toFixed(2, BN.ROUND_CEIL);
+    const amountFixed = BN(amount).toFixed(2, BN.ROUND_CEIL);
     const receive = BN(amountFixed)
       .times(BN(priceFixed))
       .times(leverage)
