@@ -81,6 +81,11 @@ export const PerpABI = [
             name: "stop_loss",
             type: "uint128",
           },
+          {
+            internalType: "uint128",
+            name: "liquidate_price",
+            type: "uint128",
+          },
         ],
         internalType: "struct Perp.PerpPosition[]",
         name: "",
@@ -162,6 +167,151 @@ export const PerpABI = [
     name: "deposit",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "from_subaccount",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "to_subaccount",
+        type: "address",
+      },
+      {
+        internalType: "uint16",
+        name: "market_id",
+        type: "uint16",
+      },
+      {
+        internalType: "uint128",
+        name: "amount",
+        type: "uint128",
+      },
+    ],
+    name: "depositFromSubaccount",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "freeDepositFor",
+    outputs: [
+      {
+        internalType: "uint128",
+        name: "",
+        type: "uint128",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "subaccount",
+        type: "address",
+      },
+      {
+        internalType: "uint16",
+        name: "market_id",
+        type: "uint16",
+      },
+    ],
+    name: "getLiquidatePrice",
+    outputs: [
+      {
+        internalType: "uint128",
+        name: "",
+        type: "uint128",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint16",
+        name: "market_id",
+        type: "uint16",
+      },
+    ],
+    name: "getPerpMarketSpec",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint128",
+            name: "min_order_size",
+            type: "uint128",
+          },
+          {
+            internalType: "uint128",
+            name: "tick_size",
+            type: "uint128",
+          },
+          {
+            internalType: "uint128",
+            name: "step_size",
+            type: "uint128",
+          },
+        ],
+        internalType: "struct Perp.MarketSpec",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint16",
+        name: "market_id",
+        type: "uint16",
+      },
+    ],
+    name: "lastTradePriceFor",
+    outputs: [
+      {
+        internalType: "uint128",
+        name: "",
+        type: "uint128",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint16",
+        name: "market_id",
+        type: "uint16",
+      },
+    ],
+    name: "markPriceFor",
+    outputs: [
+      {
+        internalType: "uint128",
+        name: "",
+        type: "uint128",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -418,6 +568,11 @@ export const PerpABI = [
         name: "stop_loss",
         type: "uint128",
       },
+      {
+        internalType: "bool",
+        name: "reduce_only",
+        type: "bool",
+      },
     ],
     name: "placePerpOrder",
     outputs: [],
@@ -438,18 +593,49 @@ export const PerpABI = [
       },
       {
         internalType: "uint128",
-        name: "take_profit",
+        name: "take_profit_point",
         type: "uint128",
       },
       {
         internalType: "uint128",
-        name: "stop_loss",
+        name: "stop_loss_point",
         type: "uint128",
       },
     ],
     name: "setProfitAndLossPoint",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "totalCollateralAndMarginRequiredFor",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint128",
+            name: "collateral",
+            type: "uint128",
+          },
+          {
+            internalType: "uint128",
+            name: "margin_required",
+            type: "uint128",
+          },
+        ],
+        internalType: "struct Perp.TotalCollateralAndMargin",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -595,10 +781,15 @@ export const PerpABI = [
             name: "stop_loss",
             type: "uint128",
           },
+          {
+            internalType: "uint128",
+            name: "liquidate_price",
+            type: "uint128",
+          },
         ],
-        internalType: "struct Perp.PerpPosition",
+        internalType: "struct Perp.PerpPosition[]",
         name: "",
-        type: "tuple",
+        type: "tuple[]",
       },
     ],
     stateMutability: "view",

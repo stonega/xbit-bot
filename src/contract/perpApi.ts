@@ -4,7 +4,8 @@ import { Contract } from "ethers";
 import { BaseEvmApi } from "./api";
 import { PerpABI } from "./perp";
 
-export const PERP_CONTRACT_ADDRESS = "0x000000000000000000000000000000000000044E";
+export const PERP_CONTRACT_ADDRESS
+	= "0x000000000000000000000000000000000000044E";
 
 export interface PerpPosition {
   market_id: number;
@@ -84,8 +85,8 @@ const CONTRACT_ADDRESS = "0x000000000000000000000000000000000000044E";
 export class PerpApi extends BaseEvmApi {
   constructor({
     rpc,
-    marketId,
-    token,
+		marketId,
+		token,
   }: {
     rpc: string;
     marketId: number;
@@ -111,13 +112,13 @@ export class PerpApi extends BaseEvmApi {
     signer: Signer,
     {
       subaccount,
-      isLong,
-      size,
-      price,
-      orderType,
-      leverage,
-      takeProfit,
-      stopLoss,
+			isLong,
+			size,
+			price,
+			orderType,
+			leverage,
+			takeProfit,
+			stopLoss,
     }: {
       subaccount: string;
       isLong: boolean;
@@ -141,6 +142,7 @@ export class PerpApi extends BaseEvmApi {
         leverage,
         takeProfit,
         stopLoss,
+        false,
       );
     const limit = await signer.estimateGas(res);
     return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
@@ -150,7 +152,7 @@ export class PerpApi extends BaseEvmApi {
     signer: Signer,
     {
       subaccount,
-      orderId,
+			orderId,
     }: {
       subaccount: string;
       orderId: number;
@@ -167,8 +169,8 @@ export class PerpApi extends BaseEvmApi {
     signer: Signer,
     {
       subaccount,
-      price,
-      slippage,
+			price,
+			slippage,
     }: {
       subaccount: string;
       price: bigint;
@@ -186,8 +188,8 @@ export class PerpApi extends BaseEvmApi {
     provider: BrowserProvider,
     {
       subaccount,
-      takeProfit,
-      stopLoss,
+			takeProfit,
+			stopLoss,
     }: {
       subaccount: string;
       takeProfit: bigint;
@@ -206,7 +208,7 @@ export class PerpApi extends BaseEvmApi {
     signer: Signer,
     {
       subaccount,
-      amount,
+			amount,
     }: {
       subaccount: string;
       amount: bigint;
@@ -239,7 +241,7 @@ export class PerpApi extends BaseEvmApi {
     signer: Signer,
     {
       subaccount,
-      amount,
+			amount,
     }: {
       subaccount: string;
       amount: bigint;
