@@ -727,42 +727,6 @@ export const OrderABI = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "pair",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "order_id",
-        type: "uint256",
-      },
-    ],
-    name: "cancelOrderBuyB",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "pair",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "order_id",
-        type: "uint256",
-      },
-    ],
-    name: "cancelOrderSellB",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
         internalType: "address",
         name: "new_account",
         type: "address",
@@ -771,6 +735,37 @@ export const OrderABI = [
     name: "createOneClickTradingAccount",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "delegateAccounts",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "subaccount",
+            type: "address",
+          },
+          {
+            internalType: "bytes",
+            name: "name",
+            type: "bytes",
+          },
+        ],
+        internalType: "struct CoinExchange.DelegateInfo[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -851,167 +846,17 @@ export const OrderABI = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "pair",
-        type: "bytes32",
+        internalType: "address",
+        name: "subaccount",
+        type: "address",
       },
       {
-        internalType: "uint256",
-        name: "amount_u",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_b",
-        type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "slippage",
-        type: "uint8",
-      },
-      {
-        internalType: "bool",
-        name: "auto_cancel",
-        type: "bool",
+        internalType: "address",
+        name: "delegate",
+        type: "address",
       },
     ],
-    name: "placeMarketOrderBuyBWithPrice",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "pair",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_u",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_b",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "auto_cancel",
-        type: "bool",
-      },
-    ],
-    name: "placeMarketOrderBuyBWithoutPrice",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "pair",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_u",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_b",
-        type: "uint256",
-      },
-      {
-        internalType: "uint8",
-        name: "slippage",
-        type: "uint8",
-      },
-      {
-        internalType: "bool",
-        name: "auto_cancel",
-        type: "bool",
-      },
-    ],
-    name: "placeMarketOrderSellBWithPrice",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "pair",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_u",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_b",
-        type: "uint256",
-      },
-      {
-        internalType: "bool",
-        name: "auto_cancel",
-        type: "bool",
-      },
-    ],
-    name: "placeMarketOrderSellBWithoutPrice",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "pair",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_u",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_b",
-        type: "uint256",
-      },
-    ],
-    name: "placeOrderBuyB",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "bytes32",
-        name: "pair",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_u",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "amount_b",
-        type: "uint256",
-      },
-    ],
-    name: "placeOrderSellB",
+    name: "setDelegateAccount",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1219,6 +1064,33 @@ export const OrderABI = [
             type: "tuple[]",
           },
           {
+            components: [
+              {
+                internalType: "uint8",
+                name: "lending_market_id",
+                type: "uint8",
+              },
+              {
+                internalType: "bytes",
+                name: "asset",
+                type: "bytes",
+              },
+              {
+                internalType: "uint128",
+                name: "amount",
+                type: "uint128",
+              },
+              {
+                internalType: "uint128",
+                name: "interest",
+                type: "uint128",
+              },
+            ],
+            internalType: "struct CoinExchange.BorrowPosition[]",
+            name: "borrow_positions",
+            type: "tuple[]",
+          },
+          {
             internalType: "int64",
             name: "last_add_perp_lp_shares_ts",
             type: "int64",
@@ -1319,11 +1191,6 @@ export const OrderABI = [
             type: "uint8",
           },
           {
-            internalType: "uint8",
-            name: "pool_id",
-            type: "uint8",
-          },
-          {
             internalType: "bytes",
             name: "padding1",
             type: "bytes",
@@ -1379,9 +1246,20 @@ export const OrderABI = [
         name: "auto_cancel",
         type: "bool",
       },
+      {
+        internalType: "bool",
+        name: "reduce_only",
+        type: "bool",
+      },
     ],
     name: "subaccountPlaceMarketOrderBuyBWithPrice",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -1412,9 +1290,20 @@ export const OrderABI = [
         name: "auto_cancel",
         type: "bool",
       },
+      {
+        internalType: "bool",
+        name: "reduce_only",
+        type: "bool",
+      },
     ],
     name: "subaccountPlaceMarketOrderBuyBWithoutPrice",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -1450,9 +1339,20 @@ export const OrderABI = [
         name: "auto_cancel",
         type: "bool",
       },
+      {
+        internalType: "bool",
+        name: "reduce_only",
+        type: "bool",
+      },
     ],
     name: "subaccountPlaceMarketOrderSellBWithPrice",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -1483,9 +1383,20 @@ export const OrderABI = [
         name: "auto_cancel",
         type: "bool",
       },
+      {
+        internalType: "bool",
+        name: "reduce_only",
+        type: "bool",
+      },
     ],
     name: "subaccountPlaceMarketOrderSellBWithoutPrice",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -1510,10 +1421,26 @@ export const OrderABI = [
         internalType: "uint256",
         name: "amount_b",
         type: "uint256",
+      },
+      {
+        internalType: "uint8",
+        name: "post_only",
+        type: "uint8",
+      },
+      {
+        internalType: "bool",
+        name: "reduce_only",
+        type: "bool",
       },
     ],
     name: "subaccountPlaceOrderBuyB",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },
@@ -1539,9 +1466,25 @@ export const OrderABI = [
         name: "amount_b",
         type: "uint256",
       },
+      {
+        internalType: "uint8",
+        name: "post_only",
+        type: "uint8",
+      },
+      {
+        internalType: "bool",
+        name: "reduce_only",
+        type: "bool",
+      },
     ],
     name: "subaccountPlaceOrderSellB",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "nonpayable",
     type: "function",
   },

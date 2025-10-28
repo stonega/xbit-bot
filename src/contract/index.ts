@@ -63,7 +63,7 @@ export class TradeApi extends BaseEvmApi {
           if (this.subaccount) {
             res = await this.contract
               .getFunction("subaccountPlaceOrderBuyB")
-              .populateTransaction(this.subaccount, this.pairId, pay, amount);
+              .populateTransaction(this.subaccount, this.pairId, pay, amount, 0, false);
           }
           else {
             res = await this.contract
@@ -97,7 +97,7 @@ export class TradeApi extends BaseEvmApi {
           if (this.subaccount) {
             res = await this.contract
               .getFunction("subaccountPlaceOrderSellB")
-              .populateTransaction(this.subaccount, this.pairId, receive, amount);
+              .populateTransaction(this.subaccount, this.pairId, receive, amount, 0, false);
           }
           else {
             res = await this.contract
