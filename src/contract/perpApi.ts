@@ -4,8 +4,7 @@ import { Contract } from "ethers";
 import { BaseEvmApi } from "./api";
 import { PerpABI } from "./perp";
 
-export const PERP_CONTRACT_ADDRESS
-	= "0x000000000000000000000000000000000000044E";
+export const PERP_CONTRACT_ADDRESS = "0x000000000000000000000000000000000000044E";
 
 export interface PerpPosition {
   market_id: number;
@@ -142,7 +141,8 @@ export class PerpApi extends BaseEvmApi {
         leverage,
         takeProfit,
         stopLoss,
-        false,
+        false, // reduce_only
+        0,
       );
     const limit = await signer.estimateGas(res);
     return signer.sendTransaction({ ...res, gasLimit: limit * 2n });

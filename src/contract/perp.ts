@@ -573,6 +573,11 @@ export const PerpABI = [
         name: "reduce_only",
         type: "bool",
       },
+      {
+        internalType: "uint8",
+        name: "post_only",
+        type: "uint8",
+      },
     ],
     name: "placePerpOrder",
     outputs: [],
