@@ -150,7 +150,7 @@ async function main(
     // Cancel all active orders before placing new ones
     // Generate random order amount between 0.8 and 1.2
     const amount = 0.4 * Math.random() + 0.8;
-
+    console.log("target", target);
     // If no buy orders exist in the order book, create one at target price
     if (!buyPrice || validBuyPrice === 0) {
       await withRetry(() =>
