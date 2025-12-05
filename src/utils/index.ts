@@ -43,7 +43,7 @@ export async function withRetry<T>(
  * Get orderbook data from xbit api
  */
 export async function getPrice(marketId: number): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const result = await fetch(`https://testnet.xbit.finance/perp/blockchain/perp/order-books?market_id=${marketId}`).then(a => a.json());
+  const result = await fetch(`https://deepdex-api.deepdex.finance/blockchain/perp/order-books?market_id=${marketId}`).then(a => a.json());
   console.log({ result });
   if (!result.data.orderBuyList) {
     console.log({ error: result.msg });
@@ -66,7 +66,7 @@ export async function getPrice(marketId: number): Promise<{ buyPrice: string; se
  * Get pair contract address from xbit api
  */
 export async function getPairContract(pair: string): Promise<{ address: string; pairId: string | undefined }> {
-  const result = await fetch(`https://testnet.deepdex.finance/perp/blockchain/pairs`).then(a => a.json());
+  const result = await fetch(`https://deepdex-api.deepdex.finance/perp/blockchain/perp/pairs`).then(a => a.json());
   const pairInfo = result.data.find((a: any) => a.name === pair)!;
   return {
     address: pairInfo.address,

@@ -13,14 +13,13 @@ export interface PerpPosition {
   entry_price: bigint;
   leverage: number;
   last_funding_rate: bigint;
-  isolated_margin: bigint;
   version: bigint;
-  unrealized_pnl: bigint;
   realized_pnl: bigint;
   funding_payment: bigint;
   owner: string;
   take_profit: bigint;
   stop_loss: bigint;
+  liquidate_price: bigint;
 }
 
 export interface PerpOrder {
@@ -33,14 +32,10 @@ export interface PerpOrder {
   order_type: number;
   create_time: bigint;
   leverage: number;
-  isolated: boolean;
-  margin: bigint;
   slippage: bigint;
   status: number;
   size_filled: bigint;
   size_remain: bigint;
-  margin_remain: bigint;
-  margin_used: bigint;
   take_profit: bigint;
   stop_loss: bigint;
 }
@@ -64,19 +59,31 @@ export interface Token {
 export interface PerpMarket {
   id: number;
   name: string; // bytes
-  token_a: string; // bytes
-  token_a_address: string;
-  token_a_decimal: number;
-  token_b_market_id: number;
+  base_symbol: string; // bytes
+  base_decimal: number;
+  quote_market_id: number;
   network: string; // bytes
   height: bigint;
-  cumulative_funding_rate: bigint;
+  funding_rate: bigint;
   last_cacl_funding_rate_time: bigint;
   oracle_price: bigint;
   max_deviation_bps: bigint;
   liquid_spread_bps: bigint;
-  fallback_if_dlob_price_invalid: boolean;
   maintenance_margin_ratio: bigint;
+  taker_fee_rate: number;
+  maker_fee_rate: number;
+  order_spec: {
+    min_order_size: bigint;
+    tick_size: bigint;
+    step_size: bigint;
+  };
+  open_interest: bigint;
+  long_open_pos_num: bigint;
+  short_open_pos_num: bigint;
+  base_interest_rate: bigint;
+  impact_margin_value: bigint;
+  funding_rate_change_cap: bigint;
+  funding_rate_change_floor: bigint;
 }
 
 const CONTRACT_ADDRESS = "0x000000000000000000000000000000000000044E";
@@ -84,8 +91,8 @@ const CONTRACT_ADDRESS = "0x000000000000000000000000000000000000044E";
 export class PerpApi extends BaseEvmApi {
   constructor({
     rpc,
-		marketId,
-		token,
+    marketId,
+    token,
   }: {
     rpc: string;
     marketId: number;
@@ -111,13 +118,13 @@ export class PerpApi extends BaseEvmApi {
     signer: Signer,
     {
       subaccount,
-			isLong,
-			size,
-			price,
-			orderType,
-			leverage,
-			takeProfit,
-			stopLoss,
+      isLong,
+      size,
+      price,
+      orderType,
+      leverage,
+      takeProfit,
+      stopLoss,
     }: {
       subaccount: string;
       isLong: boolean;
@@ -142,7 +149,7 @@ export class PerpApi extends BaseEvmApi {
         takeProfit,
         stopLoss,
         false, // reduce_only
-        0,
+        0, // post_only
       );
     const limit = await signer.estimateGas(res);
     return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
@@ -152,7 +159,7 @@ export class PerpApi extends BaseEvmApi {
     signer: Signer,
     {
       subaccount,
-			orderId,
+      orderId,
     }: {
       subaccount: string;
       orderId: number;
@@ -169,8 +176,8 @@ export class PerpApi extends BaseEvmApi {
     signer: Signer,
     {
       subaccount,
-			price,
-			slippage,
+      price,
+      slippage,
     }: {
       subaccount: string;
       price: bigint;
@@ -188,8 +195,8 @@ export class PerpApi extends BaseEvmApi {
     provider: BrowserProvider,
     {
       subaccount,
-			takeProfit,
-			stopLoss,
+      takeProfit,
+      stopLoss,
     }: {
       subaccount: string;
       takeProfit: bigint;
@@ -200,28 +207,6 @@ export class PerpApi extends BaseEvmApi {
       .getFunction("setProfitAndLossPoint")
       .populateTransaction(subaccount, this.marketId, takeProfit, stopLoss);
     const signer = await provider.getSigner();
-    const limit = await signer.estimateGas(res);
-    return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
-  }
-
-  async deposit(
-    signer: Signer,
-    {
-      subaccount,
-			amount,
-    }: {
-      subaccount: string;
-      amount: bigint;
-    },
-  ) {
-    const res = await this.contract
-      .getFunction("deposit")
-      .populateTransaction(subaccount, this.marketId, amount);
-    console.log(res, {
-      subaccount,
-      marketId: this.marketId,
-      amount,
-    });
     const limit = await signer.estimateGas(res);
     return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
   }
@@ -237,29 +222,12 @@ export class PerpApi extends BaseEvmApi {
     return BigInt(receive);
   }
 
-  async withdraw(
-    signer: Signer,
-    {
-      subaccount,
-			amount,
-    }: {
-      subaccount: string;
-      amount: bigint;
-    },
-  ) {
-    const res = await this.contract
-      .getFunction("withdraw")
-      .populateTransaction(subaccount, this.marketId, amount);
-    const limit = await signer.estimateGas(res);
-    return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
-  }
-
   async userActiveOrders(user: string): Promise<ActiveOrder[]> {
     return this.contract.userActiveOrders!(user);
   }
 
-  async userPerpPositions(user: string): Promise<PerpPosition> {
-    return this.contract.userPerpPositions!(user, this.marketId);
+  async userPerpPositions(user: string): Promise<PerpPosition[]> {
+    return this.contract.userPerpPositions!(user, [this.marketId]);
   }
 
   async orderInfo(user: string, orderId: number): Promise<PerpOrder> {

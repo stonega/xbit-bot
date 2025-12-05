@@ -4,6 +4,7 @@ import { Contract } from "ethers";
 import { withRetry } from "../utils";
 import { OrderABI, TradeABI, TradeNativeABI } from "./abi";
 import { BaseEvmApi } from "./api";
+export * from "./subaccountApi";
 
 const CONTRACT = "0x000000000000000000000000000000000000044E";
 const SPENDER_ADDRESS = "0x6d6F646C617070726F76652f0000000000000000";

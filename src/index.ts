@@ -109,7 +109,8 @@ async function main(
   const wallet = new Wallet(privateKey, provider);
   console.log(`[${pair.symbol}${new Date().toISOString()}] ${role} address: ${wallet.address}, sub-account: ${account}`);
   try {
-    const position = await perpApi.userPerpPositions(account);
+    const positions = await perpApi.userPerpPositions(account);
+    const position = positions[0];
     if (position && position.base_asset_amount > 0n) {
       const positionSize = Number(formatUnits(position.base_asset_amount, pair.decimals));
       console.log(`[${pair.symbol}${new Date().toISOString()}] Current position size: ${positionSize}, isLong: ${position.is_long}`);
