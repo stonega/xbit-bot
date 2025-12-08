@@ -93,10 +93,9 @@ async function main(
   // Initialize trading API with contract, token, and subaccount information
   const tradeApi = new TradeApi({
     rpc: currentNetwork.rpc,
-    contract: "0x000000000000000000000000000000000000044d",
-    tokenA: tradeToken,
-    tokenB: collateralToken,
-    pairId: pair.pairId,
+    pair: pair.pairId,
+    baseToken: tradeToken,
+    quoteToken: collateralToken,
     subaccount: account, // Add subaccount to use subaccount functions
   });
 
@@ -106,7 +105,7 @@ async function main(
   provider._getConnection().timeout = 10000;
 
   // Get current market prices and order book information
-  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.symbol);
+  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.pairId);
 
   // Validate prices before using them
   const validBuyPrice = validatePrice(buyPrice);
@@ -167,7 +166,7 @@ async function main(
   if (role === "maker") {
     // Cancel all active orders before placing new ones
     // Generate random order amount between 0.8 and 1.2
-    const amount = 0.4 * Math.random() + 0.8;
+    const amount = 0.004 * Math.random() + 0.004;
 
     // If no buy orders exist in the order book, create one at target price
     if (!buyPrice || validBuyPrice === 0) {
@@ -236,7 +235,7 @@ async function main(
 
       await withRetry(() =>
         tradeApi.createSellOrder(wallet, {
-          amount: parseUnits("10", pair.decimals),
+          amount: parseUnits("0.002", pair.decimals),
           receive: tradeApi.calcUsdt(price.toString(), "10"),
         }),
       );
@@ -253,7 +252,7 @@ async function main(
 
     // Exit if no buy orders exist
     if ((!buyPrice || validBuyPrice === 0) && (sellPrice && validSellPrice > 0)) {
-      let amount = 8 + Math.random() * 4;
+      let amount = 0.004 + Math.random() * 0.004;
 
       // Adjust amount based on available sell orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && validSellAmount > 0) {
@@ -301,7 +300,7 @@ async function main(
     // If current price is very close to target, create a small sell order to maintain price
     if (validBuyPrice > 0 && Math.abs(validBuyPrice - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
-      const buyAmount = 1.5;
+      const buyAmount = 0.005;
       // If buy price exceeds 10% of target price, use target price directly
       let price = validBuyPrice;
       if (validBuyPrice > target * 1.05 || validBuyPrice < target * 0.95) {
@@ -365,7 +364,7 @@ async function main(
     else {
       // If buy price is above target, create sell order to push price down
       // Calculate order amount (between 4-8 or based on available buy amount)
-      let amount = 4 + Math.random() * 4;
+      let amount = 0.004 + Math.random() * 0.004;
 
       // Adjust amount based on available buy orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && validBuyAmount > 0) {

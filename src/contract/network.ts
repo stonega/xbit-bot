@@ -1,6 +1,6 @@
 export const betaTestnet = {
   baseUrl: "https://beta-api.boolscan.com/bool-network-beta",
-  rpc: "https://betatest-rpc-node-http.bool.network",
+  rpc: "https://rpc-testnet.deepdex.finance",
   wss: "wss://betatest-rpc-node-ws.bool.network",
   chainId: 481,
   symbol: "tBOL",
@@ -27,7 +27,7 @@ export const betaTestnet = {
 };
 
 export const ultraLiquidTestnet = {
-  rpc: "https://ultra-test-node-rpc.bool.network",
+  rpc: "https://rpc-testnet.deepdex.finance",
   chainId: 483,
   symbol: "tBOL",
   name: "Ultra Liquid Testnet",
@@ -47,14 +47,6 @@ export const ultraLiquidTestnet = {
       address: "0x3167c4d4d0d8488220ceeac8e0262cf316f82fdd",
       icon: "/images/usdc.png",
       symbol: "USDC",
-      decimals: 6,
-      price: "USDC",
-    },
-    usdc1: {
-      name: "USDC",
-      address: "0x3167c4d4d0d8488220ceeac8e0262cf316f82fdd",
-      icon: "/images/usdc.png",
-      symbol: "USDC1",
       decimals: 6,
       price: "USDC",
     },

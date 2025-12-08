@@ -42,13 +42,14 @@ export async function withRetry<T>(
 /**
  * Get orderbook data from xbit api
  */
-export async function getPrice(symbol: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const result = await fetch(`https://testnet.xbit.finance/perp/blockchain/order-books?pair=${symbol}`).then(a => a.json());
-  if (!result.data.orderBuyBList) {
+export async function getPrice(pairId: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
+  const result = await fetch(`https://deepdex-api.deepdex.finance/blockchain/spot/order-books?pair=${pairId}`).then(a => a.json());
+  console.log({ result });
+  if (!result.data.orderBuyList) {
     console.log({ error: result.msg });
   }
-  const buyList = [...result.data.orderBuyBList].sort((a: any, b: any) => b.price - a.price);
-  const sellList = [...result.data.orderSellBList].sort((a: any, b: any) => a.price - b.price);
+  const buyList = result.data.orderBuyList.sort((a: any, b: any) => b.price - a.price);
+  const sellList = result.data.orderSellList.sort((a: any, b: any) => a.price - b.price);
   const buyPrice = buyList[0]?.price;
   const buyAmount = buyList[0]?.qty;
   const sellPrice = sellList[0]?.price;
@@ -58,18 +59,6 @@ export async function getPrice(symbol: string): Promise<{ buyPrice: string; sell
     buyAmount,
     sellPrice,
     sellAmount,
-  };
-}
-
-/**
- * Get pair contract address from xbit api
- */
-export async function getPairContract(pair: string): Promise<{ address: string; pairId: string | undefined }> {
-  const result = await fetch(`https://test-api.safematrix.io/bool-stake-reward/blockchain/pairs`).then(a => a.json());
-  const pairInfo = result.data.find((a: any) => a.name === pair)!;
-  return {
-    address: pairInfo.address,
-    pairId: pairInfo.pairId,
   };
 }
 
