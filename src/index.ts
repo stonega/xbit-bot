@@ -328,7 +328,7 @@ async function main(
     // If buy price is below target, create buy order to push price up
     if (validBuyPrice < target || validBuyPrice === 0) {
       // Calculate order amount (between 4-8 or based on available sell amount)
-      let amount = 8 + Math.random() * 4;
+      let amount = 0.4 + Math.random() * 0.4;
 
       // Adjust amount based on available sell orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && validSellAmount > 0) {
