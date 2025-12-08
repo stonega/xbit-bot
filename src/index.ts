@@ -257,7 +257,7 @@ async function main(
 
     // Exit if no buy orders exist
     if ((!buyPrice || validBuyPrice === 0) && (sellPrice && validSellPrice > 0)) {
-      let amount = 8 + Math.random() * 4;
+      let amount = 0.1 + Math.random() * 0.4;
 
       // Adjust amount based on available sell orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && validSellAmount > 0) {
@@ -306,7 +306,7 @@ async function main(
     // If current price is very close to target, create a small sell order to maintain price
     if (validBuyPrice > 0 && Math.abs(validBuyPrice - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
-      const buyAmount = 1.5;
+      const buyAmount = 0.5;
       const price = validBuyPrice.toFixed(2);
 
       await withRetry(() =>
