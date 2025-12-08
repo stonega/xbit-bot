@@ -27,7 +27,7 @@ export const betaTestnet = {
 };
 
 export const ultraLiquidTestnet = {
-  rpc: "https://rpc-testnetx.deepdex.finance",
+  rpc: "https://rpc-testnet.deepdex.finance",
   chainId: 483,
   symbol: "tBOL",
   name: "Ultra Liquid Testnet",
