@@ -129,7 +129,7 @@ async function main(
   const wallet = new Wallet(privateKey, provider);
   console.log(`[${pair.symbol}${new Date().toISOString()}] ${role} address: ${wallet.address}, sub-account: ${account}`);
   const activeOrders = await tradeApi.userActiveSpotOrders(account);
-  if (activeOrders.length > 20) {
+  if (activeOrders.length > 5) {
     console.log(`[${pair.symbol}${new Date().toISOString()}] Found ${activeOrders.length} active orders to cancel.`);
 
     // Find the order with price furthest from target price
