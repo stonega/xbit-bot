@@ -10,17 +10,17 @@ export const PAIRS = [
     makerAccount: Bun.env.MAKER_ACCOUNT,
     decimals: 18,
   },
-  // {
-  //   symbol: "SOL/USDT",
-  //   price: "SOL",
-  //   makerPrivateKey: Bun.env.MAKER_PRIVATE_KEY_SOL,
-  //   takerPrivateKey: Bun.env.TAKER_PRIVATE_KEY_SOL,
-  //   marketId: 3,
-  //   takerAccount: Bun.env.TAKER_ACCOUNT_SOL,
-  //   makerAccount: Bun.env.MAKER_ACCOUNT_SOL,
-  //   decimals: 9,
-  //   pairId: "0x4e1af3b5045cc8c4feeb72e106dcb9dd2d2f0921111009fbb90d175057158932",
-  // },
+  {
+    symbol: "SOL/USDT",
+    price: "SOL",
+    makerPrivateKey: Bun.env.MAKER_PRIVATE_KEY_SOL,
+    takerPrivateKey: Bun.env.TAKER_PRIVATE_KEY_SOL,
+    marketId: 3,
+    takerAccount: Bun.env.TAKER_ACCOUNT_SOL,
+    makerAccount: Bun.env.MAKER_ACCOUNT_SOL,
+    decimals: 9,
+    pairId: '0x7eb581d73f79e10dc976bd3815f49ba4e0378a1aa8d64ece2aa3a807fbabc4d8',
+  },
 ];
 
 export const TOKENS = [
@@ -36,7 +36,7 @@ export const TOKENS = [
   },
   {
     symbol: "SOL",
-    address: "0x8a77F53BCdC4780BE8C64F341913d552B13D32fA",
+    address: "0x21Bbda69f5464d53e77206fDffAE560549414392",
     decimals: 9,
   },
 ];
