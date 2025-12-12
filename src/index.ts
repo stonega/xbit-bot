@@ -236,7 +236,7 @@ async function main(
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
           isLong: false,
-          size: parseUnits("10", pair.decimals),
+          size: parseUnits("1.2", pair.decimals),
           price: parseUnits(price.toFixed(2), 6),
           orderType: 0,
           leverage: 10,
@@ -376,7 +376,7 @@ async function main(
     else {
       // If buy price is above target, create sell order to push price down
       // Calculate order amount (between 4-8 or based on available buy amount)
-      let amount = 4 + Math.random() * 4;
+      let amount = 0.4 + Math.random() * 0.4;
 
       // Adjust amount based on available buy orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && validBuyAmount > 0) {
