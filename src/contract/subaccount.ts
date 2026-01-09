@@ -16,6 +16,37 @@ export const SubaccountABI = [
     inputs: [
       {
         internalType: 'address',
+        name: 'user',
+        type: 'address',
+      },
+    ],
+    name: 'delegateAccounts',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'subaccount',
+            type: 'address',
+          },
+          {
+            internalType: 'bytes',
+            name: 'name',
+            type: 'bytes',
+          },
+        ],
+        internalType: 'struct Subaccount.DelegateInfo[]',
+        name: '',
+        type: 'tuple[]',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
         name: 'subaccount',
         type: 'address',
       },
@@ -68,73 +99,6 @@ export const SubaccountABI = [
     inputs: [
       {
         internalType: 'address',
-        name: 'subaccount',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'delegate',
-        type: 'address',
-      },
-    ],
-    name: 'setDelegateAccount',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'subaccount',
-        type: 'address',
-      },
-      {
-        internalType: 'bool',
-        name: 'enable_spot_margin',
-        type: 'bool',
-      },
-    ],
-    name: 'setSpotMargin',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'user',
-        type: 'address',
-      },
-    ],
-    name: 'delegateAccounts',
-    outputs: [
-      {
-        components: [
-          {
-            internalType: 'address',
-            name: 'subaccount',
-            type: 'address',
-          },
-          {
-            internalType: 'bytes',
-            name: 'name',
-            type: 'bytes',
-          },
-        ],
-        internalType: 'struct Subaccount.DelegateInfo[]',
-        name: '',
-        type: 'tuple[]',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
         name: 'owner',
         type: 'address',
       },
@@ -171,6 +135,60 @@ export const SubaccountABI = [
     inputs: [
       {
         internalType: 'address',
+        name: 'subaccount',
+        type: 'address',
+      },
+      {
+        internalType: 'bytes',
+        name: 'new_name',
+        type: 'bytes',
+      },
+    ],
+    name: 'renameSubaccount',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'subaccount',
+        type: 'address',
+      },
+      {
+        internalType: 'address',
+        name: 'delegate',
+        type: 'address',
+      },
+    ],
+    name: 'setDelegateAccount',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: 'subaccount',
+        type: 'address',
+      },
+      {
+        internalType: 'bool',
+        name: 'enable_spot_margin',
+        type: 'bool',
+      },
+    ],
+    name: 'setSpotMargin',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
         name: 'account',
         type: 'address',
       },
@@ -197,44 +215,14 @@ export const SubaccountABI = [
           {
             components: [
               {
+                internalType: 'bytes',
+                name: 'symbol',
+                type: 'bytes',
+              },
+              {
                 internalType: 'uint128',
                 name: 'token_amount',
                 type: 'uint128',
-              },
-              {
-                internalType: 'int64',
-                name: 'open_bids',
-                type: 'int64',
-              },
-              {
-                internalType: 'int64',
-                name: 'open_asks',
-                type: 'int64',
-              },
-              {
-                internalType: 'int64',
-                name: 'cumulative_deposits',
-                type: 'int64',
-              },
-              {
-                internalType: 'uint16',
-                name: 'market_index',
-                type: 'uint16',
-              },
-              {
-                internalType: 'uint8',
-                name: 'balance_type',
-                type: 'uint8',
-              },
-              {
-                internalType: 'uint8',
-                name: 'open_orders',
-                type: 'uint8',
-              },
-              {
-                internalType: 'bytes',
-                name: 'padding',
-                type: 'bytes',
               },
             ],
             internalType: 'struct Subaccount.SpotPosition[]',

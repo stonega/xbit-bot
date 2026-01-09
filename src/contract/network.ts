@@ -27,8 +27,8 @@ export const betaTestnet = {
 };
 
 export const ultraLiquidTestnet = {
-  rpc: "https://rpc-testnet.deepdex.finance",
-  chainId: 483,
+  rpc: "https://testnetx-rpc.deepdex.finance",
+  chainId: 4833,
   symbol: "tBOL",
   name: "Ultra Liquid Testnet",
   value: "ultra_liquid_testnet",
@@ -44,7 +44,7 @@ export const ultraLiquidTestnet = {
     },
     usdt: {
       name: "USDC",
-      address: "0xB94e8cE66d708251C893d32B077eC634D5D44D16",
+      address: "0xBBdefA290B10D6762E44e5581A3533BF831A8C5C",
       icon: "/images/usdc.png",
       symbol: "USDC",
       decimals: 6,

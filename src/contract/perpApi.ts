@@ -151,8 +151,8 @@ export class PerpApi extends BaseEvmApi {
         false, // reduce_only
         0, // post_only
       );
-    const limit = await signer.estimateGas(res);
-    return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+    const nonce = new Date().valueOf()
+    return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
   }
 
   async cancelOrder(
@@ -168,8 +168,8 @@ export class PerpApi extends BaseEvmApi {
     const res = await this.contract
       .getFunction("cancelOrder")
       .populateTransaction(subaccount, this.marketId, orderId);
-    const limit = await signer.estimateGas(res);
-    return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+    const nonce = new Date().valueOf()
+    return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
   }
 
   async closePosition(
@@ -187,8 +187,8 @@ export class PerpApi extends BaseEvmApi {
     const res = await this.contract
       .getFunction("closePosition")
       .populateTransaction(subaccount, this.marketId, price, slippage);
-    // const limit = await signer.estimateGas(res);
-    return signer.sendTransaction({ ...res, gasLimit: 1000000n });
+    const limit = await signer.estimateGas(res);
+    return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
   }
 
   async setProfitAndLossPoint(

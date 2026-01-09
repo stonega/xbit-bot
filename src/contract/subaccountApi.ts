@@ -17,14 +17,8 @@ export interface OneClickTrading {
 }
 
 export interface SpotPosition {
+    symbol: string; // bytes
     token_amount: bigint; // uint128
-    open_bids: bigint; // int64
-    open_asks: bigint; // int64
-    cumulative_deposits: bigint; // int64
-    market_index: number; // uint16
-    balance_type: number; // uint8
-    open_orders: number; // uint8
-    padding: string; // bytes
 }
 
 export interface BorrowPosition {
@@ -134,6 +128,23 @@ export class SubaccountApi extends BaseEvmApi {
         const res = await this.contract
             .getFunction("setDelegateAccount")
             .populateTransaction(subaccount, delegate);
+        const limit = await signer.estimateGas(res);
+        return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+    }
+
+    async renameSubaccount(
+        signer: Signer,
+        {
+            subaccount,
+            newName,
+        }: {
+            subaccount: string;
+            newName: string; // bytes
+        },
+    ) {
+        const res = await this.contract
+            .getFunction("renameSubaccount")
+            .populateTransaction(subaccount, newName);
         const limit = await signer.estimateGas(res);
         return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
     }
