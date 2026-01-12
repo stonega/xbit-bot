@@ -117,8 +117,8 @@ export class SpotApi extends BaseEvmApi {
                 postOnly,
                 reduceOnly,
             );
-        const limit = await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
     }
 
     async placeMarketOrderBuyWithPrice(
