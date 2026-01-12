@@ -213,8 +213,8 @@ export class SpotApi extends BaseEvmApi {
                 autoCancel,
                 reduceOnly,
             );
-        const limit = await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
     }
 
     async placeMarketOrderSellWithoutPrice(
@@ -260,8 +260,8 @@ export class SpotApi extends BaseEvmApi {
         const res = await this.contract
             .getFunction("subaccountCancelOrderBuyB")
             .populateTransaction(subaccount, this.pair, orderId);
-        const limit = await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
     }
 
     async cancelOrderSell(
