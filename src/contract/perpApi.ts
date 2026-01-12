@@ -152,7 +152,9 @@ export class PerpApi extends BaseEvmApi {
         0, // post_only
       );
     const nonce = new Date().valueOf()
-    return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
+    const result = await signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
+    console.log(result.hash)
+    return
   }
 
   async cancelOrder(

@@ -1,4 +1,4 @@
-import { formatUnits, JsonRpcProvider, parseEther, parseUnits, Wallet } from "ethers";
+import { formatUnits, JsonRpcProvider, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY } from "./config";
 import { ultraLiquidTestnet } from "./contract/network";
@@ -110,22 +110,24 @@ async function main(
   console.log(`[${pair.symbol}${new Date().toISOString()}] ${role} address: ${wallet.address}, sub-account: ${account}`);
   try {
     const positions = await perpApi.userPerpPositions(account);
-    const position = positions[0];
-    if (position && position.base_asset_amount > 0n) {
-      const positionSize = Number(formatUnits(position.base_asset_amount, pair.decimals));
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Current position size: ${positionSize}, isLong: ${position.is_long}`);
+    if (positions.length > 0) {
+      const position = positions[0];
+      if (position && position.base_asset_amount > 0n) {
+        const positionSize = Number(formatUnits(position.base_asset_amount, pair.decimals));
+        console.log(`[${pair.symbol}${new Date().toISOString()}] Current position size: ${positionSize}, isLong: ${position.is_long}`);
 
-      const MAX_POSITION_SIZE = TAKER_CAPACITY * 6;
-      if (positionSize > MAX_POSITION_SIZE / 2) {
-        await withRetry(() =>
-          perpApi.closePosition(wallet, {
-            subaccount: account,
-            price: 0n,
-            slippage: 30n,
-          }),
-        );
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        console.log(`[${pair.symbol}${new Date().toISOString()}] Closed position.`);
+        const MAX_POSITION_SIZE = TAKER_CAPACITY * 6;
+        if (positionSize > MAX_POSITION_SIZE / 2) {
+          await withRetry(() =>
+            perpApi.closePosition(wallet, {
+              subaccount: account,
+              price: 0n,
+              slippage: 30n,
+            }),
+          );
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          console.log(`[${pair.symbol}${new Date().toISOString()}] Closed position.`);
+        }
       }
     }
   }

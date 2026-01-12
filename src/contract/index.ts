@@ -66,8 +66,8 @@ export class TradeApi extends BaseEvmApi {
             .getFunction("placeOrderBuyB")
             .populateTransaction(pay, amount);
         }
-        await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: 500000 });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 500000 });
       },
       3, // 3 retries
       1000, // 2 second delay between retries
@@ -98,8 +98,8 @@ export class TradeApi extends BaseEvmApi {
             .getFunction("placeOrderSellB")
             .populateTransaction(receive, amount);
         }
-        await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: 500000 });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 500000 });
       },
       3, // 3 retries
       1000, // 2 second delay between retries
@@ -122,8 +122,8 @@ export class TradeApi extends BaseEvmApi {
         .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
         .populateTransaction(orderId);
     }
-    await signer.estimateGas(res);
-    return signer.sendTransaction(res);
+    const nonce = new Date().valueOf()
+    return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000 });
   }
 
   calcUsdt(price: string, bool: string): bigint {

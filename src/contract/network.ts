@@ -32,7 +32,7 @@ export const ultraLiquidTestnet = {
   symbol: "tBOL",
   name: "Ultra Liquid Testnet",
   value: "ultra_liquid_testnet",
-  explorer: "https://beta-testnet.boolscan.com",
+  explorer: "https://explorer-testnet.deepdex.finance",
   icon: "https://bool.network/bool-network-orange.png",
   tokens: {
     bool: {
