@@ -5,7 +5,7 @@ export const PAIRS = [
     makerPrivateKey: Bun.env.MAKER_PRIVATE_KEY,
     takerPrivateKey: Bun.env.TAKER_PRIVATE_KEY,
     marketId: 1,
-    pairId: "0x7cf219b32b35000e20677b2c149c92b785bd8417c3c0834376a8a1df31734d6a",
+    pairId: "0x950c1bb15508369148679bf2921417929f1465c068c4b22a980c3c23535846c0",
     takerAccount: Bun.env.TAKER_ACCOUNT,
     makerAccount: Bun.env.MAKER_ACCOUNT,
     decimals: 18,
@@ -19,7 +19,7 @@ export const PAIRS = [
     takerAccount: Bun.env.TAKER_ACCOUNT_SOL,
     makerAccount: Bun.env.MAKER_ACCOUNT_SOL,
     decimals: 9,
-    pairId: '0x7eb581d73f79e10dc976bd3815f49ba4e0378a1aa8d64ece2aa3a807fbabc4d8',
+    pairId: '0x7219b7b8ceab0580a3124c284f9bda81dfef3309f28e50c08df32711967a489d',
   },
 ];
 

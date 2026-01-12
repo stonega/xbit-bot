@@ -43,7 +43,8 @@ export async function withRetry<T>(
  * Get orderbook data from xbit api
  */
 export async function getPrice(pairId: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const result = await fetch(`https://deepdex-api.deepdex.finance/v1/blockchain/spot/order-books?pair=${pairId}`).then(a => a.json());
+  const result = await fetch(`https://deepdex-api.deepdex.net/v1/blockchain/spot/order-books?pair=${pairId}`).then(a => a.json());
+  console.log(`https://deepdex-api.deepdex.net/v1/blockchain/spot/order-books?pair=${pairId}`)
   console.log({ result });
   if (!result.data.orderBuyList) {
     console.log({ error: result.msg });

@@ -27,8 +27,8 @@ export const betaTestnet = {
 };
 
 export const ultraLiquidTestnet = {
-  rpc: "https://rpc-testnet.deepdex.finance",
-  chainId: 483,
+  rpc: "https://testnetx-rpc.deepdex.finance",
+  chainId: 4833,
   symbol: "tBOL",
   name: "Ultra Liquid Testnet",
   value: "ultra_liquid_testnet",
@@ -44,25 +44,11 @@ export const ultraLiquidTestnet = {
     },
     usdt: {
       name: "USDC",
-      address: "0x3167c4d4d0d8488220ceeac8e0262cf316f82fdd",
+      address: "0xBBdefA290B10D6762E44e5581A3533BF831A8C5C",
       icon: "/images/usdc.png",
       symbol: "USDC",
       decimals: 6,
       price: "USDC",
-    },
-    stk: {
-      name: "STK",
-      address: "0x33df4cf5744e63d53cb62090f8fc9bed973aa055",
-      icon: "/images/usdc.png",
-      symbol: "STK",
-      decimals: 18,
-    },
-    btu: {
-      name: "BTU",
-      address: "0xa20454333c249e5c25942196b37f019d3d61926f",
-      icon: "/images/usdc.png",
-      symbol: "BTU",
-      decimals: 18,
     },
   },
 };

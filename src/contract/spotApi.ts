@@ -87,8 +87,8 @@ export class SpotApi extends BaseEvmApi {
                 postOnly,
                 reduceOnly,
             );
-        const limit = await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
     }
 
     async placeLimitOrderSell(
@@ -150,8 +150,8 @@ export class SpotApi extends BaseEvmApi {
                 autoCancel,
                 reduceOnly,
             );
-        const limit = await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
     }
 
     async placeMarketOrderBuyWithoutPrice(
@@ -180,8 +180,8 @@ export class SpotApi extends BaseEvmApi {
                 autoCancel,
                 reduceOnly,
             );
-        const limit = await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
     }
 
     async placeMarketOrderSellWithPrice(
@@ -243,8 +243,8 @@ export class SpotApi extends BaseEvmApi {
                 autoCancel,
                 reduceOnly,
             );
-        const limit = await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
     }
 
     async cancelOrderBuy(
@@ -277,8 +277,8 @@ export class SpotApi extends BaseEvmApi {
         const res = await this.contract
             .getFunction("subaccountCancelOrderSellB")
             .populateTransaction(subaccount, this.pair, orderId);
-        const limit = await signer.estimateGas(res);
-        return signer.sendTransaction({ ...res, gasLimit: limit * 2n });
+        const nonce = new Date().valueOf()
+        return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
     }
 
     async userActiveSpotOrders(user: string): Promise<SpotOrder[]> {
