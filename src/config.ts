@@ -1,21 +1,21 @@
 export const PAIRS = [
   {
-    symbol: "ETH/USDT",
+    symbol: "ETH/USDC",
     price: "ETH",
     makerPrivateKey: Bun.env.MAKER_PRIVATE_KEY,
     takerPrivateKey: Bun.env.TAKER_PRIVATE_KEY,
-    marketId: 1,
+    marketId: 3,
     pairId: "0x950c1bb15508369148679bf2921417929f1465c068c4b22a980c3c23535846c0",
     takerAccount: Bun.env.TAKER_ACCOUNT,
     makerAccount: Bun.env.MAKER_ACCOUNT,
     decimals: 18,
   },
   {
-    symbol: "SOL/USDT",
+    symbol: "SOL/USDC",
     price: "SOL",
     makerPrivateKey: Bun.env.MAKER_PRIVATE_KEY_SOL,
     takerPrivateKey: Bun.env.TAKER_PRIVATE_KEY_SOL,
-    marketId: 3,
+    marketId: 4,
     takerAccount: Bun.env.TAKER_ACCOUNT_SOL,
     makerAccount: Bun.env.MAKER_ACCOUNT_SOL,
     decimals: 9,
@@ -26,17 +26,17 @@ export const PAIRS = [
 export const TOKENS = [
   {
     symbol: "ETH",
-    address: "0x983D7366Ac7860809cA93b96ba3cA1640Cefc115",
+    address: "0xD6c9c7078fc1Fe5065bc85f4743FAB219Bb053fd",
     decimals: 18,
   },
   {
-    symbol: "USDT",
-    address: "0xB94e8cE66d708251C893d32B077eC634D5D44D16",
+    symbol: "USDC",
+    address: "0x273Bc0743CeD7c5508015461E60C256f880926Cb",
     decimals: 6,
   },
   {
     symbol: "SOL",
-    address: "0x21Bbda69f5464d53e77206fDffAE560549414392",
+    address: "0xBBdefA290B10D6762E44e5581A3533BF831A8C5C",
     decimals: 9,
   },
 ];

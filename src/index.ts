@@ -3,7 +3,7 @@ import { formatUnits, JsonRpcProvider, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY, TOKENS } from "./config";
 import { TradeApi } from "./contract";
-import { ultraLiquidTestnet } from "./contract/network";
+import { deepxTestnet } from "./contract/network";
 import { PerpApi } from "./contract/perpApi";
 import { getPrice, getTargetPrice, withRetry } from "./utils";
 
@@ -58,10 +58,10 @@ async function main(
   role: "maker" | "taker",
 ): Promise<void> {
   // Get network configuration
-  const currentNetwork = ultraLiquidTestnet;
+  const currentNetwork = deepxTestnet;
 
   // Find token information from config TOKENS
-  const collateralToken = TOKENS.find(token => token.symbol === "USDT");
+  const collateralToken = TOKENS.find(token => token.symbol === "USDC");
   const tradeToken = TOKENS.find(token => token.symbol === pair.price);
 
   if (!tradeToken) {
