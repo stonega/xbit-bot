@@ -52,3 +52,49 @@ export const ultraLiquidTestnet = {
     },
   },
 };
+
+export const deepxTestnet = {
+  rpc: 'https://devnet-rpc.deepx.fi',
+  chainId: 4835,
+  symbol: 'tDGAS',
+  name: 'DeepX Devnet',
+  value: 'deepx_devnet',
+  explorer: 'http://explorer-devnet.deepx.fi',
+  networkType: 'evm',
+  marketWs: 'wss://devnet-api.deepx.fi/v2/ws',
+  rpcWs: 'wss://devnet-rpc.deepx.fi',
+  icon: '/images/deepdex.png',
+  contracts: {
+    anchor: '0x9e78333ebc43a58c002c54898351a8ae94db067b',
+    consumer: '0x76919ec6102B1b7a30adef74a175b24738ad4fAF',
+    consumerSepolia: '0xedB82347AEC1808E0DB393D3c3493DA47F191018',
+    consumerSolanaDevnet: '0xf01a35C347bFE2944A32d7610531f42B706301BC',
+    vault: '0x9837BBE7BA2C7ABfcc268cDC0CD687D3AA47973A',
+  },
+  tokens: {
+    usdc: {
+      name: 'USDC',
+      address: '0x273Bc0743CeD7c5508015461E60C256f880926Cb',
+      icon: '/images/usdc.png',
+      symbol: 'USDC',
+      decimals: 6,
+      marketId: 1,
+    },
+    eth: {
+      name: 'ETH',
+      address: '0xD6c9c7078fc1Fe5065bc85f4743FAB219Bb053fd',
+      icon: '/images/eth.png',
+      symbol: 'ETH',
+      decimals: 18,
+      marketId: 3,
+    },
+    sol: {
+      name: 'SOL',
+      address: '0xBBdefA290B10D6762E44e5581A3533BF831A8C5C',
+      icon: '/images/sol.png',
+      symbol: 'SOL',
+      decimals: 9,
+      marketId: 4,
+    },
+  },
+};

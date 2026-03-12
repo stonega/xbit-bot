@@ -1,7 +1,7 @@
 import { formatUnits, JsonRpcProvider, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY } from "./config";
-import { ultraLiquidTestnet } from "./contract/network";
+import { deepxTestnet } from "./contract/network";
 import { PerpApi } from "./contract/perpApi";
 import { getPrice, getTargetPrice, withRetry } from "./utils";
 
@@ -56,10 +56,10 @@ async function main(
   role: "maker" | "taker",
 ): Promise<void> {
   // Get network configuration
-  const currentNetwork = ultraLiquidTestnet;
+  const currentNetwork = deepxTestnet;
 
   // Find token information from pair symbol
-  const collateralToken = currentNetwork.tokens.usdt;
+  const collateralToken = currentNetwork.tokens.usdc;
 
   if (!pair.marketId) {
     console.log(`[${pair.symbol}${new Date().toISOString()}] No marketId found`);

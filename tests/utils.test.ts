@@ -7,6 +7,6 @@ test("get tartget price", async () => {
 }, { timeout: 60000 });
 
 test("get order book", async () => {
-  const price = await getPrice("STK/USDC");
+  const price = await getPrice(4);
   console.log({ price });
 }, { timeout: 60000 });
