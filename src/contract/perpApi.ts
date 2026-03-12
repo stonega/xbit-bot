@@ -151,10 +151,9 @@ export class PerpApi extends BaseEvmApi {
         false, // reduce_only
         0, // post_only
       );
-    const nonce = new Date().valueOf()
+    const nonce = new Date().valueOf();
     const result = await signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
-    console.log(result.hash)
-    return
+    console.log(result.hash);
   }
 
   async cancelOrder(
@@ -170,7 +169,7 @@ export class PerpApi extends BaseEvmApi {
     const res = await this.contract
       .getFunction("cancelOrder")
       .populateTransaction(subaccount, this.marketId, orderId);
-    const nonce = new Date().valueOf()
+    const nonce = new Date().valueOf();
     return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000n });
   }
 

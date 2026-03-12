@@ -4,6 +4,7 @@ import { Contract } from "ethers";
 import { withRetry } from "../utils";
 import { OrderABI, TradeABI, TradeNativeABI } from "./abi";
 import { BaseEvmApi } from "./api";
+
 export * from "./subaccountApi";
 
 const CONTRACT = "0x000000000000000000000000000000000000044E";
@@ -66,7 +67,7 @@ export class TradeApi extends BaseEvmApi {
             .getFunction("placeOrderBuyB")
             .populateTransaction(pay, amount);
         }
-        const nonce = new Date().valueOf()
+        const nonce = new Date().valueOf();
         return signer.sendTransaction({ ...res, nonce, gasLimit: 500000 });
       },
       3, // 3 retries
@@ -98,7 +99,7 @@ export class TradeApi extends BaseEvmApi {
             .getFunction("placeOrderSellB")
             .populateTransaction(receive, amount);
         }
-        const nonce = new Date().valueOf()
+        const nonce = new Date().valueOf();
         return signer.sendTransaction({ ...res, nonce, gasLimit: 500000 });
       },
       3, // 3 retries
@@ -122,7 +123,7 @@ export class TradeApi extends BaseEvmApi {
         .getFunction(type === "buy" ? "cancelOrderBuyB" : "cancelOrderSellB")
         .populateTransaction(orderId);
     }
-    const nonce = new Date().valueOf()
+    const nonce = new Date().valueOf();
     return signer.sendTransaction({ ...res, nonce, gasLimit: 1000000 });
   }
 

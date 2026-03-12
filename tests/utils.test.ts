@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { test } from "bun:test";
 import { getPrice, getTargetPrice } from "../src/utils";
 
 test("get tartget price", async () => {
