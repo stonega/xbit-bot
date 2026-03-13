@@ -1,6 +1,6 @@
 export const PAIRS = [
   {
-    symbol: "ETH-USDT",
+    symbol: "ETH-USDC",
     price: "ETH",
     makerPrivateKey: Bun.env.MAKER_PRIVATE_KEY,
     takerPrivateKey: Bun.env.TAKER_PRIVATE_KEY,
@@ -11,7 +11,7 @@ export const PAIRS = [
     minSizeDecimals: 3,
   },
   {
-    symbol: "SOL-USDT",
+    symbol: "SOL-USDC",
     price: "SOL",
     makerPrivateKey: Bun.env.MAKER_PRIVATE_KEY_SOL,
     takerPrivateKey: Bun.env.TAKER_PRIVATE_KEY_SOL,

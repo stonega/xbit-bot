@@ -32,7 +32,7 @@ export const deepxTestnet = {
   symbol: "tDGAS",
   name: "DeepX Devnet",
   value: "deepx_devnet",
-  explorer: "http://explorer-devnet.deepx.fi",
+  explorer: "https://explorer-devnet.deepx.fi",
   networkType: "evm",
   marketWs: "wss://devnet-api.deepx.fi/v2/ws",
   rpcWs: "wss://devnet-rpc.deepx.fi",
