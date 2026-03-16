@@ -43,9 +43,8 @@ export async function withRetry<T>(
  * Get orderbook data from xbit api
  */
 export async function getPrice(pairId: string): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const result = await fetch(`https://devnet-api.deepx.fi/v1/blockchain/spot/order-books?pair=${pairId}`).then(a => a.json());
-  console.log(`https://devnet-api.deepx.fi/v1/blockchain/spot/order-books?pair=${pairId}`)
-  console.log({ result });
+  const baseAppUrl = Bun.env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
+  const result = await fetch(`${baseAppUrl}/v1/blockchain/spot/order-books?pair=${pairId}`).then(a => a.json());
   if (!result.data.orderBuyList) {
     console.log({ error: result.msg });
   }
@@ -61,6 +60,12 @@ export async function getPrice(pairId: string): Promise<{ buyPrice: string; sell
     sellPrice,
     sellAmount,
   };
+}
+
+export async function getSpotPairs() {
+  const baseAppUrl = Bun.env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
+  const result = await fetch(`${baseAppUrl}/v1/blockchain/spot/pairs`).then(a => a.json());
+  return result.data.map((a: any) => ({ pariId: a.pair, name: a.name }));
 }
 
 export function getHeaders(timestamp: string, method: string, requestPath: string, queryString = ""): {

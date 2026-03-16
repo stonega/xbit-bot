@@ -1,11 +1,11 @@
 import BN from "bignumber.js";
 import { formatUnits, JsonRpcProvider, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
-import { PAIRS, TAKER_CAPACITY, TOKENS } from "./config";
+import { PAIRS, TAKER_CAPACITY } from "./config";
 import { TradeApi } from "./contract";
-import { deepxTestnet } from "./contract/network";
+import { deepxTestnet, deepxDevnet } from "./contract/network";
 import { PerpApi } from "./contract/perpApi";
-import { getPrice, getTargetPrice, withRetry } from "./utils";
+import { getPrice, getSpotPairs, getTargetPrice, withRetry } from "./utils";
 
 /**
  * Generates a random price increase for taker orders
@@ -53,16 +53,16 @@ async function main(
     marketId?: number;
     increase?: boolean;
     decimals: number;
-    pairId: string;
   },
   role: "maker" | "taker",
 ): Promise<void> {
   // Get network configuration
-  const currentNetwork = deepxTestnet;
+  const currentNetwork = Bun.env.NETWORK === "deepx_testnet" ? deepxTestnet : deepxDevnet;
+  const tokens = Object.values(currentNetwork.tokens);
 
   // Find token information from config TOKENS
-  const collateralToken = TOKENS.find(token => token.symbol === "USDC");
-  const tradeToken = TOKENS.find(token => token.symbol === pair.price);
+  const collateralToken = tokens.find(token => token.symbol === "USDC");
+  const tradeToken = tokens.find(token => token.symbol === pair.price);
 
   if (!tradeToken) {
     console.log(`[${pair.symbol}${new Date().toISOString()}] No trade token found`);
@@ -80,6 +80,7 @@ async function main(
   // Get the subaccount for the current role
   const account = role === "maker" ? pair.makerAccount : pair.takerAccount;
   const privateKey = role === "maker" ? pair.makerPrivateKey : pair.takerPrivateKey;
+  const spotPairs = await getSpotPairs()
 
   if (!account) {
     console.log(`[${pair.symbol}${new Date().toISOString()}] No ${role} account found`);
@@ -93,7 +94,7 @@ async function main(
   // Initialize trading API with contract, token, and subaccount information
   const tradeApi = new TradeApi({
     rpc: currentNetwork.rpc,
-    pair: pair.pairId,
+    pair: spotPairs.find(a => a.name === pair.symbol)?.pariId,
     baseToken: tradeToken,
     quoteToken: collateralToken,
     subaccount: account, // Add subaccount to use subaccount functions
