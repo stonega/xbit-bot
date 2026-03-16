@@ -43,7 +43,8 @@ export async function withRetry<T>(
  * Get orderbook data from xbit api
  */
 export async function getPrice(marketId: number): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const result = await fetch(`https://devnet-api.deepx.fi/v1/blockchain/perp/order-books?market_id=${marketId}`).then(a => a.json());
+  const baseAppUrl = Bun.env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
+  const result = await fetch(`${baseAppUrl}/v1/blockchain/perp/order-books?market_id=${marketId}`).then(a => a.json());
   console.log({ result });
   if (!result.data.orderBuyList) {
     console.log({ error: result.msg });
@@ -66,7 +67,8 @@ export async function getPrice(marketId: number): Promise<{ buyPrice: string; se
  * Get pair contract address from xbit api
  */
 export async function getPairContract(pair: string): Promise<{ address: string; pairId: string | undefined }> {
-  const result = await fetch(`https://devnet-api.deepx.fi/perp/blockchain/perp/pairs`).then(a => a.json());
+  const baseAppUrl = Bun.env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
+  const result = await fetch(`${baseAppUrl}/perp/blockchain/perp/pairs`).then(a => a.json());
   const pairInfo = result.data.find((a: any) => a.name === pair)!;
   return {
     address: pairInfo.address,

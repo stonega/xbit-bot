@@ -1,7 +1,7 @@
 import { formatUnits, JsonRpcProvider, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY } from "./config";
-import { deepxTestnet } from "./contract/network";
+import { deepxDevnet, deepxTestnet } from "./contract/network";
 import { PerpApi } from "./contract/perpApi";
 import { getPrice, getTargetPrice, withRetry } from "./utils";
 
@@ -56,7 +56,7 @@ async function main(
   role: "maker" | "taker",
 ): Promise<void> {
   // Get network configuration
-  const currentNetwork = deepxTestnet;
+  const currentNetwork = Bun.env.NETWORK === "deepx_testnet" ? deepxTestnet : deepxDevnet;
 
   // Find token information from pair symbol
   const collateralToken = currentNetwork.tokens.usdc;

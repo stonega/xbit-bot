@@ -26,7 +26,7 @@ export const betaTestnet = {
   },
 };
 
-export const deepxTestnet = {
+export const deepxDevnet = {
   rpc: "https://devnet-rpc.deepx.fi",
   chainId: 4835,
   symbol: "tDGAS",
@@ -56,6 +56,53 @@ export const deepxTestnet = {
     eth: {
       name: "ETH",
       address: "0xD6c9c7078fc1Fe5065bc85f4743FAB219Bb053fd",
+      icon: "/images/eth.png",
+      symbol: "ETH",
+      decimals: 18,
+      marketId: 3,
+    },
+    sol: {
+      name: "SOL",
+      address: "0xBBdefA290B10D6762E44e5581A3533BF831A8C5C",
+      icon: "/images/sol.png",
+      symbol: "SOL",
+      decimals: 9,
+      marketId: 4,
+    },
+  },
+};
+
+export const deepxTestnet = {
+  rpc: "https://rpc-testnet.deepx.fi",
+  chainId: 4836,
+  symbol: "tDGAS",
+  name: "DeepX Testnet",
+  value: "deepx_testnet",
+  explorer: "https://explorer-testnet.deepx.fi",
+  networkType: "evm",
+  marketWs: "wss://testnet-api.deepx.fi/v2/ws",
+  rpcWs: "wss://testnet-rpc.deepx.fi",
+  icon: "/images/deepdex.png",
+  contracts: {
+    anchor: "0xe108099102ece3ea69761478098338ae322d9aa8",
+    consumer: "0x6a29aF96aC980834ee1848EE4dE2ABEF3d6434d6",
+    consumerSepolia: "0x6a29aF96aC980834ee1848EE4dE2ABEF3d6434d6",
+    consumerSolanaDevnet: "0xf01a35C347bFE2944A32d7610531f42B706301BC",
+    consumerXlayerTestnet: "0xde6029952a25b3ACfB727480b8faF05a1471D4b5",
+    vault: "0x9837BBE7BA2C7ABfcc268cDC0CD687D3AA47973A",
+  },
+  tokens: {
+    usdc: {
+      name: "USDC",
+      address: "0x273Bc0743CeD7c5508015461E60C256f880926Cb",
+      icon: "/images/usdc.png",
+      symbol: "USDC",
+      decimals: 6,
+      marketId: 1,
+    },
+    eth: {
+      name: "ETH",
+      address: "0x288a5A08F1242dFbbf09505A6cF4885a8bBe3efb",
       icon: "/images/eth.png",
       symbol: "ETH",
       decimals: 18,
