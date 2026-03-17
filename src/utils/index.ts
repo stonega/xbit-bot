@@ -45,7 +45,6 @@ export async function withRetry<T>(
 export async function getPrice(marketId: number): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
   const baseAppUrl = Bun.env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
   const result = await fetch(`${baseAppUrl}/v1/blockchain/perp/order-books?market_id=${marketId}`).then(a => a.json());
-  console.log({ result });
   if (!result.data.orderBuyList) {
     console.log({ error: result.msg });
   }
