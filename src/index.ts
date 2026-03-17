@@ -3,7 +3,7 @@ import { formatUnits, JsonRpcProvider, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
 import { PAIRS, TAKER_CAPACITY } from "./config";
 import { TradeApi } from "./contract";
-import { deepxTestnet, deepxDevnet } from "./contract/network";
+import { deepxDevnet, deepxTestnet } from "./contract/network";
 import { PerpApi } from "./contract/perpApi";
 import { getPrice, getSpotPairs, getTargetPrice, withRetry } from "./utils";
 
@@ -80,7 +80,7 @@ async function main(
   // Get the subaccount for the current role
   const account = role === "maker" ? pair.makerAccount : pair.takerAccount;
   const privateKey = role === "maker" ? pair.makerPrivateKey : pair.takerPrivateKey;
-  const spotPairs = await getSpotPairs()
+  const spotPairs = await getSpotPairs();
 
   if (!account) {
     console.log(`[${pair.symbol}${new Date().toISOString()}] No ${role} account found`);
@@ -448,9 +448,9 @@ const takerTask = new Task(
 );
 
 // Schedule maker task to run every 10 seconds
-const makerJob = new SimpleIntervalJob({ seconds: 20, runImmediately: true }, makerTask);
+const makerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, makerTask);
 // Schedule taker task to run every 15 seconds
-const takerJob = new SimpleIntervalJob({ seconds: 20, runImmediately: true }, takerTask);
+const takerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, takerTask);
 
 // Add jobs to scheduler
 scheduler.addSimpleIntervalJob(makerJob);
