@@ -65,6 +65,10 @@ export async function getPrice(pairId: string): Promise<{ buyPrice: string; sell
 export async function getSpotPairs() {
   const baseAppUrl = Bun.env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
   const result = await fetch(`${baseAppUrl}/v1/blockchain/spot/pairs`).then(a => a.json());
+  if (!result?.data || !Array.isArray(result.data)) {
+    console.error(`[getSpotPairs] Unexpected API response:`, JSON.stringify(result));
+    return [];
+  }
   return result.data.map((a: any) => ({ pariId: a.pair, name: a.name }));
 }
 

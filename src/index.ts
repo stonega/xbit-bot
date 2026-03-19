@@ -82,6 +82,17 @@ async function main(
   const privateKey = role === "maker" ? pair.makerPrivateKey : pair.takerPrivateKey;
   const spotPairs = await getSpotPairs();
 
+  if (!spotPairs.length) {
+    console.log(`[${pair.symbol}${new Date().toISOString()}] Failed to fetch spot pairs`);
+    return;
+  }
+
+  const spotPair = spotPairs.find(a => a.name === pair.symbol);
+  if (!spotPair) {
+    console.log(`[${pair.symbol}${new Date().toISOString()}] Pair not found in spot pairs list`);
+    return;
+  }
+
   if (!account) {
     console.log(`[${pair.symbol}${new Date().toISOString()}] No ${role} account found`);
     return;
@@ -94,7 +105,7 @@ async function main(
   // Initialize trading API with contract, token, and subaccount information
   const tradeApi = new TradeApi({
     rpc: currentNetwork.rpc,
-    pair: spotPairs.find(a => a.name === pair.symbol)?.pariId,
+    pair: spotPair.pariId,
     baseToken: tradeToken,
     quoteToken: collateralToken,
     subaccount: account, // Add subaccount to use subaccount functions
