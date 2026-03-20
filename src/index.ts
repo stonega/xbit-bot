@@ -471,9 +471,9 @@ const takerTask = new Task(
 );
 
 // Schedule maker task to run every 10 seconds
-const makerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, makerTask);
+const makerJob = new SimpleIntervalJob({ seconds: 2, runImmediately: true }, makerTask);
 // Schedule taker task to run every 15 seconds
-const takerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, takerTask);
+const takerJob = new SimpleIntervalJob({ seconds: 2, runImmediately: true }, takerTask);
 
 // Add jobs to scheduler
 scheduler.addSimpleIntervalJob(makerJob);
