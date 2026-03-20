@@ -1,5 +1,10 @@
 import CryptoJS from "crypto-js";
 
+type SpotPair = {
+  pairId: string;
+  name: string;
+};
+
 /**
  * Generic retry function wrapper
  * @param fn - Function to retry
@@ -62,14 +67,14 @@ export async function getPrice(pairId: string): Promise<{ buyPrice: string; sell
   };
 }
 
-export async function getSpotPairs() {
+export async function getSpotPairs(): Promise<SpotPair[]> {
   const baseAppUrl = Bun.env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
   const result = await fetch(`${baseAppUrl}/v1/blockchain/spot/pairs`).then(a => a.json());
   if (!result?.data || !Array.isArray(result.data)) {
     console.error(`[getSpotPairs] Unexpected API response:`, JSON.stringify(result));
     return [];
   }
-  return result.data.map((a: any) => ({ pariId: a.pair, name: a.name }));
+  return result.data.map((a: any) => ({ pairId: a.pair, name: a.name }));
 }
 
 export function getHeaders(timestamp: string, method: string, requestPath: string, queryString = ""): {

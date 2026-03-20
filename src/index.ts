@@ -105,7 +105,7 @@ async function main(
   // Initialize trading API with contract, token, and subaccount information
   const tradeApi = new TradeApi({
     rpc: currentNetwork.rpc,
-    pair: spotPair.pariId,
+    pair: spotPair.pairId,
     baseToken: tradeToken,
     quoteToken: collateralToken,
     subaccount: account, // Add subaccount to use subaccount functions
@@ -117,7 +117,7 @@ async function main(
   provider._getConnection().timeout = 10000;
 
   // Get current market prices and order book information
-  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.pairId);
+  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(spotPair.pairId);
 
   // Validate prices before using them
   const validBuyPrice = validatePrice(buyPrice);
@@ -428,12 +428,17 @@ const scheduler = new ToadScheduler();
  */
 const makerTask = new Task(
   "maker tasks",
-  () => {
-    PAIRS.forEach((pair) => {
-      main(pair, "maker").catch((err: Error) => {
-        console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
-      });
-    });
+  async () => {
+    await Promise.allSettled(
+      PAIRS.map(async (pair) => {
+        try {
+          await main(pair, "maker");
+        }
+        catch (err) {
+          console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
+        }
+      }),
+    );
   },
   (err: Error) => {
     console.log(err);
@@ -446,12 +451,19 @@ const makerTask = new Task(
  */
 const takerTask = new Task(
   "taker tasks",
-  () => {
-    PAIRS.filter(pair => pair.makerPrivateKey).forEach((pair) => {
-      main(pair, "taker").catch((err: Error) => {
-        console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
-      });
-    });
+  async () => {
+    await Promise.allSettled(
+      PAIRS
+        .filter(pair => pair.makerPrivateKey)
+        .map(async (pair) => {
+          try {
+            await main(pair, "taker");
+          }
+          catch (err) {
+            console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
+          }
+        }),
+    );
   },
   (err: Error) => {
     console.log(err);
