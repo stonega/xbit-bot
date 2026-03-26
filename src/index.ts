@@ -305,25 +305,9 @@ async function main(
       return;
     }
 
-    // If current price is very close to target, create a small sell order to maintain price
+    // If current price is very close to target, do nothing
     if (validBuyPrice > 0 && Math.abs(validBuyPrice - target) < 0.0001) {
-      console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached`);
-      const buyAmount = 0.5;
-      const price = validBuyPrice.toFixed(2);
-
-      await withRetry(() =>
-        perpApi.placePerpOrder(wallet, {
-          subaccount: account,
-          isLong: false,
-          size: parseUnits(buyAmount.toFixed(pair.minSizeDecimals), pair.decimals),
-          price: parseUnits(price, 6),
-          orderType: 0,
-          leverage: 10,
-          takeProfit: 0n,
-          stopLoss: 0n,
-        }),
-      );
-      console.log(`[${pair.symbol}${new Date().toISOString()}] Sell order created, price ${price} ${buyAmount}`);
+      console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached, no action required`);
       return;
     }
 
