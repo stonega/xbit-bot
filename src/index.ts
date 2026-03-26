@@ -11,7 +11,7 @@ import { getPrice, getTargetPrice, withRetry } from "./utils";
  * @returns {number} Price increase percentage
  */
 function getPriceTakerInscrease(): number {
-  return Number(Math.max(Math.random() * 0.02, 0.01).toFixed(4));
+  return Number(Math.max(Math.random() * 0.015, 0.01).toFixed(4));
 }
 
 /**
@@ -20,7 +20,7 @@ function getPriceTakerInscrease(): number {
  * @returns {number} Price increase percentage
  */
 function getPriceMakerInscrease(): number {
-  return Number(Math.max(Math.random() * 0.04, 0.02).toFixed(4));
+  return Number(Math.max(Math.random() * 0.02, 0.01).toFixed(4));
 }
 
 /**
@@ -174,7 +174,7 @@ async function main(
     }
 
     // If current price is very close to target, no action needed
-    if (Math.abs(validBuyPrice - target) < 0.00005) {
+    if (Math.abs(validBuyPrice - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
       return;
     }
