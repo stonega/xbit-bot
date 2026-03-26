@@ -174,7 +174,7 @@ async function main(
     }
 
     // If current price is very close to target, no action needed
-    if (Math.abs(validBuyPrice - target) < 0.0001) {
+    if (Math.abs(validBuyPrice - target) < 0.00005) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
       return;
     }
