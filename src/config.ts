@@ -24,4 +24,4 @@ export const PAIRS = [
 ];
 
 // Max order amount for taker
-export const TAKER_CAPACITY = 10000;
+export const TAKER_CAPACITY = 100;
