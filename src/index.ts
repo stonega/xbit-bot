@@ -419,62 +419,63 @@ async function main(
   }
 }
 
-// Initialize scheduler for periodic tasks
-const scheduler = new ToadScheduler();
+const pairs = PAIRS;
+// Support for Cloudflare Workers (Scheduled Events)
+export default {
+  async scheduled(event: any, env: any, ctx: any) {
+    const tasks = [
+      ...pairs.map(pair => main(pair, "maker", env)),
+      ...pairs.filter(pair => pair.makerPrivateKey).map(pair => main(pair, "taker", env)),
+    ];
+    ctx.waitUntil(Promise.allSettled(tasks));
+  },
+  // Also support manual trigger via fetch if needed
+  async fetch(request: Request, env: any, ctx: any) {
+    const tasks = [
+      ...pairs.map(pair => main(pair, "maker", env)),
+      ...pairs.filter(pair => pair.makerPrivateKey).map(pair => main(pair, "taker", env)),
+    ];
+    await Promise.allSettled(tasks);
+    return new Response("Tasks executed");
+  },
+};
 
-/**
- * Task for maker operations - creates liquidity by placing orders
- * Runs for all configured trading pairs
- */
-const makerTask = new Task(
-  "maker tasks",
-  async () => {
-    await Promise.allSettled(
-      PAIRS.map(async (pair) => {
-        try {
-          await main(pair, "maker");
-        }
-        catch (err) {
+// Support for local Bun execution
+if (typeof Bun !== "undefined") {
+  const scheduler = new ToadScheduler();
+  const pairs = PAIRS;
+
+  const makerTask = new Task(
+    "maker tasks",
+    () => {
+      pairs.forEach((pair) => {
+        main(pair, "maker", Bun.env).catch((err: Error) => {
           console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
-        }
-      }),
-    );
-  },
-  (err: Error) => {
-    console.log(err);
-  },
-);
+        });
+      });
+    },
+    (err: Error) => {
+      console.log(err);
+    },
+  );
 
-/**
- * Task for taker operations - consumes liquidity by taking existing orders
- * Runs for all configured trading pairs
- */
-const takerTask = new Task(
-  "taker tasks",
-  async () => {
-    await Promise.allSettled(
-      PAIRS
-        .filter(pair => pair.makerPrivateKey)
-        .map(async (pair) => {
-          try {
-            await main(pair, "taker");
-          }
-          catch (err) {
-            console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
-          }
-        }),
-    );
-  },
-  (err: Error) => {
-    console.log(err);
-  },
-);
+  const takerTask = new Task(
+    "taker tasks",
+    () => {
+      pairs.filter(pair => pair.makerPrivateKey).forEach((pair) => {
+        main(pair, "taker", Bun.env).catch((err: Error) => {
+          console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
+        });
+      });
+    },
+    (err: Error) => {
+      console.log(err);
+    },
+  );
 
-// Schedule maker task to run every 10 seconds
-const makerJob = new SimpleIntervalJob({ seconds: 2, runImmediately: true }, makerTask);
-// Schedule taker task to run every 15 seconds
-const takerJob = new SimpleIntervalJob({ seconds: 2, runImmediately: true }, takerTask);
+  const makerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, makerTask);
+  const takerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, takerTask);
 
-// Add jobs to scheduler
-scheduler.addSimpleIntervalJob(makerJob);
-scheduler.addSimpleIntervalJob(takerJob);
+  scheduler.addSimpleIntervalJob(makerJob);
+  scheduler.addSimpleIntervalJob(takerJob);
+}

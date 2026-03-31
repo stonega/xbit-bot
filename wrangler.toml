@@ -1,0 +1,29 @@
+main = "src/index.ts"
+compatibility_date = "2024-03-31"
+compatibility_flags = ["nodejs_compat"]
+
+# Common variables (if any)
+[vars]
+# Add shared vars here
+#
+[observability]
+[observability.logs]
+enabled = true
+invocation_logs = true
+
+# Environment 1: Testnet
+[env.testnet]
+name = "xbit-bot-testnet"
+[env.testnet.vars]
+NETWORK = "deepx_testnet"
+
+[env.testnet.triggers]
+crons = ["* * * * *"]
+
+# Environment 2: Devnet
+[env.devnet]
+name = "xbit-bot-devnet"
+[env.devnet.vars]
+NETWORK = "deepx_devnet"
+[env.devnet.triggers]
+crons = ["* * * * *"]
