@@ -29,4 +29,16 @@ Taker 功能：消耗流动性，通过吃掉现有订单来将价格推向目�
 - 当价格高于目标时，创建较大卖单压低价格
 - 订单大小基于可用流动性和配置的容量上限
 
+## Deploy
+
+Put  envs:
+```
+./scripts/upload-secrets.sh testnet
+```
+Deploy
+```
+bunx wrangle deploy -e testnet
+```
+
 This project was created using `bun init` in bun v1.1.10. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+

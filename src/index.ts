@@ -1,6 +1,6 @@
 import { formatUnits, JsonRpcProvider, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
-import { PAIRS, TAKER_CAPACITY } from "./config";
+import { getPairs, TAKER_CAPACITY } from "./config";
 import { deepxDevnet, deepxTestnet } from "./contract/network";
 import { PerpApi } from "./contract/perpApi";
 import { getPrice, getTargetPrice, withRetry } from "./utils";
@@ -38,6 +38,7 @@ function validatePrice(price: string | undefined, fallback: number = 0): number 
  * Main function to execute trading strategy for a specific trading pair
  * @param {object} pair - Trading pair information
  * @param {"maker" | "taker"} role - Trading role (maker creates liquidity, taker takes liquidity)
+ * @param {any} env - Environment variables
  * @returns {Promise<void>}
  */
 async function main(
@@ -54,9 +55,10 @@ async function main(
     minSizeDecimals: number;
   },
   role: "maker" | "taker",
+  env: any,
 ): Promise<void> {
   // Get network configuration
-  const currentNetwork = Bun.env.NETWORK === "deepx_testnet" ? deepxTestnet : deepxDevnet;
+  const currentNetwork = env.NETWORK === "deepx_testnet" ? deepxTestnet : deepxDevnet;
 
   // Find token information from pair symbol
   const collateralToken = currentNetwork.tokens.usdc;
@@ -79,7 +81,7 @@ async function main(
   provider._getConnection().timeout = 10000;
 
   // Get current market prices and order book information
-  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.marketId);
+  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(pair.marketId, env);
 
   // Validate prices before using them
   const validBuyPrice = validatePrice(buyPrice);
@@ -88,8 +90,7 @@ async function main(
   const validSellAmount = validatePrice(sellAmount);
 
   // Get target price for this trading pair
-  // const targetInBigInt = await perpApi.perpMarkets().then(res => res.oracle_price);
-  const target = await getTargetPrice(pair.price);
+  const target = await getTargetPrice(pair.price, env);
 
   // Log current market conditions for debugging
   console.debug(`[${pair.symbol}${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${validBuyPrice} BuyAmount: ${validBuyAmount} SellPrice: ${validSellPrice} SellAmount: ${validSellAmount}`);
@@ -148,13 +149,9 @@ async function main(
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
   // === MAKER STRATEGY ===
-  // Makers create liquidity by placing orders on both sides of the order book
   if (role === "maker") {
-    // Cancel all active orders before placing new ones
-    // Generate random order amount between 0.8 and 1.2
     const amount = 0.4 * Math.random() + 0.8;
     console.log("target", target);
-    // If no buy orders exist in the order book, create one at target price
     if (!buyPrice || validBuyPrice === 0) {
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
@@ -162,7 +159,7 @@ async function main(
           isLong: true,
           size: parseUnits(amount.toFixed(pair.minSizeDecimals), pair.decimals),
           price: parseUnits(target.toFixed(2), 6),
-          orderType: 0, // Limit order
+          orderType: 0,
           leverage: 10,
           takeProfit: 0n,
           stopLoss: 0n,
@@ -173,24 +170,18 @@ async function main(
       return;
     }
 
-    // If current price is very close to target, no action needed
     if (Math.abs(validBuyPrice - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] No action required`);
       return;
     }
 
-    // If buy price is below target, create buy order
     if (validBuyPrice < target) {
-      // Calculate a new buy price slightly below current buy price
       const nextBuyPrice = Math.min(Math.abs(validBuyPrice - getPriceMakerInscrease()), validSellPrice > 0 ? validSellPrice : target + 0.1) - 0.0001;
-
-      // Validate nextBuyPrice before using it
       if (Number.isNaN(nextBuyPrice) || nextBuyPrice <= 0) {
         console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextBuyPrice: ${nextBuyPrice}`);
         return;
       }
 
-      // Create buy order
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
@@ -206,9 +197,7 @@ async function main(
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount}`);
     }
     else {
-      // If buy price is above target, create sell order
       const nextSellPrice = Math.max(Math.abs(validBuyPrice + getPriceMakerInscrease()), validBuyPrice) + 0.0001;
-      // Validate nextSellPrice before using it
       if (Number.isNaN(nextSellPrice) || nextSellPrice <= 0) {
         console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextSellPrice: ${nextSellPrice}`);
         return;
@@ -230,9 +219,7 @@ async function main(
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    // If no sell orders exist in the order book, create one
     if (!sellPrice || validSellPrice === 0) {
-      // Create sell order at a price higher than current buy price
       const price = validBuyPrice + getPriceMakerInscrease() * 2;
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
@@ -252,16 +239,10 @@ async function main(
   }
 
   // === TAKER STRATEGY ===
-  // Takers consume liquidity by taking existing orders to move price toward target
   if (role === "taker") {
-    // Calculate price adjustment
     const priceIncrease = getPriceTakerInscrease();
-
-    // Exit if no buy orders exist
     if ((!buyPrice || validBuyPrice === 0) && (sellPrice && validSellPrice > 0)) {
       let amount = 0.1 + Math.random() * 0.4;
-
-      // Adjust amount based on available sell orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && validSellAmount > 0) {
         if (validSellAmount < TAKER_CAPACITY) {
           amount = Math.max(validSellAmount, amount);
@@ -271,15 +252,11 @@ async function main(
         }
       }
 
-      // Calculate next buy price (higher than current sell price)
       let nextBuyPrice = Math.abs(validSellPrice + priceIncrease);
-
-      // Don't exceed target price
       if (target < nextBuyPrice) {
         nextBuyPrice = target + 0.0001;
       }
 
-      // Validate nextBuyPrice before using it
       if (Number.isNaN(nextBuyPrice) || nextBuyPrice <= 0) {
         console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextBuyPrice: ${nextBuyPrice}`);
         return;
@@ -288,7 +265,6 @@ async function main(
       const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(2), 6);
       const stopLossPrice = parseUnits((nextBuyPrice * 0.98).toFixed(2), 6);
 
-      // Create buy order
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
@@ -305,18 +281,13 @@ async function main(
       return;
     }
 
-    // If current price is very close to target, do nothing
     if (validBuyPrice > 0 && Math.abs(validBuyPrice - target) < 0.0001) {
       console.debug(`[${pair.symbol}${new Date().toISOString()}] Target price reached, no action required`);
       return;
     }
 
-    // If buy price is below target, create buy order to push price up
     if (validBuyPrice < target || validBuyPrice === 0) {
-      // Calculate order amount (between 4-8 or based on available sell amount)
       let amount = 0.4 + Math.random() * 0.4;
-
-      // Adjust amount based on available sell orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && validSellAmount > 0) {
         if (validSellAmount < TAKER_CAPACITY) {
           amount = Math.max(validSellAmount, amount);
@@ -326,16 +297,13 @@ async function main(
         }
       }
 
-      // Calculate next buy price (higher than current sell price)
       const basePrice = validSellPrice > 0 ? validSellPrice : (validBuyPrice > 0 ? validBuyPrice : target);
       let nextBuyPrice = Math.abs(basePrice + priceIncrease);
 
-      // Don't exceed target price
       if (target < nextBuyPrice) {
         nextBuyPrice = target + 0.0001;
       }
 
-      // Validate nextBuyPrice before using it
       if (Number.isNaN(nextBuyPrice) || nextBuyPrice <= 0) {
         console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextBuyPrice: ${nextBuyPrice}`);
         return;
@@ -344,7 +312,6 @@ async function main(
       const takeProfitPrice = parseUnits((nextBuyPrice * 1.02).toFixed(2), 6);
       const stopLossPrice = parseUnits((nextBuyPrice * 0.98).toFixed(2), 6);
 
-      // Create buy order
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
@@ -360,11 +327,7 @@ async function main(
       console.log(`[${pair.symbol}${new Date().toISOString()}] Buy order created, price ${nextBuyPrice} ${amount}`);
     }
     else {
-      // If buy price is above target, create sell order to push price down
-      // Calculate order amount (between 4-8 or based on available buy amount)
       let amount = 0.4 + Math.random() * 0.4;
-
-      // Adjust amount based on available buy orders, but cap at TAKER_CAPACITY
       if (priceIncrease > 0 && validBuyAmount > 0) {
         if (validBuyAmount < TAKER_CAPACITY) {
           amount = Math.max(validBuyAmount, amount);
@@ -374,15 +337,11 @@ async function main(
         }
       }
 
-      // Calculate next sell price (lower than current buy price)
       let nextSellPrice = Math.abs(validBuyPrice - priceIncrease);
-
-      // Don't go below target price
       if (target > nextSellPrice) {
         nextSellPrice = target - 0.0001;
       }
 
-      // Validate nextSellPrice before using it
       if (Number.isNaN(nextSellPrice) || nextSellPrice <= 0) {
         console.log(`[${pair.symbol}${new Date().toISOString()}] Invalid nextSellPrice: ${nextSellPrice}`);
         return;
@@ -390,7 +349,6 @@ async function main(
 
       const takeProfitPrice = parseUnits((nextSellPrice * 0.98).toFixed(2), 6);
 
-      // Create sell order
       await withRetry(() =>
         perpApi.placePerpOrder(wallet, {
           subaccount: account,
@@ -408,50 +366,64 @@ async function main(
   }
 }
 
-// Initialize scheduler for periodic tasks
-const scheduler = new ToadScheduler();
+// Support for Cloudflare Workers (Scheduled Events)
+export default {
+  async scheduled(event: any, env: any, ctx: any) {
+    const pairs = getPairs(env);
+    const tasks = [
+      ...pairs.map(pair => main(pair, "maker", env)),
+      ...pairs.filter(pair => pair.makerPrivateKey).map(pair => main(pair, "taker", env)),
+    ];
+    ctx.waitUntil(Promise.allSettled(tasks));
+  },
+  // Also support manual trigger via fetch if needed
+  async fetch(request: Request, env: any, ctx: any) {
+    const pairs = getPairs(env);
+    const tasks = [
+      ...pairs.map(pair => main(pair, "maker", env)),
+      ...pairs.filter(pair => pair.makerPrivateKey).map(pair => main(pair, "taker", env)),
+    ];
+    await Promise.allSettled(tasks);
+    return new Response("Tasks executed");
+  },
+};
 
-/**
- * Task for maker operations - creates liquidity by placing orders
- * Runs for all configured trading pairs
- */
-const makerTask = new Task(
-  "maker tasks",
-  () => {
-    PAIRS.forEach((pair) => {
-      main(pair, "maker").catch((err: Error) => {
-        console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
+// Support for local Bun execution
+if (typeof Bun !== "undefined") {
+  const scheduler = new ToadScheduler();
+  const pairs = getPairs(Bun.env);
+
+  const makerTask = new Task(
+    "maker tasks",
+    () => {
+      pairs.forEach((pair) => {
+        main(pair, "maker", Bun.env).catch((err: Error) => {
+          console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
+        });
       });
-    });
-  },
-  (err: Error) => {
-    console.log(err);
-  },
-);
+    },
+    (err: Error) => {
+      console.log(err);
+    },
+  );
 
-/**
- * Task for taker operations - consumes liquidity by taking existing orders
- * Runs for all configured trading pairs
- */
-const takerTask = new Task(
-  "taker tasks",
-  () => {
-    PAIRS.filter(pair => pair.makerPrivateKey).forEach((pair) => {
-      main(pair, "taker").catch((err: Error) => {
-        console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
+  const takerTask = new Task(
+    "taker tasks",
+    () => {
+      pairs.filter(pair => pair.makerPrivateKey).forEach((pair) => {
+        main(pair, "taker", Bun.env).catch((err: Error) => {
+          console.log(`[${pair.symbol}${new Date().toISOString()}] ${err}`);
+        });
       });
-    });
-  },
-  (err: Error) => {
-    console.log(err);
-  },
-);
+    },
+    (err: Error) => {
+      console.log(err);
+    },
+  );
 
-// Schedule maker task to run every 10 seconds
-const makerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, makerTask);
-// Schedule taker task to run every 15 seconds
-const takerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, takerTask);
+  const makerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, makerTask);
+  const takerJob = new SimpleIntervalJob({ seconds: 1, runImmediately: true }, takerTask);
 
-// Add jobs to scheduler
-scheduler.addSimpleIntervalJob(makerJob);
-scheduler.addSimpleIntervalJob(takerJob);
+  scheduler.addSimpleIntervalJob(makerJob);
+  scheduler.addSimpleIntervalJob(takerJob);
+}

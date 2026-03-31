@@ -42,8 +42,8 @@ export async function withRetry<T>(
 /**
  * Get orderbook data from xbit api
  */
-export async function getPrice(marketId: number): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
-  const baseAppUrl = Bun.env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
+export async function getPrice(marketId: number, env: any): Promise<{ buyPrice: string; sellPrice: string; buyAmount: string; sellAmount: string }> {
+  const baseAppUrl = env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
   const result = await fetch(`${baseAppUrl}/v1/blockchain/perp/order-books?market_id=${marketId}`).then(a => a.json());
   if (!result.data.orderBuyList) {
     console.log({ error: result.msg });
@@ -65,8 +65,8 @@ export async function getPrice(marketId: number): Promise<{ buyPrice: string; se
 /**
  * Get pair contract address from xbit api
  */
-export async function getPairContract(pair: string): Promise<{ address: string; pairId: string | undefined }> {
-  const baseAppUrl = Bun.env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
+export async function getPairContract(pair: string, env: any): Promise<{ address: string; pairId: string | undefined }> {
+  const baseAppUrl = env.NETWORK === "deepx_testnet" ? "https://testnet-api.deepx.fi" : "https://devnet-api.deepx.fi";
   const result = await fetch(`${baseAppUrl}/perp/blockchain/perp/pairs`).then(a => a.json());
   const pairInfo = result.data.find((a: any) => a.name === pair)!;
   return {
@@ -75,13 +75,13 @@ export async function getPairContract(pair: string): Promise<{ address: string; 
   };
 }
 
-export function getHeaders(timestamp: string, method: string, requestPath: string, queryString = ""): {
+export function getHeaders(timestamp: string, method: string, requestPath: string, env: any, queryString = ""): {
   [key: string]: string;
 } {
-  const apiKey = Bun.env.OKX_API_KEY;
-  const secretKey = Bun.env.OKX_SECRET_KEY;
-  const apiPassphrase = Bun.env.OKX_API_PASSPHRASE;
-  // const projectId = Bun.env.OKX_PROJECT_ID;
+  const apiKey = env.OKX_API_KEY;
+  const secretKey = env.OKX_SECRET_KEY;
+  const apiPassphrase = env.OKX_API_PASSPHRASE;
+  // const projectId = env.OKX_PROJECT_ID;
 
   if (!apiKey || !secretKey || !apiPassphrase) {
     throw new Error("Missing required environment variables");
@@ -103,12 +103,12 @@ export function getHeaders(timestamp: string, method: string, requestPath: strin
 /**
  * Fetch price from okx api
  */
-export async function getTargetPrice(pair: string): Promise<number> {
+export async function getTargetPrice(pair: string, env: any): Promise<number> {
   const timestamp = new Date().toISOString();
   const baseUrl = "https://www.okx.com";
   const queryString = `instId=${pair}-USDT&limit=1`;
   const requestPath = "/api/v5/market/history-index-candles";
-  const headers = getHeaders(timestamp, "GET", requestPath, queryString);
+  const headers = getHeaders(timestamp, "GET", requestPath, env, queryString);
   const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
   const price = Number(data.data[0][1]);
   return Number(price.toFixed(4));
