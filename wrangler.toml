@@ -13,7 +13,7 @@ invocation_logs = true
 
 # Environment 1: Testnet
 [env.testnet]
-name = "xbit-bot-testnet"
+name = "deepx-spot-testnet"
 [env.testnet.vars]
 NETWORK = "deepx_testnet"
 
@@ -22,7 +22,7 @@ crons = ["* * * * *"]
 
 # Environment 2: Devnet
 [env.devnet]
-name = "xbit-bot-devnet"
+name = "deepx-spot-devnet"
 [env.devnet.vars]
 NETWORK = "deepx_devnet"
 [env.devnet.triggers]

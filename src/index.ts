@@ -1,10 +1,9 @@
 import BN from "bignumber.js";
 import { formatUnits, JsonRpcProvider, parseUnits, Wallet } from "ethers";
 import { SimpleIntervalJob, Task, ToadScheduler } from "toad-scheduler";
-import { PAIRS, TAKER_CAPACITY } from "./config";
+import { getPairs, TAKER_CAPACITY } from "./config";
 import { TradeApi } from "./contract";
 import { deepxDevnet, deepxTestnet } from "./contract/network";
-import { PerpApi } from "./contract/perpApi";
 import { getPrice, getSpotPairs, getTargetPrice, withRetry } from "./utils";
 
 /**
@@ -15,15 +14,6 @@ import { getPrice, getSpotPairs, getTargetPrice, withRetry } from "./utils";
 function getPriceTakerInscrease(): number {
   return Number(Math.max(Math.random() * 0.02, 0.01).toFixed(4));
 }
-
-/**
- * Generates a random price increase for maker orders
- * Returns a value between 0.02 and 0.04
- * @returns {number} Price increase percentage
- */
-// function getPriceMakerInscrease(): number {
-//   return Number(Math.max(Math.random() * 0.04, 0.02).toFixed(4));
-// }
 
 /**
  * Helper function to validate and convert price values
@@ -40,6 +30,7 @@ function validatePrice(price: string | undefined, fallback: number = 0): number 
  * Main function to execute trading strategy for a specific trading pair
  * @param {object} pair - Trading pair information
  * @param {"maker" | "taker"} role - Trading role (maker creates liquidity, taker takes liquidity)
+ * @param {any} env - Environment variables
  * @returns {Promise<void>}
  */
 async function main(
@@ -55,9 +46,10 @@ async function main(
     decimals: number;
   },
   role: "maker" | "taker",
+  env: any,
 ): Promise<void> {
   // Get network configuration
-  const currentNetwork = Bun.env.NETWORK === "deepx_testnet" ? deepxTestnet : deepxDevnet;
+  const currentNetwork = env.NETWORK === "deepx_testnet" ? deepxTestnet : deepxDevnet;
   const tokens = Object.values(currentNetwork.tokens);
 
   // Find token information from config TOKENS
@@ -80,7 +72,7 @@ async function main(
   // Get the subaccount for the current role
   const account = role === "maker" ? pair.makerAccount : pair.takerAccount;
   const privateKey = role === "maker" ? pair.makerPrivateKey : pair.takerPrivateKey;
-  const spotPairs = await getSpotPairs();
+  const spotPairs = await getSpotPairs(env);
 
   if (!spotPairs.length) {
     console.log(`[${pair.symbol}${new Date().toISOString()}] Failed to fetch spot pairs`);
@@ -117,7 +109,7 @@ async function main(
   provider._getConnection().timeout = 10000;
 
   // Get current market prices and order book information
-  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(spotPair.pairId);
+  const { buyPrice, sellPrice, buyAmount, sellAmount } = await getPrice(env, spotPair.pairId);
 
   // Validate prices before using them
   const validBuyPrice = validatePrice(buyPrice);
@@ -126,14 +118,7 @@ async function main(
   const validSellAmount = validatePrice(sellAmount);
 
   // Get target price for this trading pair
-  // const perpApi = new PerpApi({
-  //   rpc: currentNetwork.rpc,
-  //   marketId: pair.marketId,
-  //   token: tradeToken,
-  // });
-  // const targetInBigInt = await perpApi.perpMarkets().then(res => res.oracle_price);
-  // const target = Number(formatUnits(targetInBigInt, 6));
-  const target = await getTargetPrice(pair.price);
+  const target = await getTargetPrice(env, pair.price);
 
   // Log current market conditions for debugging
   console.debug(`[${pair.symbol}${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${validBuyPrice} BuyAmount: ${validBuyAmount} SellPrice: ${validSellPrice} SellAmount: ${validSellAmount}`);
@@ -419,10 +404,10 @@ async function main(
   }
 }
 
-const pairs = PAIRS;
 // Support for Cloudflare Workers (Scheduled Events)
 export default {
   async scheduled(event: any, env: any, ctx: any) {
+    const pairs = getPairs(env);
     const tasks = [
       ...pairs.map(pair => main(pair, "maker", env)),
       ...pairs.filter(pair => pair.makerPrivateKey).map(pair => main(pair, "taker", env)),
@@ -431,6 +416,7 @@ export default {
   },
   // Also support manual trigger via fetch if needed
   async fetch(request: Request, env: any, ctx: any) {
+    const pairs = getPairs(env);
     const tasks = [
       ...pairs.map(pair => main(pair, "maker", env)),
       ...pairs.filter(pair => pair.makerPrivateKey).map(pair => main(pair, "taker", env)),
@@ -443,7 +429,7 @@ export default {
 // Support for local Bun execution
 if (typeof Bun !== "undefined") {
   const scheduler = new ToadScheduler();
-  const pairs = PAIRS;
+  const pairs = getPairs(Bun.env);
 
   const makerTask = new Task(
     "maker tasks",
