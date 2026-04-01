@@ -1,4 +1,5 @@
-import CryptoJS from "crypto-js";
+import { Contract, formatUnits, JsonRpcProvider } from "ethers";
+import { PerpABI } from "../contract/perp";
 
 /**
  * Generic retry function wrapper
@@ -75,41 +76,14 @@ export async function getPairContract(pair: string, env: any): Promise<{ address
   };
 }
 
-export function getHeaders(timestamp: string, method: string, requestPath: string, env: any, queryString = ""): {
-  [key: string]: string;
-} {
-  const apiKey = env.OKX_API_KEY;
-  const secretKey = env.OKX_SECRET_KEY;
-  const apiPassphrase = env.OKX_API_PASSPHRASE;
-  // const projectId = env.OKX_PROJECT_ID;
-
-  if (!apiKey || !secretKey || !apiPassphrase) {
-    throw new Error("Missing required environment variables");
-  }
-
-  const stringToSign = timestamp + method + requestPath + queryString;
-  return {
-    "Content-Type": "application/json",
-    "OK-ACCESS-KEY": apiKey,
-    "OK-ACCESS-SIGN": CryptoJS.enc.Base64.stringify(
-      CryptoJS.HmacSHA256(stringToSign, secretKey),
-    ),
-    "OK-ACCESS-TIMESTAMP": timestamp,
-    "OK-ACCESS-PASSPHRASE": apiPassphrase,
-    // "OK-ACCESS-PROJECT": projectId,
-  };
-}
-
 /**
- * Fetch price from okx api
+ * Fetch oracle price from perp contract
  */
-export async function getTargetPrice(pair: string, env: any): Promise<number> {
-  const timestamp = new Date().toISOString();
-  const baseUrl = "https://www.okx.com";
-  const queryString = `instId=${pair}-USDT&limit=1`;
-  const requestPath = "/api/v5/market/history-index-candles";
-  const headers = getHeaders(timestamp, "GET", requestPath, env, queryString);
-  const data = await fetch(`${baseUrl}${requestPath}?${queryString}`, { headers }).then(res => res.json());
-  const price = Number(data.data[0][1]);
+export async function getTargetPrice(rpc: string, marketId: number): Promise<number> {
+  const provider = new JsonRpcProvider(rpc);
+  provider._getConnection().timeout = 10000;
+  const contract = new Contract("0x000000000000000000000000000000000000044E", PerpABI, provider);
+  const marketData = await contract.perpMarkets!(marketId);
+  const price = Number(formatUnits(marketData.oracle_price, 6));
   return Number(price.toFixed(4));
 }

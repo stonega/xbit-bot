@@ -27,14 +27,14 @@ export const betaTestnet = {
 };
 
 export const deepxDevnet = {
-  rpc: "https://devnet-rpc.deepx.fi",
-  chainId: 4835,
+  rpc: "https://devnet-rpc-new.deepx.fi",
+  chainId: 4845,
   symbol: "tDGAS",
   name: "DeepX Devnet",
   value: "deepx_devnet",
   explorer: "https://explorer-devnet.deepx.fi",
   networkType: "evm",
-  marketWs: "wss://devnet-api.deepx.fi/v2/ws",
+  marketWs: "wss://devnet-api-new.deepx.fi/v2/ws",
   rpcWs: "wss://devnet-rpc.deepx.fi",
   icon: "/images/deepdex.png",
   contracts: {

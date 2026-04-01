@@ -90,7 +90,7 @@ async function main(
   const validSellAmount = validatePrice(sellAmount);
 
   // Get target price for this trading pair
-  const target = await getTargetPrice(pair.price, env);
+  const target = await getTargetPrice(currentNetwork.rpc, pair.marketId);
 
   // Log current market conditions for debugging
   console.debug(`[${pair.symbol}${new Date().toISOString()}] TargePrice: ${target} BuyPrice: ${validBuyPrice} BuyAmount: ${validBuyAmount} SellPrice: ${validSellPrice} SellAmount: ${validSellAmount}`);
